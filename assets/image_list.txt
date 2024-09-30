@@ -1,1 +1,2 @@
-EngArch.pdf
+final_story_map.png
+engine-architecture.png
