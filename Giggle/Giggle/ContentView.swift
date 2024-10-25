@@ -1,101 +1,45 @@
-//
-//  ContentView.swift
-//  Giggle
-//
-//  Created by Karan Arora on 10/25/24.
-//
-
 import SwiftUI
 import SwiftData
 
-//struct ContentView: View {
-//    @Environment(\.modelContext) private var modelContext
-//    @Query private var items: [Item]
-//
-//    var body: some View {
-//        NavigationSplitView {
-//            List {
-//                ForEach(items) { item in
-//                    NavigationLink {
-//                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-//                    } label: {
-//                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-//                    }
-//                }
-//                .onDelete(perform: deleteItems)
-//            }
-//            .toolbar {
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    EditButton()
-//                }
-//                ToolbarItem {
-//                    Button(action: addItem) {
-//                        Label("Add Item", systemImage: "plus")
-//                    }
-//                }
-//            }
-//        } detail: {
-//            Text("Select an item")
-//        }
-//    }
-//
-//    private func addItem() {
-//        withAnimation {
-//            let newItem = Item(timestamp: Date())
-//            modelContext.insert(newItem)
-//        }
-//    }
-//
-//    private func deleteItems(offsets: IndexSet) {
-//        withAnimation {
-//            for index in offsets {
-//                modelContext.delete(items[index])
-//            }
-//        }
-//    }
-//}
-//
-//#Preview {
-//    ContentView()
-//        .modelContainer(for: Item.self, inMemory: true)
-//}
-
-
 struct ContentView: View {
-    let gridItems = [GridItem(.flexible()), GridItem(.flexible())] // For a 2-column grid
+    let gridItems = [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)] // Adjusting spacing for a 2-column grid
     
     var body: some View {
         VStack {
             // Title
             Text("Giggle")
                 .font(.largeTitle)
+                .foregroundColor(.white)
                 .padding(.top, 30)
                 .padding(.bottom, 10)
             
-            // Search Bar
+            // Custom Search Bar
             HStack {
-                TextField("Search for a Giggle", text: .constant(""))
-                    .padding(.horizontal)
-                    .frame(height: 40)
-                    .background(Color.white)
-                    .cornerRadius(10)
-                    .shadow(radius: 2)
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-                    .padding(.trailing, 10)
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.gray)
+                    
+                    TextField("Search for a Giggle", text: .constant(""))
+                        .padding(8)
+                        .foregroundColor(.black)
+                }
+                .padding(.horizontal, 10)
+                .frame(height: 40)
+                .background(Color.white)
+                .cornerRadius(20)  // Rounded corners
+                .shadow(radius: 2)
             }
             .padding(.horizontal, 20)
             
             // Grid View for Giggles
             ScrollView {
-                LazyVGrid(columns: gridItems, spacing: 20) {
-                    // Dummy data - replace with your dynamic content
+                LazyVGrid(columns: gridItems, spacing: 40) {
                     GiggleItemView(title: "Favorites")
                     GiggleItemView(title: "Recently Shared")
                     GiggleItemView(title: "All Giggles")
                     GiggleItemView(title: "Sports")
                 }
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 40) // Increase padding for more space
                 .padding(.top, 20)
             }
             
@@ -106,7 +50,7 @@ struct ContentView: View {
                 TabBarIcon(systemIconName: "pencil", tabName: "Edit")
                 TabBarIcon(systemIconName: "gearshape", tabName: "Settings")
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 10)
             .padding(.bottom, 10)
         }
         .background(Color.purple.ignoresSafeArea())
@@ -119,18 +63,18 @@ struct GiggleItemView: View {
     
     var body: some View {
         VStack {
-            // Replace with your actual images
+            // Increase the image size
             Image(systemName: "person.circle.fill")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 80, height: 80)
+                .frame(width: 120, height: 120) // Increased size
                 .foregroundColor(.black)
                 .background(Color.white)
-                .cornerRadius(10)
-                .shadow(radius: 2)
+                .cornerRadius(15) // Increased corner radius
+                .shadow(radius: 4) // More shadow for a better effect
             
             Text(title)
-                .font(.headline)
+                .font(.title2) // Increased font size for the title
                 .foregroundColor(.white)
         }
     }
