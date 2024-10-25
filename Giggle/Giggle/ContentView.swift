@@ -63,19 +63,21 @@ struct GiggleItemView: View {
     
     var body: some View {
         VStack {
-            // Increase the image size
+            // Consistent image size for all grid items
             Image(systemName: "person.circle.fill")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 120, height: 120) // Increased size
+                .frame(width: 100, height: 100) // Same image size for all
                 .foregroundColor(.black)
                 .background(Color.white)
-                .cornerRadius(15) // Increased corner radius
-                .shadow(radius: 4) // More shadow for a better effect
+                .cornerRadius(12) // Consistent corner radius for all items
+                .shadow(radius: 3) // Same shadow effect for all items
             
+            // Consistent font size for all grid items
             Text(title)
-                .font(.title2) // Increased font size for the title
+                .font(.headline) // Same font size for all items
                 .foregroundColor(.white)
+                .multilineTextAlignment(.center)
         }
     }
 }
