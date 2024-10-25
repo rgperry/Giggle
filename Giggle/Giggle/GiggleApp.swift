@@ -5,6 +5,8 @@
 //  Created by Karan Arora on 10/25/24.
 //
 
+// FINISH: not sure if we need this or what it does. Probably delete
+
 import SwiftUI
 import SwiftData
 
