@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 
+
 // TODO
 // Make ContentView a wrapper?
 // Put components in different files for better organization?
@@ -84,12 +85,20 @@ struct SearchBar: View {
 }
 
 struct BottomNavBar: View {
+    @State private var isPickerPresented = false
+    @State private var selectedImages: [UIImage] = []
     var body: some View {
         HStack {
             BottomNavBarIcon(systemIconName: "house", tabName: "Home")
             BottomNavBarIcon(systemIconName: "plus", tabName: "Add")
+                .onTapGesture {
+                    isPickerPresented = true
+                }
             BottomNavBarIcon(systemIconName: "pencil", tabName: "Edit")
             BottomNavBarIcon(systemIconName: "gearshape", tabName: "Settings")
+        }
+        .sheet(isPresented: $isPickerPresented) {
+            ImagePicker(selectedImages: $selectedImages)
         }
         .padding(.horizontal, 10)
     }
