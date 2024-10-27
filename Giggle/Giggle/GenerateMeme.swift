@@ -22,6 +22,7 @@ struct GenerateMemeView: View {
             Spacer()
             
             // Bottom Navigation Bar (no arguments needed)
+            BottomNavBar()
         }
         .background(Color.purple.ignoresSafeArea()) // Background color
     }
@@ -127,5 +128,5 @@ struct BottomNavBarIcon: View {
 }
 
 #Preview {
-    GenerateMeme()
+    GenerateMemeView()
 }
