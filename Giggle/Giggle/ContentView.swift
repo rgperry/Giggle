@@ -1,18 +1,42 @@
-//
-//  ContentView.swift
-//  Giggle
-//
-//  Created by Karan Arora on 10/25/24.
-//
-
 import SwiftUI
-import SwiftData
-
-// TODO
-// Make ContentView a wrapper?
-// Put components in different files for better organization?
 
 struct ContentView: View {
+    var body: some View {
+        TabView {
+            // Home Screen
+            HomeView()
+                .tabItem {
+                    Image(systemName: "house")
+                    Text("Home")
+                }
+
+            // Add Screen
+            AddView()
+                .tabItem {
+                    Image(systemName: "plus")
+                    Text("Add")
+                }
+
+            // Edit (Generate Meme) Screen
+            GenerateMemeView()
+                .tabItem {
+                    Image(systemName: "pencil")
+                    Text("Edit")
+                }
+
+            // Settings Screen
+            SettingsView()
+                .tabItem {
+                    Image(systemName: "gearshape")
+                    Text("Settings")
+                }
+        }
+        .accentColor(.black) // Customize the color of the selected tab icon
+    }
+}
+
+// Home Screen
+struct HomeView: View {
     let gridItems = [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)]
 
     var body: some View {
@@ -30,13 +54,51 @@ struct ContentView: View {
                 .padding(.horizontal, 40)
                 .padding(.top, 28)
             }
-            
-            BottomNavBar()
         }
         .background(Color(red: 104/255, green: 86/255, blue: 182/255).ignoresSafeArea())
     }
 }
 
+// Add Screen Placeholder
+struct AddView: View {
+    var body: some View {
+        VStack {
+            MainHeader(text: "Add")
+            Spacer()
+            Text("Add Content Goes Here")
+            Spacer()
+        }
+        .background(Color.purple.ignoresSafeArea())
+    }
+}
+
+// Generate Meme Screen
+struct GenerateMeme: View {
+    var body: some View {
+        VStack {
+            MainHeader(text: "Generate Meme")
+            Spacer()
+            Text("Generate Meme Content Goes Here")
+            Spacer()
+        }
+        .background(Color.purple.ignoresSafeArea())
+    }
+}
+
+// Settings Screen Placeholder
+struct SettingsView: View {
+    var body: some View {
+        VStack {
+            MainHeader(text: "Settings")
+            Spacer()
+            Text("Settings Content Goes Here")
+            Spacer()
+        }
+        .background(Color.purple.ignoresSafeArea())
+    }
+}
+
+// Reusable Components (MainHeader, ItemView, SearchBar, etc.)
 struct ItemView: View {
     var title: String
     let size: CGFloat = 140
@@ -62,14 +124,14 @@ struct ItemView: View {
 
 struct SearchBar: View {
     var text: String
-    
+
     var body: some View {
         HStack {
             HStack {
                 TextField(text, text: .constant(""))
                     .padding(8)
                     .foregroundColor(.black)
-                
+
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.gray)
             }
@@ -83,37 +145,9 @@ struct SearchBar: View {
     }
 }
 
-struct BottomNavBar: View {
-    var body: some View {
-        HStack {
-            BottomNavBarIcon(systemIconName: "house", tabName: "Home")
-            BottomNavBarIcon(systemIconName: "plus", tabName: "Add")
-            BottomNavBarIcon(systemIconName: "pencil", tabName: "Edit")
-            BottomNavBarIcon(systemIconName: "gearshape", tabName: "Settings")
-        }
-        .padding(.horizontal, 10)
-    }
-}
-
-struct BottomNavBarIcon: View {
-    var systemIconName: String
-    var tabName: String
-    let size: CGFloat = 42
-
-    var body: some View {
-        VStack {
-            Image(systemName: systemIconName)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
-                .padding(.trailing, 30)
-        }
-    }
-}
-
 struct MainHeader: View {
     var text: String
-    
+
     var body: some View {
         Text(text)
             .font(.system(size: 45, weight: .semibold, design: .default))
