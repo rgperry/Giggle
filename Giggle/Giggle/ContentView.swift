@@ -1,110 +1,129 @@
+//
+//  ContentView.swift
+//  Giggle
+//
+//  Created by Karan Arora on 10/25/24.
+//
+
 import SwiftUI
 import SwiftData
 
+// TODO
+// Make ContentView a wrapper?
+// Put components in different files for better organization?
+
 struct ContentView: View {
-    let gridItems = [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)] // Adjusting spacing for a 2-column grid
-    
+    let gridItems = [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)]
+
     var body: some View {
         VStack {
-            // Title
-            Text("Giggle")
-                .font(.largeTitle)
-                .foregroundColor(.white)
-                .padding(.top, 30)
-                .padding(.bottom, 10)
-            
-            // Custom Search Bar
-            HStack {
-                HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    
-                    TextField("Search for a Giggle", text: .constant(""))
-                        .padding(8)
-                        .foregroundColor(.black)
-                }
-                .padding(.horizontal, 10)
-                .frame(height: 40)
-                .background(Color.white)
-                .cornerRadius(20)  // Rounded corners
-                .shadow(radius: 2)
-            }
-            .padding(.horizontal, 20)
-            
-            // Grid View for Giggles
+            MainHeader(text: "Giggle")
+            SearchBar(text: "Search for a Giggle")
+
             ScrollView {
                 LazyVGrid(columns: gridItems, spacing: 40) {
-                    GiggleItemView(title: "Favorites")
-                    GiggleItemView(title: "Recently Shared")
-                    GiggleItemView(title: "All Giggles")
-                    GiggleItemView(title: "Sports")
+                    ItemView(title: "Favorites")
+                    ItemView(title: "Recently Shared")
+                    ItemView(title: "All Giggles")
+                    ItemView(title: "Sports")
                 }
-                .padding(.horizontal, 40) // Increase padding for more space
-                .padding(.top, 20)
+                .padding(.horizontal, 40)
+                .padding(.top, 28)
             }
             
-            // Bottom Tab Bar
-            HStack {
-                TabBarIcon(systemIconName: "house", tabName: "Home")
-                TabBarIcon(systemIconName: "plus", tabName: "Add")
-                TabBarIcon(systemIconName: "pencil", tabName: "Edit")
-                TabBarIcon(systemIconName: "gearshape", tabName: "Settings")
-            }
-            .padding(.horizontal, 10)
-            .padding(.bottom, 10)
+            BottomNavBar()
         }
-        .background(Color.purple.ignoresSafeArea())
+        .background(Color(red: 104/255, green: 86/255, blue: 182/255).ignoresSafeArea())
     }
 }
 
-// Reusable GiggleItem View for the grid
-struct GiggleItemView: View {
+struct ItemView: View {
     var title: String
-    
+    let size: CGFloat = 140
+
     var body: some View {
         VStack {
-            // Consistent image size for all grid items
             Image(systemName: "person.circle.fill")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 100, height: 100) // Same image size for all
+                .frame(width: size, height: size)
                 .foregroundColor(.black)
                 .background(Color.white)
-                .cornerRadius(12) // Consistent corner radius for all items
-                .shadow(radius: 3) // Same shadow effect for all items
-            
-            // Consistent font size for all grid items
+                .cornerRadius(18)
+                .shadow(radius: 4)
+
             Text(title)
-                .font(.headline) // Same font size for all items
+                .font(.headline)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.center)
         }
     }
 }
 
-// Reusable TabBarIcon View for the bottom navigation
-struct TabBarIcon: View {
+struct SearchBar: View {
+    var text: String
+    
+    var body: some View {
+        HStack {
+            HStack {
+                TextField(text, text: .constant(""))
+                    .padding(8)
+                    .foregroundColor(.black)
+                
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.gray)
+            }
+            .padding(.horizontal, 20)
+            .frame(height: 45)
+            .background(Color.white)
+            .cornerRadius(18)
+            .shadow(radius: 2)
+        }
+        .padding(.horizontal, 23)
+    }
+}
+
+struct BottomNavBar: View {
+    var body: some View {
+        HStack {
+            BottomNavBarIcon(systemIconName: "house", tabName: "Home")
+            BottomNavBarIcon(systemIconName: "plus", tabName: "Add")
+            BottomNavBarIcon(systemIconName: "pencil", tabName: "Edit")
+            BottomNavBarIcon(systemIconName: "gearshape", tabName: "Settings")
+        }
+        .padding(.horizontal, 10)
+    }
+}
+
+struct BottomNavBarIcon: View {
     var systemIconName: String
     var tabName: String
-    
+    let size: CGFloat = 42
+
     var body: some View {
         VStack {
             Image(systemName: systemIconName)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 25, height: 25)
-                .padding(.top, 10)
-            Text(tabName)
-                .font(.caption)
-                .foregroundColor(.white)
-            Spacer()
+                .frame(width: size, height: size)
+                .padding(.trailing, 30)
         }
     }
 }
 
-// Preview
-struct GiggleHomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+struct MainHeader: View {
+    var text: String
+    
+    var body: some View {
+        Text(text)
+            .font(.system(size: 45, weight: .semibold, design: .default))
+            .padding(.top, 10)
+            .padding(.bottom, 15)
+            .foregroundColor(.white)
+            .tracking(1)
     }
+}
+
+#Preview {
+    ContentView()
 }
