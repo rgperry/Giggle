@@ -88,26 +88,33 @@ struct BottomNavBar: View {
     @State private var isPickerPresented = false
     @State private var selectedImages: [UIImage] = []
     var body: some View {
-        HStack {
-            BottomNavBarIcon(systemIconName: "house", tabName: "Home")
-            BottomNavBarIcon(systemIconName: "plus", tabName: "Add")
-                .onTapGesture {
-                    isPickerPresented = true
-                }
-            BottomNavBarIcon(systemIconName: "pencil", tabName: "Edit")
-            BottomNavBarIcon(systemIconName: "gearshape", tabName: "Settings")
+        ZStack(alignment: .bottom) {
+            Rectangle()
+                .fill(Color.white)
+                .frame(height: 100)
+                .edgesIgnoringSafeArea(.bottom)
+            HStack {
+                BottomNavBarIcon(systemIconName: "house", tabName: "Home")
+                BottomNavBarIcon(systemIconName: "plus", tabName: "Add")
+                    .onTapGesture {
+                        isPickerPresented = true
+                    }
+                BottomNavBarIcon(systemIconName: "pencil", tabName: "Edit")
+                BottomNavBarIcon(systemIconName: "gearshape", tabName: "Settings")
+            }
+            .sheet(isPresented: $isPickerPresented) {
+                ImagePicker(selectedImages: $selectedImages)
+            }
+            .padding(.bottom, 30)
         }
-        .sheet(isPresented: $isPickerPresented) {
-            ImagePicker(selectedImages: $selectedImages)
-        }
-        .padding(.horizontal, 10)
+        .frame(height: 25)
     }
 }
 
 struct BottomNavBarIcon: View {
     var systemIconName: String
     var tabName: String
-    let size: CGFloat = 42
+    let size: CGFloat = 55
 
     var body: some View {
         VStack {
