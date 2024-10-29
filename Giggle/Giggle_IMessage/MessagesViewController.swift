@@ -25,6 +25,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         print("MessagesViewController loaded")
+        collectionView.backgroundColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)
 
         searchBar.delegate = self
         collectionView.dataSource = self
@@ -51,7 +52,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
 
             // Define the size of each group to hold 3 items in a row
-            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(120))
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(130))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 3)
 
             // Define the section with the group
