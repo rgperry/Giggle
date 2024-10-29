@@ -53,9 +53,12 @@ class SearchManager {
         // Calculate distances and sort
         let entriesWithDistances = entries.compactMap { entry -> (Entry, Double)? in
             guard !entry.contentEmbedding.isEmpty else { return nil }
+            
+            // this computes it on the fly, not ideal for our search! (we can test the speed of it)
             let distance = embedding.distance(
-                between: queryVector,
-                and: entry.contentEmbedding
+                between: query,
+                and: entry.content,
+                distanceType: .cosine
             )
             return (entry, distance)
         }
