@@ -11,126 +11,56 @@ import SwiftData
 
 // TODO
 // Make ContentView a wrapper?
-// Put components in different files for better organization?
+// Put components in different files for better organization - semi-done
 
 struct ContentView: View {
-    let gridItems = [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)]
-
     var body: some View {
-        VStack {
-            MainHeader(text: "Giggle")
-            SearchBar(text: "Search for a Giggle")
+        NavigationStack {
+            VStack {
+                PageHeader(text: "Giggle")
+                SearchBar(text: "Search for a Giggle")
 
-            ScrollView {
-                LazyVGrid(columns: gridItems, spacing: 40) {
-                    ItemView(title: "Favorites")
-                    ItemView(title: "Recently Shared")
-                    ItemView(title: "All Giggles")
-                    ItemView(title: "Sports")
+                ScrollView {
+                    LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
+                        Folder(folderName: "Favorites", pinned: true)
+                        Folder(folderName: "Recently Shared", pinned: true)
+                        Folder(folderName: "All Giggles", pinned: true)
+                        Folder(folderName: "Sports")
+                    }
+                    .padding(.horizontal, GridStyle.columnPadding)
+                    .padding(.top, GridStyle.searchBarPadding)
                 }
-                .padding(.horizontal, 40)
-                .padding(.top, 28)
+
+                BottomNavBar()
             }
-            
-            BottomNavBar()
-        }
-        .background(Color(red: 104/255, green: 86/255, blue: 182/255).ignoresSafeArea())
+            .background(Colors.backgroundColor.ignoresSafeArea())
+        }.tint(.black)
     }
 }
 
-struct ItemView: View {
-    var title: String
-    let size: CGFloat = 140
+struct Folder: View {
+    var folderName: String
+    var pinned: Bool = false
 
     var body: some View {
-        VStack {
-            Image(systemName: "person.circle.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
-                .foregroundColor(.black)
-                .background(Color.white)
-                .cornerRadius(18)
-                .shadow(radius: 4)
+        NavigationLink(destination: FolderView(header: folderName)) {
+            ZStack {
+                GiggleItem(text: folderName)
 
-            Text(title)
-                .font(.headline)
-                .foregroundColor(.white)
-                .multilineTextAlignment(.center)
-        }
-    }
-}
-
-struct SearchBar: View {
-    var text: String
-    
-    var body: some View {
-        HStack {
-            HStack {
-                TextField(text, text: .constant(""))
-                    .padding(8)
-                    .foregroundColor(.black)
-                
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
-            }
-            .padding(.horizontal, 20)
-            .frame(height: 45)
-            .background(Color.white)
-            .cornerRadius(18)
-            .shadow(radius: 2)
-        }
-        .padding(.horizontal, 23)
-    }
-}
-
-struct BottomNavBar: View {
-    @State private var isImagePickerPresented = false
-    @State private var selectedImages: [UIImage] = []
-    
-    var body: some View {
-        HStack {
-            BottomNavBarIcon(systemIconName: "house", tabName: "Home")
-            BottomNavBarIcon(systemIconName: "plus", tabName: "Add")
-                .onTapGesture {
-                    isImagePickerPresented = true
+                if pinned {
+                    PinIcon()
                 }
-            BottomNavBarIcon(systemIconName: "pencil", tabName: "Edit")
-            BottomNavBarIcon(systemIconName: "gearshape", tabName: "Settings")
-        }
-        .sheet(isPresented: $isImagePickerPresented) {
-            ImagePicker(selectedImages: $selectedImages)
-        }
-        .padding(.horizontal, 10)
-    }
-}
-
-struct BottomNavBarIcon: View {
-    var systemIconName: String
-    var tabName: String
-    let size: CGFloat = 42
-
-    var body: some View {
-        VStack {
-            Image(systemName: systemIconName)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
-                .padding(.trailing, 30)
+            }
         }
     }
 }
 
-struct MainHeader: View {
-    var text: String
-    
+struct PinIcon: View {
     var body: some View {
-        Text(text)
-            .font(.system(size: 45, weight: .semibold, design: .default))
-            .padding(.top, 10)
-            .padding(.bottom, 15)
-            .foregroundColor(.white)
-            .tracking(1)
+        Image(systemName: "pin.fill")
+            .foregroundColor(.gray)
+            .font(.system(size: 35))
+            .offset(x: -71, y: -80)
     }
 }
 
