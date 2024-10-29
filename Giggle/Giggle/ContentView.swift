@@ -85,19 +85,20 @@ struct SearchBar: View {
 }
 
 struct BottomNavBar: View {
-    @State private var isPickerPresented = false
+    @State private var isImagePickerPresented = false
     @State private var selectedImages: [UIImage] = []
+    
     var body: some View {
         HStack {
             BottomNavBarIcon(systemIconName: "house", tabName: "Home")
             BottomNavBarIcon(systemIconName: "plus", tabName: "Add")
                 .onTapGesture {
-                    isPickerPresented = true
+                    isImagePickerPresented = true
                 }
             BottomNavBarIcon(systemIconName: "pencil", tabName: "Edit")
             BottomNavBarIcon(systemIconName: "gearshape", tabName: "Settings")
         }
-        .sheet(isPresented: $isPickerPresented) {
+        .sheet(isPresented: $isImagePickerPresented) {
             ImagePicker(selectedImages: $selectedImages)
         }
         .padding(.horizontal, 10)
