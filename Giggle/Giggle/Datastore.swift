@@ -14,7 +14,7 @@ class Entry {
     var tags: [String]
     var content: String
     var filePath: String
-    var contentEmbedding: [Double]  // Store embedding vector
+//    var contentEmbedding: [Double]  // Store embedding vector
     
     init(content: String, tags: [String] = [], filePath: String = "") {
         self.id = UUID()
@@ -22,13 +22,7 @@ class Entry {
         self.content = content
         self.tags = tags
         self.filePath = filePath
-        self.contentEmbedding = Entry.generateEmbedding(for: content) ?? []
-    }
-    
-    // Generate embedding vector for content
-    static func generateEmbedding(for text: String) -> [Double]? {
-        guard let embedding = NLEmbedding.sentenceEmbedding(for: .english) else { return nil }
-        return embedding.vector(for: text)
+//        self.contentEmbedding = Entry.generateEmbedding(for: content) ?? []
     }
 }
 
@@ -52,7 +46,6 @@ class SearchManager {
         
         // Calculate distances and sort
         let entriesWithDistances = entries.compactMap { entry -> (Entry, Double)? in
-            guard !entry.contentEmbedding.isEmpty else { return nil }
             
             // this computes it on the fly, not ideal for our search! (we can test the speed of it)
             let distance = embedding.distance(
