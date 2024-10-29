@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ItemView: View {
+struct GiggleItem: View {
     var text: String?
     let size: CGFloat = 150
 
@@ -58,23 +58,22 @@ struct SearchBar: View {
 struct BottomNavBar: View {
     var body: some View {
         HStack {
-            BottomNavBarIcon(systemIconName: "house", tabName: "Home")
-            BottomNavBarIcon(systemIconName: "plus", tabName: "Add")
-            BottomNavBarIcon(systemIconName: "pencil", tabName: "Edit")
-            BottomNavBarIcon(systemIconName: "gearshape", tabName: "Settings")
+            BottomNavBarIcon(icon: "house.fill")
+            BottomNavBarIcon(icon: "plus")
+            BottomNavBarIcon(icon: "paintbrush.fill")
+            BottomNavBarIcon(icon: "gearshape.fill")
         }
         .padding(.horizontal, 10)
     }
 }
 
 struct BottomNavBarIcon: View {
-    var systemIconName: String
-    var tabName: String
+    var icon: String
     let size: CGFloat = 42
 
     var body: some View {
         VStack {
-            Image(systemName: systemIconName)
+            Image(systemName: icon)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)

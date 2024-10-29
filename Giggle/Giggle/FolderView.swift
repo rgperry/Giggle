@@ -20,7 +20,7 @@ struct FolderView: View {
             ScrollView {
                 LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.memeRowPadding) {
                     ZStack {
-                        ItemView()
+                        GiggleItem()
                         
                         // FINISH: button is not working
                         Button(action: {
@@ -33,11 +33,11 @@ struct FolderView: View {
                         }
                     }
                     
-                    ItemView()
-                    ItemView()
-                    ItemView()
-                    ItemView()
-                    ItemView()
+                    GiggleItem()
+                    GiggleItem()
+                    GiggleItem()
+                    GiggleItem()
+                    GiggleItem()
                 }
                 .padding(.horizontal, GridStyle.columnPadding)
                 .padding(.top, GridStyle.searchBarPadding)

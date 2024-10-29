@@ -22,40 +22,10 @@ struct ContentView: View {
 
                 ScrollView {
                     LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
-                        NavigationLink(destination: FolderView(header: "Favorites")) {
-                            ZStack {
-                                ItemView(text: "Favorites")
-
-                                Image(systemName: "pin.fill")
-                                    .foregroundColor(.gray)
-                                    .font(.system(size: 35))
-                                    .offset(x: -71, y: -80)
-                            }
-                        }
-
-                        NavigationLink(destination: FolderView(header: "Recently Shared")) {
-                            ZStack {
-                                ItemView(text: "Recently Shared")
-
-                                Image(systemName: "pin.fill")
-                                    .foregroundColor(.gray)
-                                    .font(.system(size: 35))
-                                    .offset(x: -71, y: -80)
-                            }
-                        }
-
-                        NavigationLink(destination: FolderView(header: "All Giggles")) {
-                            ZStack {
-                                ItemView(text: "All Giggles")
-
-                                Image(systemName: "pin.fill")
-                                    .foregroundColor(.gray)
-                                    .font(.system(size: 35))
-                                    .offset(x: -71, y: -80)
-                            }
-                        }
-
-                        ItemView(text: "Sports")
+                        Folder(folderName: "Favorites", pinned: true)
+                        Folder(folderName: "Recently Shared", pinned: true)
+                        Folder(folderName: "All Giggles", pinned: true)
+                        Folder(folderName: "Sports")
                     }
                     .padding(.horizontal, GridStyle.columnPadding)
                     .padding(.top, GridStyle.searchBarPadding)
@@ -64,7 +34,33 @@ struct ContentView: View {
                 BottomNavBar()
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
+        }.tint(.white)
+    }
+}
+
+struct Folder: View {
+    var folderName: String
+    var pinned: Bool = false
+
+    var body: some View {
+        NavigationLink(destination: FolderView(header: folderName)) {
+            ZStack {
+                GiggleItem(text: folderName)
+
+                if pinned {
+                    PinIcon()
+                }
+            }
         }
+    }
+}
+
+struct PinIcon: View {
+    var body: some View {
+        Image(systemName: "pin.fill")
+            .foregroundColor(.gray)
+            .font(.system(size: 35))
+            .offset(x: -71, y: -80)
     }
 }
 
