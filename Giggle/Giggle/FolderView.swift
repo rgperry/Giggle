@@ -9,14 +9,13 @@ import SwiftUI
 
 struct FolderView: View {
     var header: String
-    var searchBarText: String
     
     @State var isLiked = true
     
     var body: some View {
         VStack {
             PageHeader(text: header)
-            SearchBar(text: searchBarText)
+            SearchBar(text: "Search " + header)
         
             ScrollView {
                 LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.memeRowPadding) {
@@ -51,5 +50,5 @@ struct FolderView: View {
 }
 
 #Preview {
-    FolderView(header: "Favorites", searchBarText: "Search Favorites")
+    FolderView(header: "Favorites")
 }

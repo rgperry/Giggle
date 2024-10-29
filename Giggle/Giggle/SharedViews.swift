@@ -88,10 +88,9 @@ struct PageHeader: View {
     
     var body: some View {
         Text(text)
-            .font(.system(size: 45, weight: .semibold, design: .default))
+            .font(.system(size: 45, weight: .semibold, design: .rounded))
             .padding(.top, 10)
             .padding(.bottom, 15)
             .foregroundColor(.white)
-            .tracking(1)
     }
 }
