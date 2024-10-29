@@ -9,14 +9,14 @@ import SwiftUI
 
 struct FolderView: View {
     var header: String
-    
+
     @State var isLiked = true
-    
+
     var body: some View {
         VStack {
             PageHeader(text: header)
             SearchBar(text: "Search " + header)
-        
+
             ScrollView {
                 LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.memeRowPadding) {
                     GiggleItem()
@@ -29,7 +29,7 @@ struct FolderView: View {
                 .padding(.horizontal, GridStyle.columnPadding)
                 .padding(.top, GridStyle.searchBarPadding)
             }
-            
+
             BottomNavBar()
         }
         .background(Colors.backgroundColor.ignoresSafeArea())

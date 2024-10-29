@@ -13,13 +13,13 @@ struct Colors {
 
 struct GridStyle {
     static let grid = [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)]
-    
+
     // Padding between the grid columns
     static let columnPadding: CGFloat = 33
-    
+
     // Padding between rows of folders
     static let folderRowPadding: CGFloat = 0
-    
+
     // Padding between rows of memes
     static let memeRowPadding: CGFloat = 0
 
