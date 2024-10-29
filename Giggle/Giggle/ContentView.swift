@@ -34,7 +34,7 @@ struct ContentView: View {
                 BottomNavBar()
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
-        }.tint(.white)
+        }.tint(.black)
     }
 }
 
