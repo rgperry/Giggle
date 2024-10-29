@@ -22,7 +22,7 @@ struct FolderView: View {
                     ZStack {
                         GiggleItem()
                         
-                        // FINISH: button is not working
+                        // FINISH: button works when you click on image but not when you click on heart itself
                         Button(action: {
                             isLiked.toggle()
                         }) {
