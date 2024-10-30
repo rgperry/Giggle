@@ -13,7 +13,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     var imagesArray: [UIImage] = []
     //
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imagesArray.count  // Return the count of your data array,
+        return imagesArray.count
         //Replace imagesArray.count with the actual array you’re using to hold the images.
 
     }
@@ -40,22 +40,19 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             imagesArray = Array(repeating: symbolImage, count: 10)
         }
         //end dummy images
-        collectionView.reloadData() // Ensure the collection view reloads with the data
+        collectionView.reloadData()
     }
     //ADDED FUNCTIONS - Tamaer
     func setupCollectionViewLayout() {
         collectionView.collectionViewLayout = UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
-            
-            // Define the size of each item
+
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
 
-            // Define the size of each group to hold 3 items in a row
             let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(130))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 3)
 
-            // Define the section with the group
             let section = NSCollectionLayoutSection(group: group)
             section.interGroupSpacing = 10
 
@@ -65,34 +62,26 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageCell", for: indexPath) as! ImageCell
-        
-        // Configure the cell with data, such as setting an image
-        cell.imageView.image = imagesArray[indexPath.item]  // Assuming imagesArray contains the images you want to display
-        //Replace imagesArray.count with the actual array you’re using to hold the images.
-
+        cell.imageView.image = imagesArray[indexPath.item]
         return cell
     }
     //for image attaching to imessage on tap
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // Get the selected image
         let selectedImage = imagesArray[indexPath.item]
         
-        // Create an MSMessageTemplateLayout and set the image
         let layout = MSMessageTemplateLayout()
         layout.image = selectedImage
         //layout.caption = "Sent from Giggle" // Optional caption
-
-        // Create an MSMessage with the layout
+        
         let message = MSMessage()
         message.layout = layout
-
-        // Insert the message into the conversation
+        //insert the message into the conversation
         activeConversation?.insert(message, completionHandler: { error in
             if let error = error {
                 print("Failed to insert message: \(error.localizedDescription)")
             }
         })
-        //pull menu down when image is seleted
+        //pull menu down when image is selected
         requestPresentationStyle(.compact)
         
     }
