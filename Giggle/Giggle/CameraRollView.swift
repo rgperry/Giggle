@@ -10,6 +10,7 @@ import SwiftUI
 import PhotosUI
 
 struct ImagePicker: UIViewControllerRepresentable {
+    @Environment(\.modelContext) private var context
     @Binding var selectedImages: [UIImage]
 
     func makeUIViewController(context: Context) -> PHPickerViewController {

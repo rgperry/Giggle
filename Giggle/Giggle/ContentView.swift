@@ -14,6 +14,8 @@ import SwiftData
 // Put components in different files for better organization?
 
 struct ContentView: View {
+    @Environment(\.modelContext) private var context
+
     let gridItems = [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)]
 
     var body: some View {

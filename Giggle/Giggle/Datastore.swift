@@ -8,8 +8,8 @@ import SwiftData
 import NaturalLanguage
 
 @Model
-class Entry {
-    var id: UUID
+class Meme {
+    @Attribute(.unique) var id: UUID
     var dateAdded: Date
     var tags: [String]
     var content: String
@@ -19,7 +19,9 @@ class Entry {
     init(content: String, tags: [String] = [], filePath: String = "") {
         self.id = UUID()
         self.dateAdded = Date()
+        // async get content function
         self.content = content
+        // async get tag function
         self.tags = tags
         self.filePath = filePath
 //        self.contentEmbedding = Entry.generateEmbedding(for: content) ?? []
@@ -34,20 +36,18 @@ class SearchManager {
         self.embedding = NLEmbedding.sentenceEmbedding(for: .english)
     }
     
-    func findSimilarEntries(query: String, in context: ModelContext, limit: Int = 5) -> [Entry] {
-        guard let embedding = embedding,
-              let queryVector = embedding.vector(for: query) else {
+    func findSimilarEntries(query: String, in context: ModelContext, limit: Int = 5) -> [Meme] {
+        guard let embedding = embedding else {
             return []
         }
         
         // Fetch all entries
-        let descriptor = FetchDescriptor<Entry>()
+        let descriptor = FetchDescriptor<Meme>()
         guard let entries = try? context.fetch(descriptor) else { return [] }
         
         // Calculate distances and sort
-        let entriesWithDistances = entries.compactMap { entry -> (Entry, Double)? in
+        let entriesWithDistances = entries.compactMap { entry -> (Meme, Double)? in
             
-            // this computes it on the fly, not ideal for our search! (we can test the speed of it)
             let distance = embedding.distance(
                 between: query,
                 and: entry.content,
