@@ -1,30 +1,47 @@
-//
-//  MemeCreatedView.swift
-//  Giggle
-//
-//  Created by Griffin Gong on 10/27/24.
-//
-
 import SwiftUI
 
 struct MemeCreatedView: View {
-    var memeDescription: String
-
+    @State var memeDescription: String
+    @State private var navigateToGenerateMemeView = false
+    @State private var navigateToMemeCreatedView = false
+    @State private var navigateToAllGiggles = false
+    
     var body: some View {
-        VStack {
-            PageHeader(text: "Giggle")
+        NavigationStack {
+            VStack {
+                PageHeader(text: "Giggle")
 
-            MemeImageView()
-            
-            ActionButtonsView()
-            
-            MemeDescriptionField(memeDescription: .constant(memeDescription))
-            
-            GenerateMemeButton(isClicked:.constant(false), isEnabled: true, showAlertAction: {})
-            
-            BottomNavBar()
+                MemeImageView()
+
+                ActionButtonsView(
+                    downloadAction: {
+                        navigateToAllGiggles = true
+                    },
+                    refreshAction: {
+                        navigateToMemeCreatedView = true
+                    },
+                    deleteAction: {
+                        navigateToGenerateMemeView = true
+                    }
+                )
+                
+                MemeDescriptionField(memeDescription: $memeDescription)
+
+                GenerateMemeButton(isClicked: .constant(false), isEnabled: true, showAlertAction: {})
+
+                BottomNavBar()
+            }
+            .background(Colors.backgroundColor.ignoresSafeArea())
+            .navigationDestination(isPresented: $navigateToGenerateMemeView) {
+                GenerateMemeView()
+            }
+            .navigationDestination(isPresented: $navigateToMemeCreatedView) {
+                MemeCreatedView(memeDescription: memeDescription)
+            }
+            .navigationDestination(isPresented: $navigateToAllGiggles) {
+                FolderView(header: "All Giggles")
+            }
         }
-        .background(Colors.backgroundColor.ignoresSafeArea())
     }
 }
 
