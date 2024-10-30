@@ -6,6 +6,9 @@
 //
 import SwiftData
 import NaturalLanguage
+import SwiftUI
+
+// May need a separate @Model for each tag, depending on how we execute the search?
 
 @Model
 class Meme {
@@ -13,30 +16,22 @@ class Meme {
     var dateAdded: Date
     var tags: [String]
     var content: String
-    var filePath: String
+    var image: UIImage
 //    var contentEmbedding: [Double]  // Store embedding vector
     
-    init(content: String, tags: [String] = [], filePath: String = "") {
+    init(content: String, tags: [String] = [], image: UIImage) {
         self.id = UUID()
         self.dateAdded = Date()
-        // async get content function
         self.content = content
-        // async get tag function
         self.tags = tags
-        self.filePath = filePath
-//        self.contentEmbedding = Entry.generateEmbedding(for: content) ?? []
+        self.image = image
     }
 }
 
-// Search utility class
-class SearchManager {
-    private let embedding: NLEmbedding?
-    
-    init() {
-        self.embedding = NLEmbedding.sentenceEmbedding(for: .english)
-    }
-    
-    func findSimilarEntries(query: String, in context: ModelContext, limit: Int = 5) -> [Meme] {
+// Utility Class
+class DataManager {
+    static func findSimilarEntries(query: String, in context: ModelContext, limit: Int = 10) -> [Meme] {
+        let embedding = NLEmbedding.sentenceEmbedding(for: .english)
         guard let embedding = embedding else {
             return []
         }
@@ -64,4 +59,42 @@ class SearchManager {
         
         return Array(sortedEntries)
     }
+    static func storeMemes(in context: ModelContext, images: [UIImage]) async {
+        // Loop through each image
+        for image in images {
+            // Retrieve tags and content for each image
+            let (tags, content) = await DataManager.getInfo(for: image)
+            
+             let meme = Meme(content: content, tags: tags, image: image)
+             context.insert(meme)
+        }
+        
+        do {
+            try context.save()
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+
+    // Placeholder for an async function that retrieves tags and content for an image
+    static func getInfo(for image: UIImage) async -> ([String], String) {
+        // Replace this with your actual tagging logic
+        return (["funny", "cute", "dog", "doberman"], "Sample content based on image") // Mock data for now
+    }
+    
+    // this could be useful for testing
+    static func clearDB(in context: ModelContext) {
+        do {
+            try context.delete(model: Meme.self)
+        } catch {
+            fatalError(error.localizedDescription)
+        }
+    }
+        
+    // TODO add a helper to update an image, when the tags are changed
+    static func updateImage(imageID: String) async -> () {
+        
+    }
+    
+    
 }
