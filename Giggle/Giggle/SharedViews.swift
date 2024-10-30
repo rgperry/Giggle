@@ -47,7 +47,7 @@ struct SearchBar: View {
             }
             .padding(.horizontal, 20)
             .frame(height: 45)
-            .background(Color.white)
+            .background(.white)
             .cornerRadius(18)
             .shadow(radius: 2)
         }
@@ -60,25 +60,34 @@ struct BottomNavBar: View {
     @State private var selectedImages: [UIImage] = []
     
     var body: some View {
-        HStack {
-            BottomNavBarIcon(icon: "house.fill")
-            BottomNavBarIcon(icon: "plus")
-                .onTapGesture {
-                    isImagePickerPresented = true
-                }
-            BottomNavBarIcon(icon: "paintbrush.fill")
-            BottomNavBarIcon(icon: "gearshape.fill")
+        ZStack(alignment: .bottom) {
+            Rectangle()
+                .fill(Color(white: 0.97))
+                .frame(height: 84)
+                .edgesIgnoringSafeArea(.bottom)
+            
+            HStack {
+                BottomNavBarIcon(icon: "house.fill")
+                BottomNavBarIcon(icon: "plus.circle.fill")
+                    .onTapGesture {
+                        isImagePickerPresented = true
+                    }
+                BottomNavBarIcon(icon: "paintbrush.fill")
+                BottomNavBarIcon(icon: "gearshape.fill")
+            }
+            .padding(.leading, 25)
+            .sheet(isPresented: $isImagePickerPresented) {
+                ImagePicker(selectedImages: $selectedImages)
+            }
+            .padding(.bottom, 19)
         }
-        .sheet(isPresented: $isImagePickerPresented) {
-            ImagePicker(selectedImages: $selectedImages)
-        }
-        .padding(.horizontal, 10)
+        .frame(height: 10)
     }
 }
 
 struct BottomNavBarIcon: View {
     var icon: String
-    let size: CGFloat = 42
+    let size: CGFloat = 49
 
     var body: some View {
         VStack {
