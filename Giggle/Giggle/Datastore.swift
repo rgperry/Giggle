@@ -17,8 +17,7 @@ class Meme {
     var tags: [String]
     var content: String
     var image: UIImage
-//    var contentEmbedding: [Double]  // Store embedding vector
-    
+
     init(content: String, tags: [String] = [], image: UIImage) {
         self.id = UUID()
         self.dateAdded = Date()

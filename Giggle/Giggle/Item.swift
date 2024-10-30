@@ -13,7 +13,6 @@ import SwiftData
 
 @Model
 final class Item {
-    @Environment(\.modelContext) private var context
     var timestamp: Date
     
     init(timestamp: Date) {
