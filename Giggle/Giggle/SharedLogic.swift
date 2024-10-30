@@ -18,7 +18,7 @@ struct GridStyle {
     static let columnPadding: CGFloat = 33
     
     // Padding between rows of folders
-    static let folderRowPadding: CGFloat = 35
+    static let folderRowPadding: CGFloat = 26
     
     // Padding between rows of memes
     static let memeRowPadding: CGFloat = 23

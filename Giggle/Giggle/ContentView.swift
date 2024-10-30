@@ -25,7 +25,10 @@ struct ContentView: View {
                         Folder(folderName: "Favorites", pinned: true)
                         Folder(folderName: "Recently Shared", pinned: true)
                         Folder(folderName: "All Giggles", pinned: true)
+                        
+                        Folder(folderName: "Sad")
                         Folder(folderName: "Sports")
+                        Folder(folderName: "Surprised")
                     }
                     .padding(.horizontal, GridStyle.columnPadding)
                     .padding(.top, GridStyle.searchBarPadding)
