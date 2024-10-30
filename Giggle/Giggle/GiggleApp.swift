@@ -32,3 +32,4 @@ struct GiggleApp: App {
         .modelContainer(sharedModelContainer)
     }
 }
+

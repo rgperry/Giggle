@@ -6,11 +6,60 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		413185702CCEB271000BC665 /* Messages.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4131856F2CCEB271000BC665 /* Messages.framework */; };
+		4131857C2CCEB276000BC665 /* Giggle_IMessage.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4131856D2CCEB271000BC665 /* Giggle_IMessage.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4131857A2CCEB276000BC665 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BB2FDAB42CCBF4E800A5BD7B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4131856C2CCEB271000BC665;
+			remoteInfo = Giggle_IMessage;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4131857D2CCEB276000BC665 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				4131857C2CCEB276000BC665 /* Giggle_IMessage.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		4131856D2CCEB271000BC665 /* Giggle_IMessage.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = Giggle_IMessage.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4131856F2CCEB271000BC665 /* Messages.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Messages.framework; path = System/Library/Frameworks/Messages.framework; sourceTree = SDKROOT; };
 		BB2FDABC2CCBF4E800A5BD7B /* Giggle.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Giggle.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		413185802CCEB276000BC665 /* Exceptions for "Giggle_IMessage" folder in "Giggle_IMessage" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 4131856C2CCEB271000BC665 /* Giggle_IMessage */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		413185712CCEB271000BC665 /* Giggle_IMessage */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				413185802CCEB276000BC665 /* Exceptions for "Giggle_IMessage" folder in "Giggle_IMessage" target */,
+			);
+			path = Giggle_IMessage;
+			sourceTree = "<group>";
+		};
 		BB2FDABE2CCBF4E800A5BD7B /* Giggle */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Giggle;
@@ -19,6 +68,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4131856A2CCEB271000BC665 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				413185702CCEB271000BC665 /* Messages.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BB2FDAB92CCBF4E800A5BD7B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -29,10 +86,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4131856E2CCEB271000BC665 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4131856F2CCEB271000BC665 /* Messages.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		BB2FDAB32CCBF4E800A5BD7B = {
 			isa = PBXGroup;
 			children = (
 				BB2FDABE2CCBF4E800A5BD7B /* Giggle */,
+				413185712CCEB271000BC665 /* Giggle_IMessage */,
+				4131856E2CCEB271000BC665 /* Frameworks */,
 				BB2FDABD2CCBF4E800A5BD7B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				BB2FDABC2CCBF4E800A5BD7B /* Giggle.app */,
+				4131856D2CCEB271000BC665 /* Giggle_IMessage.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +116,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4131856C2CCEB271000BC665 /* Giggle_IMessage */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 413185812CCEB276000BC665 /* Build configuration list for PBXNativeTarget "Giggle_IMessage" */;
+			buildPhases = (
+				413185692CCEB271000BC665 /* Sources */,
+				4131856A2CCEB271000BC665 /* Frameworks */,
+				4131856B2CCEB271000BC665 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				413185712CCEB271000BC665 /* Giggle_IMessage */,
+			);
+			name = Giggle_IMessage;
+			packageProductDependencies = (
+			);
+			productName = Giggle_IMessage;
+			productReference = 4131856D2CCEB271000BC665 /* Giggle_IMessage.appex */;
+			productType = "com.apple.product-type.app-extension.messages";
+		};
 		BB2FDABB2CCBF4E800A5BD7B /* Giggle */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BB2FDACC2CCBF4EB00A5BD7B /* Build configuration list for PBXNativeTarget "Giggle" */;
@@ -55,10 +145,12 @@
 				BB2FDAB82CCBF4E800A5BD7B /* Sources */,
 				BB2FDAB92CCBF4E800A5BD7B /* Frameworks */,
 				BB2FDABA2CCBF4E800A5BD7B /* Resources */,
+				4131857D2CCEB276000BC665 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				4131857B2CCEB276000BC665 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				BB2FDABE2CCBF4E800A5BD7B /* Giggle */,
@@ -80,6 +172,9 @@
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					4131856C2CCEB271000BC665 = {
+						CreatedOnToolsVersion = 16.0;
+					};
 					BB2FDABB2CCBF4E800A5BD7B = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -100,11 +195,19 @@
 			projectRoot = "";
 			targets = (
 				BB2FDABB2CCBF4E800A5BD7B /* Giggle */,
+				4131856C2CCEB271000BC665 /* Giggle_IMessage */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4131856B2CCEB271000BC665 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BB2FDABA2CCBF4E800A5BD7B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +218,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		413185692CCEB271000BC665 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		BB2FDAB82CCBF4E800A5BD7B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +234,67 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		4131857B2CCEB276000BC665 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4131856C2CCEB271000BC665 /* Giggle_IMessage */;
+			targetProxy = 4131857A2CCEB276000BC665 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		4131857E2CCEB276000BC665 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Giggle_IMessage/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Giggle;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-IMessage";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		4131857F2CCEB276000BC665 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Giggle_IMessage/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Giggle;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-IMessage";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		BB2FDACA2CCBF4EB00A5BD7B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -303,6 +473,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		413185812CCEB276000BC665 /* Build configuration list for PBXNativeTarget "Giggle_IMessage" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4131857E2CCEB276000BC665 /* Debug */,
+				4131857F2CCEB276000BC665 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		BB2FDAB72CCBF4E800A5BD7B /* Build configuration list for PBXProject "Giggle" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
