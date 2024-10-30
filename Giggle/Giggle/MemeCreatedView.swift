@@ -8,23 +8,26 @@
 import SwiftUI
 
 struct MemeCreatedView: View {
+    var memeDescription: String
+
     var body: some View {
         VStack {
-            QuestionMarkImage()
+            PageHeader(text: "Giggle")
+
+            MemeImageView()
             
             ActionButtonsView()
-
-            MemeDescriptionField()
-
-            GenerateMemeButton()
-
+            
+            MemeDescriptionField(memeDescription: .constant(memeDescription))
+            
+            GenerateMemeButton(isClicked:.constant(false), isEnabled: true, showAlertAction: {})
+            
             BottomNavBar()
         }
         .background(Colors.backgroundColor.ignoresSafeArea())
     }
 }
 
-
 #Preview {
-    MemeCreatedView()
+    MemeCreatedView(memeDescription: "Sample Meme Description")
 }

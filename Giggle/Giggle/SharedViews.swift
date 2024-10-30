@@ -113,8 +113,8 @@ struct QuestionMarkImage: View {
 
 // Component: Meme Description Text Field
 struct MemeDescriptionField: View {
-    @State private var memeDescription: String = ""
-    
+    @Binding var memeDescription: String // Binding to use an external variable
+
     var body: some View {
         VStack {
             TextField("Describe the meme you want to create!", text: $memeDescription)
@@ -129,35 +129,45 @@ struct MemeDescriptionField: View {
 
 // Component: Generate Meme Button
 struct GenerateMemeButton: View {
+    @Binding var isClicked: Bool
+    var isEnabled: Bool
+    var showAlertAction: () -> Void // Closure to trigger alert
+
     var body: some View {
-        VStack {
-            Button(action: {
-                // Action for generating meme
+        Button(action: {
+            if isEnabled {
+                isClicked = true
                 print("Generate meme with Dalle3 AI!")
-            }) {
-                Text("Generate with Dalle3 AI")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.black)
-                    .cornerRadius(10)
-                    .padding(.horizontal, 80)
+            } else {
+                showAlertAction() // Trigger alert if no description
             }
-            Spacer().frame(height: 40)
+        }) {
+            Text("Generate with Dalle3 AI")
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Color.black)
+                .cornerRadius(10)
+                .padding(.horizontal, 80)
         }
+        Spacer().frame(height: 40)
     }
 }
 
 // Component: Meme Image View
 struct MemeImageView: View {
     var body: some View {
-        Image("generated_meme") // Replace "generated_meme" with the appropriate image name or use network image logic
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 300, height: 250)
-            .cornerRadius(18)
-            .shadow(radius: 5)
+        VStack {
+            Spacer()
+            
+            Image("lebron_meme_441")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 400, height: 400)
+            
+            Spacer()
+        }
     }
 }
 
@@ -183,7 +193,7 @@ struct DownloadButton: View {
 // Component: Refresh Button
 struct RefreshButton: View {
     var body: some View {
-        ActionButton(iconName: "arrow.clockwise")
+        ActionButton(iconName: "arrow.counterclockwise")
     }
 }
 
