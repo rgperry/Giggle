@@ -54,12 +54,14 @@ class DataManager {
         let descriptor = FetchDescriptor<Meme>()
         guard let entries = try? context.fetch(descriptor) else { return [] }
         
+        
         // Calculate distances and sort
         let entriesWithDistances = entries.compactMap { entry -> (Meme, Double)? in
+            let memeAsText = entry.content + "With tags " + entry.tags.joined(separator: ", ")
             
             let distance = embedding.distance(
                 between: query,
-                and: entry.content,
+                and: memeAsText,
                 distanceType: .cosine
             )
             return (entry, distance)
