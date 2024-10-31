@@ -16,16 +16,18 @@ struct MemeInfoView: View {
                 
                 MemeImageView()
                 
+                // Directly calling Tags component
                 Tags(tags: tags)
                 
+                // More Info View
                 MoreInfo(dateSaved: dateSaved, source: source)
                 
-                
+                // Delete Button
                 DeleteButton(deleteAction: {
                     navigateToAllGiggles = true
                 })
                 
-                // LikeButton directly in MemeInfoView
+                // Like Button
                 LikeButton(isLiked: $isLiked)
             
                 BottomNavBar()
