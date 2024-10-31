@@ -10,20 +10,35 @@ import SwiftUI
 
 // May need a separate @Model for each tag, depending on how we execute the search?
 
+enum ImageConversionError: Error {
+    case imageNotFound
+    case pngConversionFailed
+}
+
+func convertImageToPNG(uiImage: UIImage?) throws -> Data {
+    guard let image = uiImage else {
+        throw ImageConversionError.imageNotFound
+    }
+    guard let pngData = image.pngData() else {
+        throw ImageConversionError.pngConversionFailed
+    }
+    return pngData
+}
+
 @Model
 class Meme {
     @Attribute(.unique) var id: UUID
     var dateAdded: Date
     var tags: [String]
     var content: String
-    var image: UIImage
+    @Attribute(.externalStorage) var image: Data?
 
     init(content: String, tags: [String] = [], image: UIImage) {
         self.id = UUID()
         self.dateAdded = Date()
         self.content = content
         self.tags = tags
-        self.image = image
+        self.image = try? convertImageToPNG(uiImage: image)
     }
 }
 
