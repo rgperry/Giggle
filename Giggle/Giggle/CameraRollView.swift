@@ -10,7 +10,7 @@ import SwiftUI
 import PhotosUI
 
 struct ImagePicker: UIViewControllerRepresentable {
-    @Environment(\.modelContext) private var context
+    @Environment(\.modelContext) private var modelContext
     @Binding var selectedImages: [UIImage]
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
@@ -46,10 +46,14 @@ struct ImagePicker: UIViewControllerRepresentable {
                             DispatchQueue.main.async {
                                 self.parent.selectedImages.append(uiImage)
                             }
+                            Task {
+                                await DataManager.storeMemes(context: self.parent.modelContext, images: [uiImage])
+                            }
                         }
                     }
                 }
             }
+            
         }
     }
 }

@@ -42,9 +42,9 @@ class Meme {
     }
 }
 
-// Utility Class
+ // Utility Class
 class DataManager {
-    static func findSimilarEntries(query: String, in context: ModelContext, limit: Int = 10) -> [Meme] {
+    static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10) -> [Meme] {
         let embedding = NLEmbedding.sentenceEmbedding(for: .english)
         guard let embedding = embedding else {
             return []
@@ -57,7 +57,7 @@ class DataManager {
         
         // Calculate distances and sort
         let entriesWithDistances = entries.compactMap { entry -> (Meme, Double)? in
-            let memeAsText = entry.content + "With tags " + entry.tags.joined(separator: ", ")
+            let memeAsText = entry.content + " With tags " + entry.tags.joined(separator: ", ")
             
             let distance = embedding.distance(
                 between: query,
@@ -75,31 +75,35 @@ class DataManager {
         
         return Array(sortedEntries)
     }
-    static func storeMemes(in context: ModelContext, images: [UIImage]) async {
+    
+    static func storeMemes(context: ModelContext, images: [UIImage]) async {
+        print("begin loading the memes")
         // Loop through each image
-        for image in images {
+        for (i, image) in images.enumerated() {
+            print("Loading image #\(i)")
             // Retrieve tags and content for each image
             let (tags, content) = await DataManager.getInfo(for: image)
             
-             let meme = Meme(content: content, tags: tags, image: image)
-             context.insert(meme)
+            let meme = Meme(content: content, tags: tags, image: image)
+            context.insert(meme)
         }
         
         do {
             try context.save()
+            print("successfully saved memes")
         } catch {
-            print(error.localizedDescription)
+            print("Error in storeMemes: \(error.localizedDescription)")
         }
     }
 
     // Placeholder for an async function that retrieves tags and content for an image
-    static func getInfo(for image: UIImage) async -> ([String], String) {
+    static func getInfo(for image: UIImage) async -> ([String], String){
         // Replace this with your actual tagging logic
         return (["funny", "cute", "dog", "doberman"], "Sample content based on image") // Mock data for now
     }
     
     // this could be useful for testing
-    static func clearDB(in context: ModelContext) {
+    static func clearDB(context: ModelContext) {
         do {
             try context.delete(model: Meme.self)
         } catch {
