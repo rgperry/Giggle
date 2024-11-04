@@ -19,7 +19,7 @@ from django.urls import path
 from app import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('getchatts/', views.getchatts, name='getchatts'),
-    path('postchatt/', views.postchatt, name='postchatt'),
+    path('generateMeme/', views.generate_meme, name='generate_meme'),
+    path('redoGeneration/', views.redo_generation, name='redo_generation'),
+    path('getSentiment/', views.get_sentiment, name='get_sentiment'),
 ]
