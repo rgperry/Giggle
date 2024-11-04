@@ -7,6 +7,7 @@ import json
 import base64
 from django.views.decorators.http import require_http_methods
 from .utils import generate_image, analyze_sentiment
+from io import BytesIO
 
 @require_http_methods(["GET"])
 def generate_meme(request):
