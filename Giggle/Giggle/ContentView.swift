@@ -48,6 +48,7 @@ struct Folder: View {
     var body: some View {
         NavigationLink(destination: FolderView(header: folderName)) {
             ZStack {
+                //We don't want this to be a GiggleItem; create FolderItem?
                 GiggleItem(text: folderName)
 
                 if pinned {

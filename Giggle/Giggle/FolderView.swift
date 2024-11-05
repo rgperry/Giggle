@@ -19,20 +19,7 @@ struct FolderView: View {
         
             ScrollView {
                 LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.memeRowPadding) {
-                    ZStack {
-                        GiggleItem()
-                        
-                        // FINISH: button works when you click on image but not when you click on heart itself
-                        Button(action: {
-                            isLiked.toggle()
-                        }) {
-                            Image(systemName: isLiked ? "heart.fill" : "heart")
-                                .foregroundColor(isLiked ? .red : .black)
-                                .font(.system(size: 35))
-                                .offset(x: -72, y: -70)
-                        }
-                    }
-                    
+                    GiggleItem()
                     GiggleItem()
                     GiggleItem()
                     GiggleItem()

@@ -10,7 +10,8 @@ import SwiftUI
 struct GiggleItem: View {
     var text: String?
     let size: CGFloat = 150
-
+    @State private var isLiked = false
+    
     var body: some View {
         VStack {
             Image(systemName: "person.circle.fill")
@@ -21,6 +22,32 @@ struct GiggleItem: View {
                 .background(Color.white)
                 .cornerRadius(18)
                 .shadow(radius: 4)
+                .onTapGesture {
+                    //short tap to open meme view
+                    
+                }
+                .contextMenu {
+                    Button(action: {
+                        copyImage()
+                    }) {
+                        Label("Copy", systemImage: "doc.on.doc")
+                    }
+                    
+                    Button(action: {
+                        shareImage()
+                    }) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                }
+            
+            Button(action: {
+                isLiked.toggle()
+            }) {
+                Image(systemName: isLiked ? "heart.fill" : "heart")
+                    .foregroundColor(isLiked ? .red : .black)
+                    .font(.system(size: 50))
+            }
+            .offset(x: -72, y: -175)
             
             if let text = text {
                 Text(text)
@@ -28,6 +55,22 @@ struct GiggleItem: View {
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
             }
+        }
+    }
+    
+    //Handle copying the image (placeholder for now)
+    private func copyImage() {
+        //PLACEHOLDER
+    }
+        
+    //Handle sharing the image
+    private func shareImage() {
+        let image = UIImage(systemName: "person.circle.fill")!
+        let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootVC = windowScene.windows.first?.rootViewController {
+            rootVC.present(activityVC, animated: true, completion: nil)
         }
     }
 }
