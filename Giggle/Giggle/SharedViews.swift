@@ -75,6 +75,16 @@ struct GiggleItem: View {
     }
 }
 
+struct FolderItem() {
+    GiggleItem()
+    
+}
+
+struct MemeItem() {
+    GiggleItem()
+    // meme specific stuff
+}
+
 struct SearchBar: View {
     var text: String
     
