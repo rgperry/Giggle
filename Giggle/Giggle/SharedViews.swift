@@ -75,15 +75,44 @@ struct GiggleItem: View {
     }
 }
 
-struct FolderItem() {
-    GiggleItem()
+struct FolderItem: View {
+    var text: String
+    let size: CGFloat = 150
+    @State var isPinned = false
     
+    var body: some View {
+        NavigationLink(destination: FolderView(header: text)) {
+            ZStack {
+                VStack {
+                    Image(systemName: "person.circle.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: size, height: size)
+                        .foregroundColor(.black)
+                        .background(Color.white)
+                        .cornerRadius(18)
+                        .shadow(radius: 4)
+                    
+                    Text(text)
+                        .font(.headline)
+                        .foregroundColor(.white)
+                }
+                .padding(.vertical, 20)
+                
+                Button(action: {
+                    isPinned.toggle()
+                }) {
+                    Image(systemName: isPinned ? "pin.fill" : "pin")
+                        .foregroundColor(.gray)
+                        .font(.system(size: 55))
+                        .shadow(color: .black, radius: 4, x: 0, y: 0)
+                }
+                .offset(x: -65, y: -size / 2 - 10)
+            }
+        }
+    }
 }
 
-struct MemeItem() {
-    GiggleItem()
-    // meme specific stuff
-}
 
 struct SearchBar: View {
     var text: String
@@ -91,12 +120,12 @@ struct SearchBar: View {
     var body: some View {
         HStack {
             HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.black)
+                
                 TextField(text, text: .constant(""))
                     .padding(8)
                     .foregroundColor(.black)
-                
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.gray)
             }
             .padding(.horizontal, 20)
             .frame(height: 45)
