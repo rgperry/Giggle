@@ -8,9 +8,15 @@ openai.api_key = settings.OPENAI_API_KEY
 
 def generate_image(description):
     """
-    Generates an image based on a description using DALL-E or a similar OpenAI image model.
+    Generates an image based on a description. Uses OpenAI's API.
+    Note: This function requires openai==0.28 due to API changes in later versions.
     """
+    if not description:
+        print("Error: Description is empty.")
+        return None
+    
     try:
+        # For text-to-image generation, use openai.Image.create (available in openai==0.28)
         response = openai.Image.create(
             prompt=description,
             n=1,
@@ -18,7 +24,6 @@ def generate_image(description):
         )
         
         image_url = response['data'][0]['url']
-        
         image_response = requests.get(image_url)
         img = Image.open(BytesIO(image_response.content))
         return img
@@ -29,13 +34,18 @@ def generate_image(description):
 def analyze_sentiment(message):
     """
     Calls the OpenAI API to perform sentiment analysis on a given message.
+    Uses openai.ChatCompletion with gpt-3.5-turbo model.
     """
+    if not message:
+        print("Error: Message is empty.")
+        return "Error in analyzing sentiment"
+    
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are an assistant that analyzes sentiment in messages."},
-                {"role": "user", "content": f"Analyze the sentiment of this message: {message}"}
+                {"role": "system", "content": "Analyze the sentiment of the following message."},
+                {"role": "user", "content": message}
             ],
             max_tokens=50,
             temperature=0.5
@@ -45,3 +55,4 @@ def analyze_sentiment(message):
     except Exception as e:
         print(f"An error occurred: {e}")
         return "Error in analyzing sentiment"
+

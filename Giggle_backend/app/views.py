@@ -1,20 +1,21 @@
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
-from django.db import connection
 from django.views.decorators.csrf import csrf_exempt
-import json
-
-import base64
 from django.views.decorators.http import require_http_methods
-from .utils import generate_image, analyze_sentiment
+import json
+import base64
 from io import BytesIO
+from .utils import generate_image, analyze_sentiment
 
 @require_http_methods(["GET"])
 def generate_meme(request):
     """
-    Endpoint to generate a meme based on description
+    Endpoint to generate a meme based on description.
     """
-    description = request.GET.get('description', '')
+    description = request.GET.get('description', '').strip()
+    if not description:
+        return JsonResponse({"error": "Description cannot be empty"}, status=400)
+    
     img = generate_image(description)
     
     if img:
@@ -29,27 +30,35 @@ def generate_meme(request):
 @require_http_methods(["POST"])
 def redo_generation(request):
     """
-    Endpoint to redo meme generation
+    Endpoint to redo meme generation.
     """
-    import json
-    data = json.loads(request.body)
-    description = data.get('description', '')
-    
-    img = generate_image(description)
-    if img:
-        img_io = BytesIO()
-        img.save(img_io, 'PNG')
-        img_io.seek(0)
-        img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
-        return JsonResponse({"imageFile": img_base64})
-    else:
-        return JsonResponse({"error": "Image generation failed"}, status=500)
+    try:
+        data = json.loads(request.body)
+        description = data.get('description', '').strip()
+        if not description:
+            return JsonResponse({"error": "Description cannot be empty"}, status=400)
+        
+        img = generate_image(description)
+        if img:
+            img_io = BytesIO()
+            img.save(img_io, 'PNG')
+            img_io.seek(0)
+            img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
+            return JsonResponse({"imageFile": img_base64})
+        else:
+            return JsonResponse({"error": "Image generation failed"}, status=500)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
 @require_http_methods(["GET"])
 def get_sentiment(request):
     """
-    Endpoint to get sentiment analysis
+    Endpoint to get sentiment analysis.
     """
-    message = request.GET.get('message', '')
+    message = request.GET.get('message', '').strip()
+    if not message:
+        return JsonResponse({"error": "Message cannot be empty"}, status=400)
+    
     sentiment = analyze_sentiment(message)
     return JsonResponse({"sentiment": sentiment})
+
