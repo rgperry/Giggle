@@ -15,25 +15,27 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var context
+    @State private var searchText = ""
 
     let gridItems = [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)]
 
     var body: some View {
         VStack {
             MainHeader(text: "Giggle")
-            SearchBar(text: "Search for a Giggle")
+            SearchBar(text: "Search for a Giggle", searchText: $searchText)
 
-            ScrollView {
-                LazyVGrid(columns: gridItems, spacing: 40) {
-                    ItemView(title: "Favorites")
-                    ItemView(title: "Recently Shared")
-                    ItemView(title: "All Giggles")
-                    ItemView(title: "Sports")
+            if searchText.isEmpty {
+                ScrollView {
+                    LazyVGrid(columns: gridItems, spacing: 40) {
+                        ItemView(title: "Favorites")
+                        ItemView(title: "Recently Shared")
+                        ItemView(title: "All Giggles")
+                        ItemView(title: "Sports")
+                    }
+                    .padding(.horizontal, 40)
+                    .padding(.top, 28)
                 }
-                .padding(.horizontal, 40)
-                .padding(.top, 28)
             }
-            
             BottomNavBar()
         }
         .background(Color(red: 104/255, green: 86/255, blue: 182/255).ignoresSafeArea())
@@ -63,13 +65,42 @@ struct ItemView: View {
     }
 }
 
+struct MemeView: View {
+    let size: CGFloat = 140
+    let meme: Meme
+
+    var body: some View {
+        VStack {
+            Image(uiImage: meme.imageAsUIImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size, height: size)
+                .foregroundColor(.black)
+                .background(Color.white)
+                .cornerRadius(18)
+                .shadow(radius: 4)
+        }
+    }
+}
+
 struct SearchBar: View {
     var text: String
+    @Binding var searchText: String
+    @Query private var memes: [Meme]
+    @Environment(\.modelContext) private var context
+    
+    var filteredMemes: [Meme] {
+        if searchText.isEmpty {
+            return memes
+        } else {
+            return DataManager.findSimilarEntries(query: searchText, context: context, limit: 10)
+        }
+    }
     
     var body: some View {
         HStack {
             HStack {
-                TextField(text, text: .constant(""))
+                TextField(text, text: $searchText)
                     .padding(8)
                     .foregroundColor(.black)
                 
@@ -83,6 +114,18 @@ struct SearchBar: View {
             .shadow(radius: 2)
         }
         .padding(.horizontal, 23)
+        
+        // Display the filtered results
+        if !searchText.isEmpty {
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                    ForEach(filteredMemes) { meme in
+                        MemeView(meme: meme)
+                    }
+                }
+                .padding()
+            }
+        }
     }
 }
 
@@ -105,10 +148,13 @@ struct BottomNavBar: View {
             ImagePicker(selectedImages: $selectedImages)
         }
         .onChange(of: selectedImages) {
+            // only add new memes when there are a few in the selectedPhotos. (this .onchange gets called twice bc we clear the selected images array.)
+            guard selectedImages.isEmpty else { return }
             Task {
                 // ignore the modelContext warning here - Matt
                 await DataManager.storeMemes(context: context, images: selectedImages) {
-                    print("Successfully store \(selectedImages.count) images to the swiftData database")
+//                    print("Successfully store \(selectedImages.count) images to the swiftData database")
+                    selectedImages.removeAll()
                 }
             }
         }

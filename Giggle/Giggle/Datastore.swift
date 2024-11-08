@@ -49,17 +49,18 @@ class Meme {
         }
     }
     // Computed property to get the UIImage from image Data
-    var imageAsUIImage: UIImage? {
+    var imageAsUIImage: UIImage {
         guard let imageData = image else {
-            return nil
+            return UIImage(systemName: "photo") ?? UIImage()
         }
-        return UIImage(data: imageData)
+        return UIImage(data: imageData) ?? UIImage()
     }
 }
 
  // Utility Class
 class DataManager {
     static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10) -> [Meme] {
+        print("searching for similar entries \(query)")
         let embedding = NLEmbedding.sentenceEmbedding(for: .english)
         guard let embedding = embedding else {
             return []
@@ -88,16 +89,16 @@ class DataManager {
             .prefix(limit)
             .map { $0.0 }
         
-        return Array(sortedEntries)
+        return sortedEntries
     }
     
     // Decorated with @MainActor to avoid concurrency issues with passing down the model context
     @MainActor
     static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
-        print("begin loading the memes")
+//        print("begin loading the memes")
         // Loop through each image
-        for (i, image) in images.enumerated() {
-            print("Loading image #\(i)")
+        for (_, image) in images.enumerated() {
+//            print("Loading image #\(i)")
             // Retrieve tags and content for each image
             let (tags, content) = await DataManager.getInfo(for: image)
             
@@ -107,7 +108,7 @@ class DataManager {
         
         do {
             try context.save()
-            print("successfully saved memes")
+            print("successfully saved \(images.count) memes")
         } catch {
             print("Error in storeMemes: \(error.localizedDescription)")
         }
@@ -130,7 +131,11 @@ class DataManager {
     }
         
     // TODO add a helper to update an image, when the tags are changed
-    static func updateImage(imageID: String) async -> () {
+    static func addTag(context: ModelContext, imageID: String, tagsToAdd: [String]) -> () {
+        
+    }
+    
+    static func removeTag(context: ModelContext, imageID: String, tagsToRemove: [String]) -> () {
         
     }
     
