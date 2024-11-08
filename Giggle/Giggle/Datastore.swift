@@ -40,7 +40,13 @@ class Meme {
         self.dateAdded = Date()
         self.content = content
         self.tags = tags
-        self.image = try? convertImageToPNG(image)
+//        self.image = try? convertImageToPNG(image)
+        do {
+            self.image = try convertImageToPNG(image)
+        } catch {
+            print("Image conversion failed for \(self.id)")
+            self.image = try? convertImageToPNG(UIImage(systemName: "photo"))
+        }
     }
     // Computed property to get the UIImage from image Data
     var imageAsUIImage: UIImage? {
