@@ -55,7 +55,7 @@ class Meme {
         do {
             self.image = try convertImageToPNG(image)
         } catch {
-            print("Image conversion failed for \(self.id)")
+            logger.error("Image conversion failed for \(self.id)")
             self.image = try? convertImageToPNG(UIImage(systemName: "photo"))
         }
     }
@@ -81,7 +81,7 @@ extension Meme {
  // Utility Class
 class DataManager {
     static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10) -> [Meme] {
-        print("searching for similar entries \(query)")
+        logger.debug("searching for similar entries \(query)")
         let embedding = NLEmbedding.sentenceEmbedding(for: .english)
         guard let embedding = embedding else {
             return []
@@ -116,10 +116,8 @@ class DataManager {
     // Decorated with @MainActor to avoid concurrency issues with passing down the model context
     @MainActor
     static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
-//        print("begin loading the memes")
         // Loop through each image
         for (_, image) in images.enumerated() {
-//            print("Loading image #\(i)")
             // Retrieve tags and content for each image
             let (tags, content) = await DataManager.getInfo(for: image)
             
@@ -129,9 +127,9 @@ class DataManager {
         
         do {
             try context.save()
-            print("successfully saved \(images.count) memes")
+            logger.error("successfully saved \(images.count) memes")
         } catch {
-            print("Error in storeMemes: \(error.localizedDescription)")
+            logger.error("Error in storeMemes: \(error.localizedDescription)")
         }
         completion()
     }

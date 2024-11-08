@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
+
+let logger = Logger()
 
 
 // TODO
@@ -151,9 +154,9 @@ struct BottomNavBar: View {
             // only add new memes when there are a few in the selectedPhotos. (this .onchange gets called twice bc we clear the selected images array.)
             guard selectedImages.isEmpty else { return }
             Task {
-                // ignore the modelContext warning here - Matt
+                // ignore the modelContext warning here - Matt (@MainActor decorator on storeMemes function fixed this)
                 await DataManager.storeMemes(context: context, images: selectedImages) {
-//                    print("Successfully store \(selectedImages.count) images to the swiftData database")
+                    logger.info("Successfully store \(selectedImages.count) images to the swiftData database")
                     selectedImages.removeAll()
                 }
             }
