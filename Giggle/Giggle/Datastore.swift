@@ -25,28 +25,30 @@ func convertImageToPNG(_ uiImage: UIImage?) throws -> Data {
 
 // This isn't being used now, but if we wanted to do search solely based on tags, we could with this.
 @Model
-class Tag {
-    @Attribute(.unique) var id: UUID
-    var name: String
-    @Relationship(inverse: \Meme.tags) var memes: [Meme]
+class Tag: Hashable {
+    @Attribute(.unique) var name: String
+    @Relationship var memes: [Meme]
     
     init(name: String) {
-        self.id = UUID()
         self.name = name
         self.memes = []
+    }
+    // Computed property to get the memes with this tag
+    var memesWithThisTag: [Meme] {
+        return memes.filter { $0.tags.contains(self) }
     }
 }
 
 @Model
 class Meme {
-    @Attribute(.unique) var id: UUID
-    var dateAdded: Date
-    var tags: Set<String>
-    var content: String
     @Attribute(.externalStorage) var image: Data?
-
+    @Attribute(.unique) var id: UUID
+    @Relationship var tags: Set<Tag>
+    var dateAdded: Date
+    var content: String
+    
     // Initializer
-    init(content: String, tags: [String] = [], image: UIImage, id: UUID? = nil) {
+    init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
         self.dateAdded = Date()
@@ -70,11 +72,11 @@ class Meme {
 
 extension Meme {
     func addTag(_ tag: String) {
-        tags.insert(tag.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
+        tags.insert(Tag(name: tag.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)))
     }
     
     func removeTag(_ tag: String) {
-        tags.remove(tag.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
+        tags.remove(Tag(name: tag.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)))
     }
 }
 
@@ -94,7 +96,7 @@ class DataManager {
         
         // Calculate distances and sort
         let entriesWithDistances = entries.compactMap { entry -> (Meme, Double)? in
-            let memeAsText = entry.content + " With tags " + entry.tags.joined(separator: ", ")
+            let memeAsText = entry.content + " With tags " + entry.tags.map { $0.name }.joined(separator: ", ")
             
             let distance = embedding.distance(
                 between: query,
@@ -134,7 +136,7 @@ class DataManager {
         completion()
     }
 
-    static func getInfo(for image: UIImage) async -> ([String], String){
+    static func getInfo(for image: UIImage) async -> ([Tag], String){
         // Replace this with your actual tagging logic
         
         var tags = ["funny", "cute", "dog", "doberman"]
@@ -142,7 +144,7 @@ class DataManager {
         // convert all tags to lowercase and remove whitespace
         tags = tags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) }
         
-        return (tags, "Sample content based on image") // Mock data for now
+        return (tags.map { Tag(name: $0) }, "Sample content based on image") // Mock data for now
     }
     
     // this could be useful for testing
