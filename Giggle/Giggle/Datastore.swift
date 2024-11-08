@@ -25,7 +25,7 @@ func convertImageToPNG(_ uiImage: UIImage?) throws -> Data {
 
 // This isn't being used now, but if we wanted to do search solely based on tags, we could with this.
 @Model
-class Tag: Hashable {
+class Tag {
     @Attribute(.unique) var name: String
     @Relationship var memes: [Meme]
     
