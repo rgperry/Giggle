@@ -60,4 +60,3 @@ class ViewsTestCase(TestCase):
         response = self.client.get(reverse('get_sentiment'))
         self.assertEqual(response.status_code, 400)  # Updated to expect 400 instead of 500
         self.assertJSONEqual(response.content, {"error": "Message cannot be empty"})  # Updated error message
-

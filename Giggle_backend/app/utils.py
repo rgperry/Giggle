@@ -2,6 +2,7 @@ import openai
 import requests
 from io import BytesIO
 from PIL import Image
+import base64
 from django.conf import settings
 
 openai.api_key = settings.OPENAI_API_KEY
@@ -56,3 +57,56 @@ def analyze_sentiment(message):
         print(f"An error occurred: {e}")
         return "Error in analyzing sentiment"
 
+def extract_tags(image, num_tags=10):
+    """
+    Extracts tags for an image using OpenAI's API. Returns a list of tags.
+    """
+    try:
+        # Convert image to base64 to send in prompt
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")
+        img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        
+        # Send image description request to OpenAI's model
+        prompt = f"Generate {num_tags} descriptive tags for this image."
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a tagging assistant."},
+                {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
+            ],
+            max_tokens=50,
+            temperature=0.5
+        )
+        tags = response.choices[0].message['content'].strip().split(',')
+        return [tag.strip() for tag in tags][:num_tags]
+    except Exception as e:
+        print(f"An error occurred in extract_tags: {e}")
+        return ["error"]
+
+def extract_content(image, content_length=200):
+    """
+    Extracts a text description for an image. Uses OpenAI's API.
+    """
+    try:
+        # Convert image to base64
+        buffered = BytesIO()
+        image.save(buffered, format="PNG")
+        img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        
+        # Create prompt for content description
+        prompt = f"Describe this image in up to {content_length} characters."
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are an image description assistant."},
+                {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
+            ],
+            max_tokens=100,
+            temperature=0.5
+        )
+        content = response.choices[0].message['content'].strip()
+        return content[:content_length]
+    except Exception as e:
+        print(f"An error occurred in extract_content: {e}")
+        return "error in content extraction"

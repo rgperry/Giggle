@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods
 import json
 import base64
 from io import BytesIO
-from .utils import generate_image, analyze_sentiment
+from .utils import generate_image, analyze_sentiment, extract_tags, extract_content
 
 @require_http_methods(["GET"])
 def generate_meme(request):
@@ -62,3 +62,54 @@ def get_sentiment(request):
     sentiment = analyze_sentiment(message)
     return JsonResponse({"sentiment": sentiment})
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def image_info(request):
+    """
+    Endpoint to get image info for multiple images.
+    """
+    try:
+        # Read URL parameters
+        num_tags = int(request.GET.get('numTags', 10))
+        content_length = int(request.GET.get('contentLength', 200))
+
+        # Parse the request body
+        data = json.loads(request.body)
+        
+        # Validate input: limit batch size to 10 images
+        if len(data) > 10:
+            return JsonResponse({"error": "Batch size exceeds limit of 10 images"}, status=400)
+
+        response_data = []
+        for image_data in data:
+            image_id = image_data.get('Id')
+            image_base64 = image_data.get('imageFile')
+
+            # Validate fields
+            if not image_id or not image_base64:
+                return JsonResponse({"error": f"Invalid data for image ID {image_id}"}, status=400)
+
+            # Decode the base64 image
+            try:
+                image_bytes = base64.b64decode(image_base64)
+                image = BytesIO(image_bytes)
+            except base64.binascii.Error:
+                return JsonResponse({"error": f"Invalid base64 encoding for image ID {image_id}"}, status=400)
+
+            # Process the image to extract tags and content
+            # Assuming you have functions `extract_tags` and `extract_content`
+            tags = extract_tags(image, num_tags=num_tags)  # Custom function to generate tags
+            content = extract_content(image, content_length=content_length)  # Custom function to generate content
+
+            response_data.append({
+                "id": image_id,
+                "tags": tags,
+                "content": content
+            })
+
+        return JsonResponse(response_data, safe=False)
+
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except ValueError:
+        return JsonResponse({"error": "Invalid parameters for numTags or contentLength"}, status=400)

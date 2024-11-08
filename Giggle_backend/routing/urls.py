@@ -22,4 +22,5 @@ urlpatterns = [
     path('generateMeme/', views.generate_meme, name='generate_meme'),
     path('redoGeneration/', views.redo_generation, name='redo_generation'),
     path('getSentiment/', views.get_sentiment, name='get_sentiment'),
+    path('imageInfo/', views.image_info, name='image_info'),
 ]
