@@ -33,17 +33,17 @@ class Tag: Hashable {
         self.name = name
         self.memes = []
     }
-    // Computed property to get the memes with this tag
-    var memesWithThisTag: [Meme] {
-        return memes.filter { $0.tags.contains(self) }
-    }
+//    // Computed property to get the memes with this tag
+//    var memesWithThisTag: [Meme] {
+//        return memes.filter { $0.tags.contains(self) }
+//    }
 }
 
 @Model
 class Meme {
     @Attribute(.externalStorage) var image: Data?
     @Attribute(.unique) var id: UUID
-    @Relationship var tags: Set<Tag>
+    @Relationship(inverse: \Tag.memes) var tags: Set<Tag>
     var dateAdded: Date
     var content: String
     
