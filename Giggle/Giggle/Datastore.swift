@@ -25,11 +25,25 @@ func convertImageToPNG(_ uiImage: UIImage?) throws -> Data {
     return pngData
 }
 
+// This isn't being used now, but if we wanted to do search solely based on tags, we could with this.
+@Model
+class Tag {
+    @Attribute(.unique) var id: UUID
+    var name: String
+    @Relationship(inverse: \Meme.tags) var memes: [Meme]
+    
+    init(name: String) {
+        self.id = UUID()
+        self.name = name
+        self.memes = []
+    }
+}
+
 @Model
 class Meme {
     @Attribute(.unique) var id: UUID
     var dateAdded: Date
-    var tags: [String]
+    var tags: Set<String>
     var content: String
     @Attribute(.externalStorage) var image: Data?
 
@@ -39,8 +53,7 @@ class Meme {
         self.id = id ?? UUID()
         self.dateAdded = Date()
         self.content = content
-        self.tags = tags
-//        self.image = try? convertImageToPNG(image)
+        self.tags = Set(tags)
         do {
             self.image = try convertImageToPNG(image)
         } catch {
@@ -54,6 +67,16 @@ class Meme {
             return UIImage(systemName: "photo") ?? UIImage()
         }
         return UIImage(data: imageData) ?? UIImage()
+    }
+}
+
+extension Meme {
+    func addTag(_ tag: String) {
+        tags.insert(tag.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+    
+    func removeTag(_ tag: String) {
+        tags.remove(tag.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
     }
 }
 
@@ -118,7 +141,13 @@ class DataManager {
     // Placeholder for an async function that retrieves tags and content for an image
     static func getInfo(for image: UIImage) async -> ([String], String){
         // Replace this with your actual tagging logic
-        return (["funny", "cute", "dog", "doberman"], "Sample content based on image") // Mock data for now
+        
+        var tags = ["funny", "cute", "dog", "doberman"]
+        
+        // convert all tags to lowercase and remove whitespace
+        tags = tags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) }
+        
+        return (tags, "Sample content based on image") // Mock data for now
     }
     
     // this could be useful for testing
@@ -129,15 +158,6 @@ class DataManager {
             fatalError(error.localizedDescription)
         }
     }
-        
-    // TODO add a helper to update an image, when the tags are changed
-    static func addTag(context: ModelContext, imageID: String, tagsToAdd: [String]) -> () {
-        
-    }
-    
-    static func removeTag(context: ModelContext, imageID: String, tagsToRemove: [String]) -> () {
-        
-    }
-    
-    
 }
+
+
