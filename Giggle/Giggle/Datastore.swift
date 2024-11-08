@@ -8,8 +8,6 @@ import SwiftData
 import NaturalLanguage
 import SwiftUI
 
-// May need a separate @Model for each tag, depending on how we execute the search?
-
 enum ImageConversionError: Error {
     case imageNotFound
     case pngConversionFailed
@@ -138,7 +136,6 @@ class DataManager {
         completion()
     }
 
-    // Placeholder for an async function that retrieves tags and content for an image
     static func getInfo(for image: UIImage) async -> ([String], String){
         // Replace this with your actual tagging logic
         
@@ -159,5 +156,18 @@ class DataManager {
         }
     }
 }
+
+// TODO
+func generateMeme(description: String) async -> (UIImage) {
+    // call backend to generate meme
+    return UIImage()
+}
+
+// TODO
+func regenerateMeme(description: String, prevImage: UIImage) async -> (UIImage) {
+    // call backend to generate meme
+    return UIImage()
+}
+
 
 
