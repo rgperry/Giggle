@@ -35,6 +35,10 @@ struct ImagePicker: UIViewControllerRepresentable {
         init(_ parent: ImagePicker) {
             self.parent = parent
         }
+        
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            picker.dismiss(animated: true)
+        }
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
             picker.dismiss(animated: true)
@@ -45,9 +49,6 @@ struct ImagePicker: UIViewControllerRepresentable {
                         if let uiImage = image as? UIImage {
                             DispatchQueue.main.async {
                                 self.parent.selectedImages.append(uiImage)
-                            }
-                            Task {
-                                await DataManager.storeMemes(context: self.parent.modelContext, images: [uiImage])
                             }
                         }
                     }

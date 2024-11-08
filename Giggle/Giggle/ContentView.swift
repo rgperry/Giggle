@@ -89,6 +89,8 @@ struct SearchBar: View {
 struct BottomNavBar: View {
     @State private var isPickerPresented = false
     @State private var selectedImages: [UIImage] = []
+    @Environment(\.modelContext) private var context
+    
     var body: some View {
         HStack {
             BottomNavBarIcon(systemIconName: "house", tabName: "Home")
@@ -101,6 +103,14 @@ struct BottomNavBar: View {
         }
         .sheet(isPresented: $isPickerPresented) {
             ImagePicker(selectedImages: $selectedImages)
+        }
+        .onChange(of: selectedImages) {
+            Task {
+                // ignore the modelContext warning here - Matt
+                await DataManager.storeMemes(context: context, images: selectedImages) {
+                    print("Successfully store \(selectedImages.count) images to the swiftData database")
+                }
+            }
         }
         .padding(.horizontal, 10)
     }

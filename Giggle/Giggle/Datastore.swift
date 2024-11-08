@@ -15,7 +15,7 @@ enum ImageConversionError: Error {
     case pngConversionFailed
 }
 
-func convertImageToPNG(uiImage: UIImage?) throws -> Data {
+func convertImageToPNG(_ uiImage: UIImage?) throws -> Data {
     guard let image = uiImage else {
         throw ImageConversionError.imageNotFound
     }
@@ -33,12 +33,21 @@ class Meme {
     var content: String
     @Attribute(.externalStorage) var image: Data?
 
-    init(content: String, tags: [String] = [], image: UIImage) {
-        self.id = UUID()
+    // Initializer
+    init(content: String, tags: [String] = [], image: UIImage, id: UUID? = nil) {
+        // Use the provided id or generate a new UUID if none is provided
+        self.id = id ?? UUID()
         self.dateAdded = Date()
         self.content = content
         self.tags = tags
-        self.image = try? convertImageToPNG(uiImage: image)
+        self.image = try? convertImageToPNG(image)
+    }
+    // Computed property to get the UIImage from image Data
+    var imageAsUIImage: UIImage? {
+        guard let imageData = image else {
+            return nil
+        }
+        return UIImage(data: imageData)
     }
 }
 
@@ -76,7 +85,9 @@ class DataManager {
         return Array(sortedEntries)
     }
     
-    static func storeMemes(context: ModelContext, images: [UIImage]) async {
+    // Decorated with @MainActor to avoid concurrency issues with passing down the model context
+    @MainActor
+    static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
         print("begin loading the memes")
         // Loop through each image
         for (i, image) in images.enumerated() {
@@ -94,6 +105,7 @@ class DataManager {
         } catch {
             print("Error in storeMemes: \(error.localizedDescription)")
         }
+        completion()
     }
 
     // Placeholder for an async function that retrieves tags and content for an image
