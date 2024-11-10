@@ -22,13 +22,12 @@ struct ContentView: View {
 
                 ScrollView {
                     LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
-                        Folder(folderName: "Favorites", pinned: true)
-                        Folder(folderName: "Recently Shared", pinned: true)
-                        Folder(folderName: "All Giggles", pinned: true)
-                        
-                        Folder(folderName: "Sad")
-                        Folder(folderName: "Sports")
-                        Folder(folderName: "Surprised")
+                        FolderItem(text: "Favorites", isPinned: true)
+                        FolderItem(text: "Recently Shared", isPinned: true)
+                        FolderItem(text: "All Giggles", isPinned: true)
+                        FolderItem(text: "Sad")
+                        FolderItem(text: "Sports")
+                        FolderItem(text: "Surprised")
                     }
                     .padding(.horizontal, GridStyle.columnPadding)
                     .padding(.top, GridStyle.searchBarPadding)
@@ -38,23 +37,6 @@ struct ContentView: View {
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
         }.tint(.black)
-    }
-}
-
-struct Folder: View {
-    var folderName: String
-    var pinned: Bool = false
-
-    var body: some View {
-        NavigationLink(destination: FolderView(header: folderName)) {
-            ZStack {
-                GiggleItem(text: folderName)
-
-                if pinned {
-                    PinIcon()
-                }
-            }
-        }
     }
 }
 
