@@ -7,10 +7,6 @@
 
 import SwiftUI
 import SwiftData
-import OSLog
-
-let logger = Logger()
-
 
 // TODO
 // Make ContentView a wrapper?
