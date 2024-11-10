@@ -19,7 +19,7 @@ struct GiggleItem: View {
     
     var body: some View {
         VStack {
-            Image(systemName: meme.imageAsUIImage)
+            Image(uiImage: meme.imageAsUIImage)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
@@ -118,21 +118,9 @@ struct FolderItem: View {
     }
 }
 
-
 struct SearchBar: View {
     var text: String
     @Binding var searchText: String
-    @Query private var memes: [Meme]
-    @Environment(\.modelContext) private var context
-
-    // computed property for filtering of memes
-    var filteredMemes: [Meme] {
-        if searchText.isEmpty {
-            return memes
-        } else {
-            return DataManager.findSimilarEntries(query: searchText, context: context, limit: 50)
-        }
-    }
     
     var body: some View {
         HStack {
@@ -140,7 +128,7 @@ struct SearchBar: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.black)
                 
-                TextField(text, text: .constant(""))
+                TextField(text, text: $searchText)
                     .padding(8)
                     .foregroundColor(.black)
             }
@@ -151,24 +139,12 @@ struct SearchBar: View {
             .shadow(radius: 2)
         }
         .padding(.horizontal, 23)
-
-        // Display the filtered results
-        if !searchText.isEmpty {
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
-                    ForEach(filteredMemes) { meme in
-                        GiggleItem(meme: meme)
-                    }
-                }
-                .padding()
-            }
-        }
     }
 }
-
 struct BottomNavBar: View {
     @State private var isImagePickerPresented = false
     @State private var selectedImages: [UIImage] = []
+    @Environment(\.modelContext) private var context
     
     var body: some View {
         ZStack(alignment: .bottom) {

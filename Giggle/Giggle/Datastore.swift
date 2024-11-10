@@ -86,7 +86,7 @@ extension Meme {
 
  // Utility Class
 class DataManager {
-    static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10) -> [Meme] {
+    static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10, tagName: String?) -> [Meme] {
         logger.debug("searching for similar entries \(query)")
         let embedding = NLEmbedding.sentenceEmbedding(for: .english)
         guard let embedding = embedding else {
@@ -97,9 +97,14 @@ class DataManager {
         let descriptor = FetchDescriptor<Meme>()
         guard let entries = try? context.fetch(descriptor) else { return [] }
         
+        // First filter by tag if tagName is provided
+        let filteredEntries = tagName != nil ?
+            entries.filter { meme in
+                meme.tags.contains { $0.name == tagName }
+            } : entries
         
         // Calculate distances and sort
-        let entriesWithDistances = entries.compactMap { entry -> (Meme, Double)? in
+        let entriesWithDistances = filteredEntries.compactMap { entry -> (Meme, Double)? in
             let memeAsText = entry.content + " With tags " + entry.tags.map { $0.name }.joined(separator: ", ")
             
             let distance = embedding.distance(
