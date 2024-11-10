@@ -14,12 +14,10 @@ import SwiftData
 struct GiggleApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Meme.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return try ModelContainer(for: schema, configurations: [ModelConfiguration()])
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }

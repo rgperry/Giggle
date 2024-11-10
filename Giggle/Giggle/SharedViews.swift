@@ -6,15 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
+import OSLog
+
+let logger = Logger()
 
 struct GiggleItem: View {
     var text: String?
     let size: CGFloat = 150
+    let meme: Meme
     @State private var isLiked = false
     
     var body: some View {
         VStack {
-            Image(systemName: "person.circle.fill")
+            Image(uiImage: meme.imageAsUIImage)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
@@ -113,9 +118,9 @@ struct FolderItem: View {
     }
 }
 
-
 struct SearchBar: View {
     var text: String
+    @Binding var searchText: String
     
     var body: some View {
         HStack {
@@ -123,7 +128,7 @@ struct SearchBar: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.black)
                 
-                TextField(text, text: .constant(""))
+                TextField(text, text: $searchText)
                     .padding(8)
                     .foregroundColor(.black)
             }
@@ -136,10 +141,10 @@ struct SearchBar: View {
         .padding(.horizontal, 23)
     }
 }
-
 struct BottomNavBar: View {
     @State private var isImagePickerPresented = false
     @State private var selectedImages: [UIImage] = []
+    @Environment(\.modelContext) private var context
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -160,6 +165,17 @@ struct BottomNavBar: View {
             .padding(.leading, 25)
             .sheet(isPresented: $isImagePickerPresented) {
                 ImagePicker(selectedImages: $selectedImages)
+            }
+            .onChange(of: selectedImages) {
+            // only add new memes when there are a few in the selectedPhotos. (this .onchange gets called twice bc we clear the selected images array.)
+            guard selectedImages.isEmpty else { return }
+            Task {
+                    // ignore the modelContext warning here - Matt (@MainActor decorator on storeMemes function fixed this)
+                    await DataManager.storeMemes(context: context, images: selectedImages) {
+                        logger.info("Successfully store \(selectedImages.count) images to the swiftData database")
+                        selectedImages.removeAll()
+                    }
+                }
             }
             .padding(.bottom, 19)
         }
