@@ -43,7 +43,7 @@ class Tag: Hashable {
 class Meme {
     @Attribute(.externalStorage) var image: Data?
     @Attribute(.unique) var id: UUID
-    @Relationship(inverse: \Tag.memes) var tags: Set<Tag>
+    @Relationship(inverse: \Tag.memes) var tags: [Tag]
     var dateAdded: Date
     var content: String
     
@@ -53,7 +53,7 @@ class Meme {
         self.id = id ?? UUID()
         self.dateAdded = Date()
         self.content = content
-        self.tags = Set(tags)
+        self.tags = tags
         do {
             self.image = try convertImageToPNG(image)
         } catch {
@@ -71,12 +71,16 @@ class Meme {
 }
 
 extension Meme {
-    func addTag(_ tag: String) {
-        tags.insert(Tag(name: tag.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)))
+    func addTag(_ tagName: String) {
+        let tag = Tag(name: tagName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
+        if !tags.contains(where: { $0.name == tag.name }) {
+            tags.append(tag)
+        }
     }
-    
-    func removeTag(_ tag: String) {
-        tags.remove(Tag(name: tag.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)))
+
+    func removeTag(_ tagName: String) {
+        let tagName = tagName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        tags.removeAll { $0.name == tagName }
     }
 }
 
