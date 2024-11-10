@@ -9,9 +9,7 @@ struct GenerateMemeView: View {
         NavigationStack {
             VStack {
                 PageHeader(text: "Giggle")
-
                 QuestionMarkImage()
-                
                 MemeDescriptionField(memeDescription: $memeDescription)
                 
                 GenerateMemeButton(
