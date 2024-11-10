@@ -40,15 +40,6 @@ struct ContentView: View {
     }
 }
 
-struct PinIcon: View {
-    var body: some View {
-        Image(systemName: "pin.fill")
-            .foregroundColor(.gray)
-            .font(.system(size: 35))
-            .offset(x: -71, y: -80)
-    }
-}
-
 #Preview {
     ContentView()
 }

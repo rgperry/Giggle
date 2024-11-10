@@ -9,9 +9,7 @@ import SwiftUI
 
 struct FolderView: View {
     var header: String
-    
-    @State var isLiked = true
-    
+        
     var body: some View {
         VStack {
             PageHeader(text: header)
