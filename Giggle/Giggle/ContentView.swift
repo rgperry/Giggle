@@ -96,7 +96,7 @@ struct SearchBar: View {
         if searchText.isEmpty {
             return memes
         } else {
-            return DataManager.findSimilarEntries(query: searchText, context: context, limit: 10)
+            return DataManager.findSimilarEntries(query: searchText, context: context, limit: 50)
         }
     }
     
