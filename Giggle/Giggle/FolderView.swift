@@ -11,18 +11,15 @@ import SwiftData
 struct FolderView: View {
     var header: String
     @State private var searchText = ""
-    @Query(filter: #Predicate<Meme> { meme in
-            meme.tags.contains { $0.name == "header" }
-        }) private var memes: [Meme]
+    @Query private var memes: [Meme]  // Fetches all memes initially
     @Environment(\.modelContext) private var context
     
     // Moved filtering logic here
     var filteredMemes: [Meme] {
-        if searchText.isEmpty {
-            return memes
-        } else {
-            return DataManager.findSimilarEntries(query: searchText, context: context, limit: 50, tagName: header)
+        let tagFilteredMemes = memes.filter { meme in
+            meme.tags.contains { $0.name == header }
         }
+        return searchText.isEmpty ? tagFilteredMemes : DataManager.findSimilarEntries(query: searchText, context: context, limit: 50, tagName: header)
     }
     
     var body: some View {
