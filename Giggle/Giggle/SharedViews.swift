@@ -152,6 +152,7 @@ struct SearchBar: View {
 struct BottomNavBar: View {
     @State private var isImagePickerPresented = false
     @State private var selectedImages: [UIImage] = []
+    
     @Environment(\.modelContext) private var context
 
     var body: some View {

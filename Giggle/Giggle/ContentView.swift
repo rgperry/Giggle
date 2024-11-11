@@ -73,6 +73,7 @@ struct ContentView: View {
                 BottomNavBar()
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
+<<<<<<< HEAD
         }.tint(.black)
         .onAppear {
             // Initialize settings if they don't exist
@@ -82,6 +83,11 @@ struct ContentView: View {
                 try? context.save()
             }
         }
+=======
+        }
+        .tint(.black)
+        .navigationBarHidden(true)
+>>>>>>> 6c9048552d9c139e6adfe443b4b5b6e7020f233f
     }
 }
 
