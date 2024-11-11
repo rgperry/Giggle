@@ -13,13 +13,20 @@ struct FolderView: View {
     @State private var searchText = ""
     @Query private var memes: [Meme]  // Fetches all memes initially
     @Environment(\.modelContext) private var context
+    @Query private var settings: [AppSettings]
     
     // Moved filtering logic here
     var filteredMemes: [Meme] {
+        if (header == "All Giggles") {
+            return memes
+        }
         let tagFilteredMemes = memes.filter { meme in
             meme.tags.contains { $0.name == header }
         }
-        return searchText.isEmpty ? tagFilteredMemes : DataManager.findSimilarEntries(query: searchText, context: context, limit: 50, tagName: header)
+        if let settings = settings.first {
+            return searchText.isEmpty ? tagFilteredMemes : DataManager.findSimilarEntries(query: searchText, context: context, limit: settings.num_results, tagName: header)
+        }
+        return tagFilteredMemes
     }
     
     var body: some View {
@@ -47,6 +54,6 @@ struct FolderView: View {
     }
 }
 
-#Preview {
-    FolderView(header: "Favorites")
-}
+//#Preview {
+//    FolderView(header: "Favorites")
+//}

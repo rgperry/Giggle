@@ -17,15 +17,15 @@ struct ContentView: View {
     @State private var searchText = ""
     @Query private var memes: [Meme]
     @Query(sort: \Tag.name) private var allTags: [Tag]
-        
-    let num_folders = 10
+    @Query private var settings: [AppSettings]
 
     // Efficiently get top tags using @Query and computed property
     private var topTags: [Tag] {
         // Convert to array to perform the complex sorting
         let sortedTags = allTags.sorted { $0.memes.count > $1.memes.count }
         // Take only the first 10 tags
-        return Array(sortedTags.prefix(num_folders))
+        let folderLimit = settings.first?.num_folders ?? 10
+        return Array(sortedTags.prefix(folderLimit))
     }
     
     // Moved filtering logic here
@@ -35,7 +35,8 @@ struct ContentView: View {
             return memes
         } else {
 //            DataManager.clearDB(context: context)
-            return DataManager.findSimilarEntries(query: searchText, context: context, limit: 50, tagName:nil)
+            let numResults = settings.first?.num_results ?? 10
+            return DataManager.findSimilarEntries(query: searchText, context: context, limit: numResults, tagName:nil)
         }
     }
 
@@ -73,6 +74,14 @@ struct ContentView: View {
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
         }.tint(.black)
+        .onAppear {
+            // Initialize settings if they don't exist
+            if settings.isEmpty {
+                let newSettings = AppSettings(num_results: 10, num_folders: 10)
+                context.insert(newSettings)
+                try? context.save()
+            }
+        }
     }
 }
 
