@@ -16,10 +16,10 @@ struct GiggleItem: View {
     var text: String?
     let size: CGFloat = 150
     let meme: Meme
-    
+
     @State private var isLiked = false
     @State private var navigateToMemeInfo = false
-    
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -40,14 +40,14 @@ struct GiggleItem: View {
                         }) {
                             Label("Copy", systemImage: "doc.on.doc")
                         }
-                        
+
                         Button(action: {
                             shareImage()
                         }) {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
                     }
-                
+
                 Button(action: {
                     isLiked.toggle()
                 }) {
@@ -56,7 +56,7 @@ struct GiggleItem: View {
                         .font(.system(size: 50))
                 }
                 .offset(x: -72, y: -175)
-                
+
                 // REMOVE LATER FINISH
                 if let text = text {
                     Text(text)
@@ -72,15 +72,15 @@ struct GiggleItem: View {
             }
         }
     }
-    
+
     private func copyImage() {
         let imageToCopy = meme.imageAsUIImage
             UIPasteboard.general.image = imageToCopy
     }
-        
+
     private func shareImage() {
         let activityVC = UIActivityViewController(activityItems: [meme.imageAsUIImage], applicationActivities: nil)
-        
+
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootVC = windowScene.windows.first?.rootViewController {
             rootVC.present(activityVC, animated: true, completion: nil)
@@ -92,7 +92,7 @@ struct FolderItem: View {
     var text: String
     let size: CGFloat = 150
     @State var isPinned = false
-    
+
     var body: some View {
         NavigationLink(destination: FolderView(header: text)) {
             ZStack {
@@ -105,13 +105,13 @@ struct FolderItem: View {
                         .background(Color.white)
                         .cornerRadius(18)
                         .shadow(radius: 4)
-                    
+
                     Text(text)
                         .font(.headline)
                         .foregroundColor(.white)
                 }
                 .padding(.vertical, 20)
-                
+
                 Button(action: {
                     isPinned.toggle()
                 }) {
@@ -129,13 +129,13 @@ struct FolderItem: View {
 struct SearchBar: View {
     var text: String
     @Binding var searchText: String
-    
+
     var body: some View {
         HStack {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.black)
-                
+
                 TextField(text, text: $searchText)
                     .padding(8)
                     .foregroundColor(.black)
@@ -153,18 +153,18 @@ struct BottomNavBar: View {
     @State private var isImagePickerPresented = false
     @State private var selectedImages: [UIImage] = []
     @Environment(\.modelContext) private var context
-    
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Rectangle()
                 .fill(Color(white: 0.97))
                 .frame(height: 84)
                 .edgesIgnoringSafeArea(.bottom)
-            
+
             HStack {
                 BottomNavBarIcon(icon: "house.fill")
                     .onTapGesture {
-                        
+
                     }
                 BottomNavBarIcon(icon: "plus.circle.fill")
                     .onTapGesture {
@@ -214,7 +214,7 @@ struct BottomNavBarIcon: View {
 
 struct PageHeader: View {
     var text: String
-    
+
     var body: some View {
         Text(text)
             .font(.system(size: 45, weight: .semibold, design: .rounded))
@@ -291,7 +291,7 @@ struct GenerateMemeButton: View {
 // Component: Meme Image View
 struct MemeImageView: View {
     let image: UIImage
-    
+
     var body: some View {
         VStack {
             Spacer()
