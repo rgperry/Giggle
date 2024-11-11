@@ -17,7 +17,7 @@ struct MemeCreatedView: View {
         NavigationStack {
             VStack {
                 PageHeader(text: "Giggle")
-                MemeImageView()
+                // MemeImageView(image: )
 
                 ActionButtonsView(
                     downloadAction: {
