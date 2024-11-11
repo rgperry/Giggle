@@ -15,7 +15,9 @@ let logger = Logger()
 struct GiggleItem: View {
     var text: String?
     let size: CGFloat = 150
+    
     let meme: Meme
+    @Environment(\.modelContext) private var context
 
     @State private var isLiked = false
     @State private var navigateToMemeInfo = false
@@ -37,12 +39,14 @@ struct GiggleItem: View {
                     .contextMenu {
                         Button(action: {
                             copyImage()
+                            DataManager.updateDateLastShared(for: meme, context: context)
                         }) {
                             Label("Copy", systemImage: "doc.on.doc")
                         }
 
                         Button(action: {
                             shareImage()
+                            DataManager.updateDateLastShared(for: meme, context: context)
                         }) {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
@@ -75,7 +79,7 @@ struct GiggleItem: View {
 
     private func copyImage() {
         let imageToCopy = meme.imageAsUIImage
-            UIPasteboard.general.image = imageToCopy
+        UIPasteboard.general.image = imageToCopy
     }
 
     private func shareImage() {

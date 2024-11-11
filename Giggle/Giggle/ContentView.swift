@@ -27,7 +27,7 @@ struct ContentView: View {
         let folderLimit = settings.first?.num_folders ?? 10
         return Array(sortedTags.prefix(folderLimit))
     }
-    
+
     // Moved filtering logic here
     var filteredMemes: [Meme] {
         if searchText.isEmpty {
@@ -52,6 +52,7 @@ struct ContentView: View {
                                 FolderItem(text: "Favorites", isPinned: true)
                                 FolderItem(text: "Recently Shared", isPinned: true)
                                 FolderItem(text: "All Giggles", isPinned: true)
+
                                 // Display top 10 tags as folders
                                 ForEach(topTags, id: \.name) { tag in
                                     FolderItem(
@@ -59,7 +60,7 @@ struct ContentView: View {
                                         isPinned: false
                                     )
                                 }
-                                
+
                             } else {
                                 ForEach(filteredMemes) { meme in
                                     GiggleItem(meme: meme)
@@ -73,8 +74,9 @@ struct ContentView: View {
                 BottomNavBar()
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
-<<<<<<< HEAD
-        }.tint(.black)
+        }
+        .tint(.black)
+        .navigationBarHidden(true)
         .onAppear {
             // Initialize settings if they don't exist
             if settings.isEmpty {
@@ -83,11 +85,6 @@ struct ContentView: View {
                 try? context.save()
             }
         }
-=======
-        }
-        .tint(.black)
-        .navigationBarHidden(true)
->>>>>>> 6c9048552d9c139e6adfe443b4b5b6e7020f233f
     }
 }
 
