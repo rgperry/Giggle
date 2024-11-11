@@ -162,16 +162,22 @@ struct BottomNavBar: View {
                 .edgesIgnoringSafeArea(.bottom)
 
             HStack {
-                BottomNavBarIcon(icon: "house.fill")
-                    .onTapGesture {
-
-                    }
+                NavigationLink(destination: ContentView()) {
+                    BottomNavBarIcon(icon: "house.fill")
+                }
+                
                 BottomNavBarIcon(icon: "plus.circle.fill")
                     .onTapGesture {
                         isImagePickerPresented = true
                     }
-                BottomNavBarIcon(icon: "paintbrush.fill")
-                BottomNavBarIcon(icon: "gearshape.fill")
+                
+                NavigationLink(destination: GenerateMemeView()) {
+                    BottomNavBarIcon(icon: "paintbrush.fill")
+                }
+                
+                NavigationLink(destination: SettingsView()) {
+                    BottomNavBarIcon(icon: "gearshape.fill")
+                }
             }
             .padding(.leading, 25)
             .sheet(isPresented: $isImagePickerPresented) {
