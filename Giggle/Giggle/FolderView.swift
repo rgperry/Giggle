@@ -35,16 +35,9 @@ struct FolderView: View {
         
             ScrollView {
                 LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.memeRowPadding) {
-                    if searchText.isEmpty {
-                        // Display regular grid items when not searching
-                        ForEach(memes) { meme in
-                            GiggleItem(meme: meme)
-                        }
-                    } else {
-                        // Display filtered results when searching
-                        ForEach(filteredMemes) { meme in
-                            GiggleItem(meme: meme)
-                        }
+                    // Display filtered results when searching
+                    ForEach(filteredMemes) { meme in
+                        GiggleItem(meme: meme)
                     }
                 }
                 .padding(.horizontal, GridStyle.columnPadding)
