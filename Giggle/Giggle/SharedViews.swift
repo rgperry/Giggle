@@ -72,9 +72,8 @@ struct GiggleItem: View {
     }
     
     private func copyImage() {
-        let imageToCopy = meme.imageAsUIImage  // Directly assign since it’s not optional
+        let imageToCopy = meme.imageAsUIImage
             UIPasteboard.general.image = imageToCopy
-            print("Image copied to clipboard")
     }
         
     private func shareImage() {
