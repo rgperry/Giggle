@@ -20,8 +20,10 @@ struct ContentView: View {
     // Moved filtering logic here
     var filteredMemes: [Meme] {
         if searchText.isEmpty {
+//            DataManager.clearDB(context: context)
             return memes
         } else {
+//            DataManager.clearDB(context: context)
             return DataManager.findSimilarEntries(query: searchText, context: context, limit: 50, tagName:nil)
         }
     }
