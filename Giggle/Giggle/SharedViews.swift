@@ -16,6 +16,7 @@ struct GiggleItem: View {
     var text: String?
     let size: CGFloat = 150
     let meme: Meme
+    
     @State private var isLiked = false
     @State private var navigateToMemeInfo = false
     
@@ -56,6 +57,7 @@ struct GiggleItem: View {
                 }
                 .offset(x: -72, y: -175)
                 
+                // REMOVE LATER FINISH
                 if let text = text {
                     Text(text)
                         .font(.headline)
@@ -77,8 +79,7 @@ struct GiggleItem: View {
     }
         
     private func shareImage() {
-        let image = UIImage(systemName: "person.circle.fill")!
-        let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
+        let activityVC = UIActivityViewController(activityItems: [meme.imageAsUIImage], applicationActivities: nil)
         
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootVC = windowScene.windows.first?.rootViewController {
