@@ -12,6 +12,8 @@ import SwiftData
 
 @main
 struct GiggleApp: App {
+    @Environment(\.modelContext) private var context
+    
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Meme.self,

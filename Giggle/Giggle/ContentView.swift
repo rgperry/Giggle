@@ -15,19 +15,20 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @State private var searchText = ""
+    
     @Query private var memes: [Meme]
     @Query(sort: \Tag.name) private var allTags: [Tag]
-        
-    let num_folders = 10
+    @AppStorage("numSearchResults") private var numSearchResults: Double = 10
 
     // Efficiently get top tags using @Query and computed property
     private var topTags: [Tag] {
         // Convert to array to perform the complex sorting
         let sortedTags = allTags.sorted { $0.memes.count > $1.memes.count }
         // Take only the first 10 tags
-        return Array(sortedTags.prefix(num_folders))
+        let folderLimit = 10
+        return Array(sortedTags.prefix(folderLimit))
     }
-    
+
     // Moved filtering logic here
     var filteredMemes: [Meme] {
         if searchText.isEmpty {
@@ -35,7 +36,7 @@ struct ContentView: View {
             return memes
         } else {
 //            DataManager.clearDB(context: context)
-            return DataManager.findSimilarEntries(query: searchText, context: context, limit: 50, tagName:nil)
+            return DataManager.findSimilarEntries(query: searchText, context: context, limit: Int(numSearchResults), tagName: nil)
         }
     }
 
@@ -51,6 +52,7 @@ struct ContentView: View {
                                 FolderItem(text: "Favorites", isPinned: true)
                                 FolderItem(text: "Recently Shared", isPinned: true)
                                 FolderItem(text: "All Giggles", isPinned: true)
+
                                 // Display top 10 tags as folders
                                 ForEach(topTags, id: \.name) { tag in
                                     FolderItem(
@@ -58,7 +60,7 @@ struct ContentView: View {
                                         isPinned: false
                                     )
                                 }
-                                
+
                             } else {
                                 ForEach(filteredMemes) { meme in
                                     GiggleItem(meme: meme)
@@ -72,7 +74,9 @@ struct ContentView: View {
                 BottomNavBar()
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
-        }.tint(.black)
+        }
+        .tint(.black)
+        .navigationBarHidden(true)
     }
 }
 

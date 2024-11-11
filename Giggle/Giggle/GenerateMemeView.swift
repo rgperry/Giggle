@@ -39,6 +39,8 @@ struct GenerateMemeView: View {
                 MemeCreatedView(memeDescription: memeDescription)
             }
         }
+        .tint(.black)
+        .navigationBarHidden(true)
     }
 }
 

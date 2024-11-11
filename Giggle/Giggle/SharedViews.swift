@@ -15,10 +15,13 @@ let logger = Logger()
 struct GiggleItem: View {
     var text: String?
     let size: CGFloat = 150
+    
     let meme: Meme
+    @Environment(\.modelContext) private var context
+
     @State private var isLiked = false
     @State private var navigateToMemeInfo = false
-    
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -36,17 +39,19 @@ struct GiggleItem: View {
                     .contextMenu {
                         Button(action: {
                             copyImage()
+                            DataManager.updateDateLastShared(for: meme, context: context)
                         }) {
                             Label("Copy", systemImage: "doc.on.doc")
                         }
-                        
+
                         Button(action: {
                             shareImage()
+                            DataManager.updateDateLastShared(for: meme, context: context)
                         }) {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
                     }
-                
+
                 Button(action: {
                     isLiked.toggle()
                 }) {
@@ -55,7 +60,8 @@ struct GiggleItem: View {
                         .font(.system(size: 50))
                 }
                 .offset(x: -72, y: -175)
-                
+
+                // REMOVE LATER FINISH
                 if let text = text {
                     Text(text)
                         .font(.headline)
@@ -70,16 +76,15 @@ struct GiggleItem: View {
             }
         }
     }
-    
+
     private func copyImage() {
         let imageToCopy = meme.imageAsUIImage
-            UIPasteboard.general.image = imageToCopy
+        UIPasteboard.general.image = imageToCopy
     }
-        
+
     private func shareImage() {
-        let image = UIImage(systemName: "person.circle.fill")!
-        let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
-        
+        let activityVC = UIActivityViewController(activityItems: [meme.imageAsUIImage], applicationActivities: nil)
+
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootVC = windowScene.windows.first?.rootViewController {
             rootVC.present(activityVC, animated: true, completion: nil)
@@ -91,7 +96,7 @@ struct FolderItem: View {
     var text: String
     let size: CGFloat = 150
     @State var isPinned = false
-    
+
     var body: some View {
         NavigationLink(destination: FolderView(header: text)) {
             ZStack {
@@ -104,13 +109,13 @@ struct FolderItem: View {
                         .background(Color.white)
                         .cornerRadius(18)
                         .shadow(radius: 4)
-                    
+
                     Text(text)
                         .font(.headline)
                         .foregroundColor(.white)
                 }
                 .padding(.vertical, 20)
-                
+
                 Button(action: {
                     isPinned.toggle()
                 }) {
@@ -128,13 +133,13 @@ struct FolderItem: View {
 struct SearchBar: View {
     var text: String
     @Binding var searchText: String
-    
+
     var body: some View {
         HStack {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.black)
-                
+
                 TextField(text, text: $searchText)
                     .padding(8)
                     .foregroundColor(.black)
@@ -151,26 +156,33 @@ struct SearchBar: View {
 struct BottomNavBar: View {
     @State private var isImagePickerPresented = false
     @State private var selectedImages: [UIImage] = []
-    @Environment(\.modelContext) private var context
     
+    @Environment(\.modelContext) private var context
+
     var body: some View {
         ZStack(alignment: .bottom) {
             Rectangle()
                 .fill(Color(white: 0.97))
                 .frame(height: 84)
                 .edgesIgnoringSafeArea(.bottom)
-            
+
             HStack {
-                BottomNavBarIcon(icon: "house.fill")
-                    .onTapGesture {
-                        
-                    }
+                NavigationLink(destination: ContentView()) {
+                    BottomNavBarIcon(icon: "house.fill")
+                }
+                
                 BottomNavBarIcon(icon: "plus.circle.fill")
                     .onTapGesture {
                         isImagePickerPresented = true
                     }
-                BottomNavBarIcon(icon: "paintbrush.fill")
-                BottomNavBarIcon(icon: "gearshape.fill")
+                
+                NavigationLink(destination: GenerateMemeView()) {
+                    BottomNavBarIcon(icon: "paintbrush.fill")
+                }
+                
+                NavigationLink(destination: SettingsView()) {
+                    BottomNavBarIcon(icon: "gearshape.fill")
+                }
             }
             .padding(.leading, 25)
             .sheet(isPresented: $isImagePickerPresented) {
@@ -213,7 +225,7 @@ struct BottomNavBarIcon: View {
 
 struct PageHeader: View {
     var text: String
-    
+
     var body: some View {
         Text(text)
             .font(.system(size: 45, weight: .semibold, design: .rounded))
@@ -290,7 +302,7 @@ struct GenerateMemeButton: View {
 // Component: Meme Image View
 struct MemeImageView: View {
     let image: UIImage
-    
+
     var body: some View {
         VStack {
             Spacer()

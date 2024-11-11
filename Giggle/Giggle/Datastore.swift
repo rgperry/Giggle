@@ -45,13 +45,15 @@ class Meme {
     @Attribute(.unique) var id: UUID
     @Relationship(inverse: \Tag.memes) var tags: [Tag]
     var dateAdded: Date
+    var dateLastShared: Date?
     var content: String
-    
+
     // Initializer
     init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
         self.dateAdded = Date()
+        self.dateLastShared = nil
         self.content = content
         self.tags = tags
         do {
@@ -205,6 +207,17 @@ class DataManager {
         // until here
     }
     
+    static func updateDateLastShared(for meme: Meme, context: ModelContext) {
+        meme.dateLastShared = Date()
+        
+        do {
+            try context.save()
+            print("Updated date last shared for meme")
+        } catch {
+            logger.error("Failed to update dateLastShared for Meme \(meme.id): \(error.localizedDescription)")
+        }
+    }
+    
     // this could be useful for testing
     static func clearDB(context: ModelContext) {
         do {
@@ -251,6 +264,3 @@ func regenerateMeme(description: String) async -> UIImage? {
     }
     return nil // Return nil if the operation fails
 }
-
-
-
