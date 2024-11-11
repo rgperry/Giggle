@@ -72,7 +72,9 @@ struct ContentView: View {
                 BottomNavBar()
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
-        }.tint(.black)
+        }
+        .tint(.black)
+        .navigationBarHidden(true)
     }
 }
 

@@ -38,6 +38,7 @@ struct SettingsView: View {
             BottomNavBar().frame(maxHeight: .infinity, alignment: .bottom)
         }
         .background(Colors.backgroundColor.ignoresSafeArea())
+        .navigationBarHidden(true)
     }
 }
 
