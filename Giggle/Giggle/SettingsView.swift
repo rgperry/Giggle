@@ -9,9 +9,8 @@ import SwiftUI
 import SwiftData
 
 struct SettingsView: View {
-    @State private var numberOfResults: Double = 10
+    @AppStorage("numSearchResults") private var numSearchResults: Double = 10
     @Environment(\.modelContext) private var context
-    @Query private var settings: [AppSettings]  // Expecting a single row
 
     var body: some View {
         VStack {
@@ -25,24 +24,16 @@ struct SettingsView: View {
                     .foregroundColor(.white)
                     .padding(.leading, 20)
                 
-                Text("\(Int(numberOfResults))")
+                Text("\(Int(numSearchResults))")
                     .font(.largeTitle)
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, alignment: .center)
 
-                Slider(value: $numberOfResults, in: 10...50, step: 1)
+                Slider(value: $numSearchResults, in: 10...50, step: 1)
                     .padding(.horizontal, 40)
                     .tint(.white)
-                    .onChange(of: numberOfResults) {
-                        print("asdffghjihgbjuhgbnjuh")
-                        if let settings = settings.first {
-                            settings.num_results = Int(numberOfResults)
-                            print("saving settings")
-                            try? context.save()
-                        }
-                    }
-                
-            }
+
+             }
             .padding()
             .padding(.top, -10)
 

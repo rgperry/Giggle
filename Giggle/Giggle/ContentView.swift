@@ -15,16 +15,17 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @State private var searchText = ""
+    
     @Query private var memes: [Meme]
     @Query(sort: \Tag.name) private var allTags: [Tag]
-    @Query private var settings: [AppSettings]
+    @AppStorage("numSearchResults") private var numSearchResults: Double = 10
 
     // Efficiently get top tags using @Query and computed property
     private var topTags: [Tag] {
         // Convert to array to perform the complex sorting
         let sortedTags = allTags.sorted { $0.memes.count > $1.memes.count }
         // Take only the first 10 tags
-        let folderLimit = settings.first?.num_folders ?? 10
+        let folderLimit = 10
         return Array(sortedTags.prefix(folderLimit))
     }
 
@@ -35,8 +36,7 @@ struct ContentView: View {
             return memes
         } else {
 //            DataManager.clearDB(context: context)
-            let numResults = settings.first?.num_results ?? 10
-            return DataManager.findSimilarEntries(query: searchText, context: context, limit: numResults, tagName:nil)
+            return DataManager.findSimilarEntries(query: searchText, context: context, limit: Int(numSearchResults), tagName: nil)
         }
     }
 
@@ -77,14 +77,6 @@ struct ContentView: View {
         }
         .tint(.black)
         .navigationBarHidden(true)
-        .onAppear {
-            // Initialize settings if they don't exist
-            if settings.isEmpty {
-                let newSettings = AppSettings(num_results: 10, num_folders: 10)
-                context.insert(newSettings)
-                try? context.save()
-            }
-        }
     }
 }
 
