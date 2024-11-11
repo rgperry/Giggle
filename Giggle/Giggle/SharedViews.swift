@@ -110,7 +110,7 @@ struct FolderItem: View {
                         .cornerRadius(18)
                         .shadow(radius: 4)
 
-                    Text(text)
+                    Text(text.capitalized)
                         .font(.headline)
                         .foregroundColor(.white)
                 }
