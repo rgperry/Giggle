@@ -16,59 +16,64 @@ struct GiggleItem: View {
     let size: CGFloat = 150
     let meme: Meme
     @State private var isLiked = false
+    @State private var navigateToMemeInfo = false
     
     var body: some View {
-        VStack {
-            Image(uiImage: meme.imageAsUIImage)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size, height: size)
-                .foregroundColor(.black)
-                .background(Color.white)
-                .cornerRadius(18)
-                .shadow(radius: 4)
-                .onTapGesture {
-                    //short tap to open meme view
-                    
-                }
-                .contextMenu {
-                    Button(action: {
-                        copyImage()
-                    }) {
-                        Label("Copy", systemImage: "doc.on.doc")
+        NavigationStack {
+            VStack {
+                Image(uiImage: meme.imageAsUIImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: size, height: size)
+                    .foregroundColor(.black)
+                    .background(Color.white)
+                    .cornerRadius(18)
+                    .shadow(radius: 4)
+                    .onTapGesture {
+                        navigateToMemeInfo = true
                     }
-                    
-                    Button(action: {
-                        shareImage()
-                    }) {
-                        Label("Share", systemImage: "square.and.arrow.up")
+                    .contextMenu {
+                        Button(action: {
+                            copyImage()
+                        }) {
+                            Label("Copy", systemImage: "doc.on.doc")
+                        }
+                        
+                        Button(action: {
+                            shareImage()
+                        }) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
                     }
+                
+                Button(action: {
+                    isLiked.toggle()
+                }) {
+                    Image(systemName: isLiked ? "heart.fill" : "heart")
+                        .foregroundColor(isLiked ? .red : .black)
+                        .font(.system(size: 50))
                 }
-            
-            Button(action: {
-                isLiked.toggle()
-            }) {
-                Image(systemName: isLiked ? "heart.fill" : "heart")
-                    .foregroundColor(isLiked ? .red : .black)
-                    .font(.system(size: 50))
+                .offset(x: -72, y: -175)
+                
+                if let text = text {
+                    Text(text)
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                }
             }
-            .offset(x: -72, y: -175)
-            
-            if let text = text {
-                Text(text)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .multilineTextAlignment(.center)
+            .navigationDestination(isPresented: $navigateToMemeInfo) {
+                MemeInfoView(
+                    meme: meme
+                )
             }
         }
     }
     
-    //Handle copying the image (placeholder for now)
     private func copyImage() {
         //PLACEHOLDER
     }
         
-    //Handle sharing the image
     private func shareImage() {
         let image = UIImage(systemName: "person.circle.fill")!
         let activityVC = UIActivityViewController(activityItems: [image], applicationActivities: nil)
@@ -155,6 +160,9 @@ struct BottomNavBar: View {
             
             HStack {
                 BottomNavBarIcon(icon: "house.fill")
+                    .onTapGesture {
+                        
+                    }
                 BottomNavBarIcon(icon: "plus.circle.fill")
                     .onTapGesture {
                         isImagePickerPresented = true
@@ -279,11 +287,13 @@ struct GenerateMemeButton: View {
 
 // Component: Meme Image View
 struct MemeImageView: View {
+    let image: UIImage
+    
     var body: some View {
         VStack {
             Spacer()
 
-            Image("lebron_meme_441")
+            Image(uiImage: image)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 400, height: 400)
@@ -362,85 +372,6 @@ struct DeleteButton: View {
                 .frame(width: size, height: size)
                 .background(Circle().fill(Color.clear)) // Transparent fill for the circle
                 .overlay(Circle().stroke(Color.white, lineWidth: 2)) // White border
-        }
-    }
-}
-
-struct Tags: View {
-    var tags: [String]
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Tags")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-
-                HStack(spacing: 8) {
-                    ForEach(tags, id: \.self) { tag in
-                        Text("#\(tag)")
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .background(Colors.backgroundColor.ignoresSafeArea())
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                    }
-
-                    Button(action: {
-                        // Action for add tag button
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 20))
-                            .foregroundColor(.black)
-                            .padding(8)
-                            .background(Circle().fill(Color.white))
-                            .overlay(Circle().stroke(Color.black, lineWidth: 1))
-                    }
-                }
-            }
-            .background(Color.white)
-            .cornerRadius(5)
-        }
-    }
-}
-
-
-struct MoreInfo: View {
-    var dateSaved: String
-    var source: String
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("More Info")
-                .font(.title2)
-                .fontWeight(.semibold)
-                .padding(.top, 10)
-
-            HStack {
-                Text("Date Saved:")
-                    .fontWeight(.bold)
-                Text(dateSaved)
-            }
-            HStack {
-                Text("Source:")
-                    .fontWeight(.bold)
-                Text(source)
-            }
-        }
-    }
-}
-
-// GRIFFIN ADDED THIS FOR HIS IMPLEMENTATION OF MEME INFO VIEW
-struct LikeButton: View {
-    @Binding var isLiked: Bool
-
-    var body: some View {
-        Button(action: {
-            isLiked.toggle()
-        }) {
-            Image(systemName: isLiked ? "heart.fill" : "heart")
-                .foregroundColor(isLiked ? .red : .black)
-                .font(.system(size: 35))
         }
     }
 }
