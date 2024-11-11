@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftData
 import OSLog
+import UIKit
 
 let logger = Logger()
 
@@ -71,7 +72,8 @@ struct GiggleItem: View {
     }
     
     private func copyImage() {
-        //PLACEHOLDER
+        let imageToCopy = meme.imageAsUIImage
+            UIPasteboard.general.image = imageToCopy
     }
         
     private func shareImage() {
