@@ -18,26 +18,45 @@ struct FolderView: View {
     
     // Moved filtering logic here
     var filteredMemes: [Meme] {
-        if (header == "All Giggles") {
-            return memes
-        }
+        switch header {
+            case "All Giggles":
+                // If there's a search text, filter all memes by the search query
+                return searchText.isEmpty ? memes : DataManager.findSimilarEntries(
+                    query: searchText,
+                    context: context,
+                    limit: Int(numSearchResults),
+                    tagName: nil // No specific tag for "All Giggles" search
+                )
 
-        else if header == "Recently Shared" {
-            let recentlySharedMemes = memes
-                .filter { $0.dateLastShared != nil }
-                .sorted { $0.dateLastShared ?? Date.distantPast > $1.dateLastShared! }
-                .prefix(24)
+            case "Recently Shared":
+                // Return the 24 most recent shared memes
+                let memesToSearch = searchText.isEmpty ? memes : DataManager.findSimilarEntries(
+                    query: searchText,
+                    context: context,
+                    limit: Int(numSearchResults),
+                    tagName: nil // No specific tag for "Recently Shared" search
+                )
+                let recentlySharedMemes = memesToSearch
+                        .filter { $0.dateLastShared != nil }
+                        .sorted { $0.dateLastShared ?? Date.distantPast > $1.dateLastShared! }
+                        .prefix(24)
+                    
+                return Array(recentlySharedMemes)
 
-            return Array(recentlySharedMemes)
-        }
+            default:
+                // Filter by tag if `header` is not "All Giggles" or "Recently Shared"
+                let tagFilteredMemes = memes.filter { meme in
+                    meme.tags.contains { $0.name == header }
+                }
 
-        let tagFilteredMemes = memes.filter { meme in
-            meme.tags.contains { $0.name == header }
-        }
-
-        return searchText.isEmpty ? tagFilteredMemes : DataManager.findSimilarEntries(query: searchText, context: context, limit: Int(numSearchResults), tagName: header)
-
-        // return tagFilteredMemes
+                // Apply search filter if there's a search text
+                return searchText.isEmpty ? tagFilteredMemes : DataManager.findSimilarEntries(
+                    query: searchText,
+                    context: context,
+                    limit: Int(numSearchResults),
+                    tagName: header.isEmpty ? nil : header
+                )
+            }
     }
 
     var body: some View {
