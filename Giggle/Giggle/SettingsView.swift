@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @State private var numberOfEntries: String = ""
+    @State private var numberOfResults: Double = 10
 
     var body: some View {
         VStack {
@@ -17,15 +17,20 @@ struct SettingsView: View {
             Spacer()
             
             VStack(alignment: .leading, spacing: 16) {
-                Text("Number of Entries:")
-                    .font(.title2)
+                Text("Number of Search Results to Display:")
+                    .font(.title3)
                     .foregroundColor(.white)
                     .padding(.leading, 20)
+                
+                Text("\(Int(numberOfResults))")
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, alignment: .center)
 
-                TextField("Enter number of entries", text: $numberOfEntries)
-                    .keyboardType(.numberPad)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal, 20)
+                Slider(value: $numberOfResults, in: 10...50, step: 1)
+                    .padding(.horizontal, 40)
+                    .tint(.white)
+                
             }
             .padding()
             .padding(.top, -10)
