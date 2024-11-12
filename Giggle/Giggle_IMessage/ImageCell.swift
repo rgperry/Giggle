@@ -12,7 +12,6 @@ class ImageCell: UICollectionViewCell {
     
     private let overlayView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor.white
         view.layer.cornerRadius = 10
         view.layer.masksToBounds = true
         return view
@@ -20,7 +19,7 @@ class ImageCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .scaleAspectFill
         //imageView.backgroundColor = UIColor.purple
         imageView.clipsToBounds = true
         //mask
@@ -38,5 +37,7 @@ class ImageCell: UICollectionViewCell {
             width: contentView.bounds.width - padding * 2,
             height: contentView.bounds.height - padding * 2
         )
+        imageView.layer.cornerRadius = 10
+        overlayView.layer.cornerRadius = 10
     }
 }

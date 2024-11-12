@@ -11,6 +11,28 @@ import SwiftUI
 import SwiftData
 
 let logger = Logger(subsystem: "com.Giggle.Giggle", category: "MessagesViewController")
+//ADDED FUNCTIONS - Tamaer
+extension UIImage {
+    //generate lower quality thumbnails to save memory
+    func thumbnail(maxWidth: CGFloat = 100) -> UIImage {
+        let aspectRatio = size.height / size.width
+        let targetSize = CGSize(width: maxWidth, height: maxWidth * aspectRatio)
+        UIGraphicsBeginImageContextWithOptions(targetSize, false, 1.0)
+        defer { UIGraphicsEndImageContext() }
+        draw(in: CGRect(origin: .zero, size: targetSize))
+        return UIGraphicsGetImageFromCurrentImageContext() ?? self
+    }
+    func fixedOrientation() -> UIImage {
+        guard imageOrientation != .up else { return self }  // No need to adjust if already correct
+
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        defer { UIGraphicsEndImageContext() }
+
+        draw(in: CGRect(origin: .zero, size: size))
+
+        return UIGraphicsGetImageFromCurrentImageContext() ?? self
+    }
+}
 
 class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
     @Environment(\.modelContext) private var context
@@ -56,12 +78,10 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         //end dummy images
         collectionView.reloadData()
     }
-    //ADDED FUNCTIONS - Tamaer
     private var hasLoadedMemes = false
 
     var loadingIndicator: UIActivityIndicatorView?
     override func viewDidAppear(_ animated: Bool) {
-
         super.viewDidAppear(animated)
         setupLoadingIndicator()
         // Load memes only once when the view appears for the first time
@@ -76,6 +96,15 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             }
         }
     }
+    //clear imagesArray to free up memory when needed
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        logger.log("Received memory warning, clearing imagesArray.")
+        imagesArray.removeAll()
+        collectionView.reloadData()
+    }
+
+
     func setupLoadingIndicator() {
         loadingIndicator = UIActivityIndicatorView(style: .medium)
         loadingIndicator?.center = view.center
@@ -133,11 +162,11 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             return section
         }
     }
-
+    //thumnails
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageCell", for: indexPath) as! ImageCell
         let meme = imagesArray[indexPath.item]
-        cell.imageView.image = meme.imageAsUIImage
+        cell.imageView.image = meme.imageAsUIImage.thumbnail(maxWidth: 200) //call thumbnail function for opt//meme.imageAsUIImage
         return cell
     }
 
@@ -151,9 +180,11 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         let meme = imagesArray[indexPath.item]
 
+        let originalImage = meme.imageAsUIImage.fixedOrientation()//preserve orientation
+
         // Configure the message layout with the meme's image
         let layout = MSMessageTemplateLayout()
-        layout.image = meme.imageAsUIImage
+        layout.image = originalImage
         // layout.caption = "Sent from Giggle" // Optional caption
 
         // Create and configure the message
