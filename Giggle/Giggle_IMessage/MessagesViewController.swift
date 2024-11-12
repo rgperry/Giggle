@@ -34,7 +34,7 @@ extension UIImage {
     }
 }
 
-class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDataSourcePrefetching {
     @Environment(\.modelContext) private var context
 
     @Query private var memes: [Meme] = []
@@ -59,8 +59,16 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         searchBar.delegate = self
         collectionView.dataSource = self
 
+        //searchBar.barTintColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)
+        //searchBar.barTintColor = UIColor.purple
+        searchBar.backgroundImage = UIImage() // Remove the default background image for a solid color
+        searchBar.searchTextField.backgroundColor = UIColor.systemBackground
+        view.backgroundColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)
+
+
         setupCollectionViewLayout()
         collectionView.delegate = self
+        collectionView.prefetchDataSource = self //enable prefetching so app only loads what is seen
 
 //        Task {
 //            await DataManager.loadMemes { [weak self] loadedMemes in
@@ -83,12 +91,12 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     var loadingIndicator: UIActivityIndicatorView?
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        setupLoadingIndicator()
+        //setupLoadingIndicator()
         // Load memes only once when the view appears for the first time
         if !hasLoadedMemes {
             hasLoadedMemes = true
             Task {
-                showLoadingIndicator()
+                //showLoadingIndicator()
                 await DataManager.loadMemes { [weak self] loadedMemes in
                     self?.imagesArray = loadedMemes
                     self?.collectionView.reloadData()
@@ -105,21 +113,21 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     }
 
 
-    func setupLoadingIndicator() {
-        loadingIndicator = UIActivityIndicatorView(style: .medium)
-        loadingIndicator?.center = view.center
-        if let loadingIndicator = loadingIndicator {
-            view.addSubview(loadingIndicator)
-        }
-    }
-
-    func showLoadingIndicator() {
-        loadingIndicator?.startAnimating()
-    }
-
-    func hideLoadingIndicator() {
-        loadingIndicator?.stopAnimating()
-    }
+//    func setupLoadingIndicator() {
+//        loadingIndicator = UIActivityIndicatorView(style: .medium)
+//        loadingIndicator?.center = view.center
+//        if let loadingIndicator = loadingIndicator {
+//            view.addSubview(loadingIndicator)
+//        }
+//    }
+//
+//    func showLoadingIndicator() {
+//        loadingIndicator?.startAnimating()
+//    }
+//
+//    func hideLoadingIndicator() {
+//        loadingIndicator?.stopAnimating()
+//    }
 
 //    func loadMemes() {
 //        logger.log("attempting to loadMemes")
@@ -127,7 +135,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 //        imagesArray = memes
 //
 //        if imagesArray.isEmpty {
-//            logger.log("imagesArray is empty. Check data source for `memes`.")
+//            logger.log("imagesArray is empty. Check data source for memes.")
 //        }
 //    }
 
@@ -149,30 +157,66 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     func setupCollectionViewLayout() {
         collectionView.collectionViewLayout = UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
 
+            let itemSpacing: CGFloat = 3 //space between items
+
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
-            item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+            item.contentInsets = NSDirectionalEdgeInsets(top: itemSpacing, leading: itemSpacing, bottom: itemSpacing, trailing: itemSpacing)
 
             let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(130))
             let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 3)
 
             let section = NSCollectionLayoutSection(group: group)
-            section.interGroupSpacing = 10
+            section.interGroupSpacing = itemSpacing //row spacing equal to column spacing
 
             return section
         }
     }
+    //method for loading only what is on screen
+    func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
+        for indexPath in indexPaths {
+            let meme = imagesArray[indexPath.item]
+            _ = meme.imageAsUIImage.thumbnail(maxWidth: 20) // Prefetch thumbnails for images about to appear
+        }
+    }
+    //release images when they are not in view
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard let imageCell = cell as? ImageCell, indexPath.item < imagesArray.count else { return }
+        imageCell.imageView.image = nil
+    }
+    //private var imageCache = NSCache<NSString, UIImage>()
+    //bring them back to good quality when they are in view
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        guard let imageCell = cell as? ImageCell, indexPath.item < imagesArray.count else { return }
+        let meme = imagesArray[indexPath.item]
+
+        // Load high-quality image asynchronously and ensure it doesn’t get overridden
+        DispatchQueue.global(qos: .utility).async {
+            let highQualityImage = meme.imageAsUIImage.thumbnail(maxWidth: 200)
+
+            // Set high-quality image on main thread with a fade-in effect
+            DispatchQueue.main.async {
+                if collectionView.indexPath(for: cell) == indexPath {
+                    UIView.transition(with: imageCell.imageView, duration: 0.3, options: .transitionCrossDissolve, animations: {
+                        imageCell.imageView.image = highQualityImage
+                    }, completion: nil)
+                }
+            }
+        }
+    }
+    //
+
     //thumnails
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageCell", for: indexPath) as! ImageCell
         let meme = imagesArray[indexPath.item]
-        cell.imageView.image = meme.imageAsUIImage.thumbnail(maxWidth: 200) //call thumbnail function for opt//meme.imageAsUIImage
+        cell.imageView.image = meme.imageAsUIImage.thumbnail(maxWidth: 50) //call thumbnail function for opt//meme.imageAsUIImage
         return cell
     }
 
     // Attaches image to message box on tap
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // Ensure `activeConversation` is available
+        // Ensure activeConversation is available
         guard let conversation = activeConversation else {
             logger.log("No active conversation found.")
             return
@@ -257,4 +301,3 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     }
 
 }
-
