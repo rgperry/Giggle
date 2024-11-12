@@ -2,7 +2,7 @@
 //  ShareViewController.swift
 //  Giggle-Share-RT
 //  Created by Robert Perry on 10/27/24.
-//  Tamaer Alharastani on 11/10/24.
+//  Improved by Tamaer Alharastani on 11/10/24.
 //
 
 import UIKit
@@ -17,7 +17,6 @@ class ShareViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         print("View did load.")
         
         showSaveConfirmation()
@@ -106,6 +105,7 @@ class ShareViewController: UIViewController {
     
     private func showFailureAlert() {
         let alertController = UIAlertController(title: "Failed to Save", message: "The image could not be saved to Giggle.", preferredStyle: .alert)
+        
         alertController.addAction(UIAlertAction(title: "OK", style: .default) { _ in
             self.extensionContext?.completeRequest(returningItems: nil, completionHandler: nil)
         })

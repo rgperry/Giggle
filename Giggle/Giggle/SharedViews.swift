@@ -12,86 +12,6 @@ import UIKit
 
 let logger = Logger()
 
-struct GiggleItem: View {
-    var text: String?
-    let size: CGFloat = 150
-    
-    let meme: Meme
-    @Environment(\.modelContext) private var context
-
-    @State private var isLiked = false
-    @State private var navigateToMemeInfo = false
-
-    var body: some View {
-        NavigationStack {
-            VStack {
-                Image(uiImage: meme.imageAsUIImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: size, height: size)
-                    .foregroundColor(.black)
-                    .background(Color.white)
-                    .cornerRadius(18)
-                    .shadow(radius: 4)
-                    .onTapGesture {
-                        navigateToMemeInfo = true
-                    }
-                    .contextMenu {
-                        Button(action: {
-                            copyImage()
-                            DataManager.updateDateLastShared(for: meme, context: context)
-                        }) {
-                            Label("Copy", systemImage: "doc.on.doc")
-                        }
-
-                        Button(action: {
-                            shareImage()
-                            DataManager.updateDateLastShared(for: meme, context: context)
-                        }) {
-                            Label("Share", systemImage: "square.and.arrow.up")
-                        }
-                    }
-
-                Button(action: {
-                    isLiked.toggle()
-                }) {
-                    Image(systemName: isLiked ? "heart.fill" : "heart")
-                        .foregroundColor(isLiked ? .red : .black)
-                        .font(.system(size: 50))
-                }
-                .offset(x: -72, y: -175)
-
-                // REMOVE LATER FINISH
-                if let text = text {
-                    Text(text)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                }
-            }
-            .navigationDestination(isPresented: $navigateToMemeInfo) {
-                MemeInfoView(
-                    meme: meme
-                )
-            }
-        }
-    }
-
-    private func copyImage() {
-        let imageToCopy = meme.imageAsUIImage
-        UIPasteboard.general.image = imageToCopy
-    }
-
-    private func shareImage() {
-        let activityVC = UIActivityViewController(activityItems: [meme.imageAsUIImage], applicationActivities: nil)
-
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController {
-            rootVC.present(activityVC, animated: true, completion: nil)
-        }
-    }
-}
-
 struct FolderItem: View {
     var text: String
     let size: CGFloat = 150
@@ -106,7 +26,7 @@ struct FolderItem: View {
                         .aspectRatio(contentMode: .fit)
                         .frame(width: size, height: size)
                         .foregroundColor(.black)
-                        .background(Color.white)
+                        .background(.white)
                         .cornerRadius(18)
                         .shadow(radius: 4)
 
@@ -167,7 +87,8 @@ struct PageHeader: View {
 }
 
 struct MemeDescriptionField: View {
-    @Binding var memeDescription: String // Binding to use an external variable
+    // Binding to use an external variable
+    @Binding var memeDescription: String
 
     var body: some View {
         VStack {
@@ -184,7 +105,7 @@ struct MemeDescriptionField: View {
 struct GenerateMemeButton: View {
     @Binding var isClicked: Bool
     var isEnabled: Bool
-    var showAlertAction: () -> Void // Closure to trigger alert
+    var showAlertAction: () -> Void
 
     var body: some View {
         Button(action: {
@@ -192,7 +113,8 @@ struct GenerateMemeButton: View {
                 isClicked = true
                 print("Generate meme with Dalle3 AI!")
             } else {
-                showAlertAction() // Trigger alert if no description
+                // Trigger alert if no description
+                showAlertAction()
             }
         }) {
             Text("Generate with Dalle3 AI")
