@@ -8,6 +8,7 @@
 import SwiftData
 import NaturalLanguage
 import SwiftUI
+import OSLog
 
  // Utility Class
 class DataManager {
@@ -69,7 +70,29 @@ class DataManager {
         }
         completion()
     }
-
+    //TA 11/12/24
+    @MainActor
+    static func loadMemes(completion: @escaping ([Meme]) -> Void) async {
+        do {
+            // Initialize ModelContainer and ModelContext the same way as in saveImageToDataStore
+            let modelContainer = try ModelContainer(for: Meme.self, Tag.self)
+            let modelContext = ModelContext(modelContainer)
+            
+            let fetchDescriptor = FetchDescriptor<Meme>()
+            
+            // Fetch Meme objects using the initialized modelContext
+            let memes = try modelContext.fetch(fetchDescriptor)
+            logger.log("Successfully loaded \(memes.count) memes")
+            
+            // Pass the fetched memes to the completion handler
+            completion(memes)
+            
+        } catch {
+            logger.error("Failed to initialize ModelContainer or load memes: \(error.localizedDescription)")
+            completion([])
+        }
+    }
+    //
     static func getInfo(for image: UIImage) async -> ([Tag], String){
         // Dummy values loaded for searching
         // load each image in then change tags and rebuild and load new image in until done.
