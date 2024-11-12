@@ -16,7 +16,7 @@ struct GenerateMemeView: View {
         NavigationStack {
             VStack {
                 PageHeader(text: "Giggle")
-                QuestionMarkImage()
+                QuestionMark()
                 MemeDescriptionField(memeDescription: $memeDescription)
 
                 GenerateMemeButton(
@@ -41,6 +41,22 @@ struct GenerateMemeView: View {
         }
         .tint(.black)
         .navigationBarHidden(true)
+    }
+}
+
+struct QuestionMark: View {
+    var body: some View {
+        VStack {
+            Spacer()
+
+            Image(systemName: "questionmark.circle.fill")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 200, height: 200)
+                .foregroundColor(.white)
+
+            Spacer()
+        }
     }
 }
 

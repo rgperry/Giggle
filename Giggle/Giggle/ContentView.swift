@@ -10,7 +10,6 @@ import SwiftData
 
 // TODO
 // Make ContentView a wrapper?
-// Put components in different files for better organization - semi-done
 
 struct ContentView: View {
     @Environment(\.modelContext) private var context
@@ -18,18 +17,17 @@ struct ContentView: View {
     
     @Query private var memes: [Meme]
     @Query(sort: \Tag.name) private var allTags: [Tag]
+    
     @AppStorage("numSearchResults") private var numSearchResults: Double = 10
 
-    // Efficiently get top tags using @Query and computed property
+    // Get top tags using @Query and computed property
     private var topTags: [Tag] {
-        // Convert to array to perform the complex sorting
         let sortedTags = allTags.sorted { $0.memes.count > $1.memes.count }
-        // Take only the first 10 tags
         let folderLimit = 10
+        
         return Array(sortedTags.prefix(folderLimit))
     }
 
-    // Moved filtering logic here
     var filteredMemes: [Meme] {
         if searchText.isEmpty {
 //            DataManager.clearDB(context: context)
@@ -48,6 +46,8 @@ struct ContentView: View {
                 SearchBar(text: "Search for a Giggle", searchText: $searchText)
                     ScrollView {
                         LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
+                            
+                            // If search bar is empty, show folders
                             if searchText.isEmpty {
                                 FolderItem(text: "Favorites", isPinned: true)
                                 FolderItem(text: "Recently Shared", isPinned: true)
@@ -61,7 +61,10 @@ struct ContentView: View {
                                     )
                                 }
 
-                            } else {
+                            }
+                            
+                            // Else show memes for search query
+                            else {
                                 ForEach(filteredMemes) { meme in
                                     GiggleItem(meme: meme)
                                 }

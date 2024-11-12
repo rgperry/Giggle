@@ -16,7 +16,6 @@ struct FolderView: View {
     @Environment(\.modelContext) private var context
     @AppStorage("numSearchResults") private var numSearchResults: Double = 10
     
-    // Moved filtering logic here
     var filteredMemes: [Meme] {
         switch header {
             case "All Giggles":
@@ -62,6 +61,7 @@ struct FolderView: View {
     var body: some View {
         VStack {
             PageHeader(text: header.capitalized)
+            
             SearchBar(
                 text: "Search \(header.capitalized)",
                 searchText: $searchText
@@ -84,6 +84,6 @@ struct FolderView: View {
     }
 }
 
-//#Preview {
-//    FolderView(header: "Favorites")
-//}
+#Preview {
+    FolderView(header: "All Giggles")
+}
