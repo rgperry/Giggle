@@ -4,6 +4,7 @@
 //
 //  Created by Matthew Drutis on 10/29/24.
 //
+
 import SwiftData
 import NaturalLanguage
 import SwiftUI
@@ -20,6 +21,7 @@ func convertImageToPNG(_ uiImage: UIImage?) throws -> Data {
     guard let pngData = image.pngData() else {
         throw ImageConversionError.pngConversionFailed
     }
+    
     return pngData
 }
 
@@ -44,11 +46,11 @@ class Meme {
     @Attribute(.externalStorage) var image: Data?
     @Attribute(.unique) var id: UUID
     @Relationship(inverse: \Tag.memes) var tags: [Tag]
+    
     var dateAdded: Date
     var dateLastShared: Date?
     var content: String
 
-    // Initializer
     init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
@@ -56,6 +58,7 @@ class Meme {
         self.dateLastShared = nil
         self.content = content
         self.tags = tags
+        
         do {
             self.image = try convertImageToPNG(image)
         } catch {
@@ -63,6 +66,7 @@ class Meme {
             self.image = try? convertImageToPNG(UIImage(systemName: "photo"))
         }
     }
+    
     // Computed property to get the UIImage from image Data
     var imageAsUIImage: UIImage {
         guard let imageData = image else {
@@ -148,8 +152,6 @@ class DataManager {
     }
 
     static func getInfo(for image: UIImage) async -> ([Tag], String){
-        
-        
         // Dummy values loaded for searching
         // load each image in then change tags and rebuild and load new image in until done.
 //
@@ -218,7 +220,7 @@ class DataManager {
         }
     }
     
-    // this could be useful for testing
+    // Used for testing
     static func clearDB(context: ModelContext) {
         do {
             try context.delete(model: Meme.self)
@@ -228,7 +230,6 @@ class DataManager {
     }
 }
 
-// TODO
 func generateMeme(description: String) async -> UIImage? {
     let urlString = "https://3.138.136.6/generateMeme/?description=\(description.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
     guard let url = URL(string: urlString) else { return nil }
@@ -242,7 +243,6 @@ func generateMeme(description: String) async -> UIImage? {
     }
 }
 
-// TODO
 func regenerateMeme(description: String) async -> UIImage? {
     let url = URL(string: "https://3.138.136.6/redoGeneration")!
     var request = URLRequest(url: url)

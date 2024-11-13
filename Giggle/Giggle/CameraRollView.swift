@@ -15,8 +15,10 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
-        config.filter = .images // Only show images
-        config.selectionLimit = 0 // Allow multiple selections
+        // Only show images
+        config.filter = .images
+        // Allow multiple selections
+        config.selectionLimit = 0
 
         let picker = PHPickerViewController(configuration: config)
         picker.delegate = context.coordinator
@@ -39,13 +41,16 @@ struct ImagePicker: UIViewControllerRepresentable {
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             picker.dismiss(animated: true)
         }
-
+        
+        // Called when the user finishes selecting images
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
             picker.dismiss(animated: true)
-
+            
+            // Iterate over the selected results and check if we can load the UIImage
             for result in results {
                 if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
                     result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
+                        // Update the selectedImages array
                         if let uiImage = image as? UIImage {
                             DispatchQueue.main.async {
                                 self.parent.selectedImages.append(uiImage)

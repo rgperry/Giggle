@@ -11,11 +11,10 @@ import Messages
 class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
     //dummy images
     var imagesArray: [UIImage] = []
-    //
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return imagesArray.count
         //Replace imagesArray.count with the actual array you’re using to hold the images.
-
     }
     
     @IBOutlet weak var searchBar: UISearchBar!
@@ -42,7 +41,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         //end dummy images
         collectionView.reloadData()
     }
-    //ADDED FUNCTIONS - Tamaer
+    
+    // Functions added by Tamaer
     func setupCollectionViewLayout() {
         collectionView.collectionViewLayout = UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
 
@@ -65,29 +65,30 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         cell.imageView.image = imagesArray[indexPath.item]
         return cell
     }
-    //for image attaching to imessage on tap
+    
+    // Attaches image to message box on tap
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedImage = imagesArray[indexPath.item]
         
         let layout = MSMessageTemplateLayout()
         layout.image = selectedImage
-        //layout.caption = "Sent from Giggle" // Optional caption
+        // layout.caption = "Sent from Giggle" // Optional caption
         
         let message = MSMessage()
         message.layout = layout
-        //insert the message into the conversation
+        
+        // Insert the message into the conversation
         activeConversation?.insert(message, completionHandler: { error in
             if let error = error {
                 print("Failed to insert message: \(error.localizedDescription)")
             }
         })
-        //pull menu down when image is selected
-        requestPresentationStyle(.compact)
         
+        // Pulls menu down when image is selected
+        requestPresentationStyle(.compact)
     }
 
-    //
-    //END OF ADDED FUNCTIONS - Tamaer
+    // End of Tamaer's added functions
     
     // MARK: - Conversation Handling
     
