@@ -36,15 +36,20 @@ extension UIImage {
 
 class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDataSourcePrefetching {
     @Environment(\.modelContext) private var context
+    //@State private var searchText = ""
+    //@Query private var memes: [Meme] = []
+    var searchText: String = ""  // Store search text
+    //var meme: [Meme] = []  // Load memes here as needed
+//    private var context: ModelContext?  // Define context as optional to set it later
+//    func setContext(_ context: ModelContext) {
+//        self.context = context
+//        logger.log("Context set successfully.")
+//    }
 
-    @Query private var memes: [Meme] = []
-    //dummy images
+
+    //@Query(sort: \Tag.name) private var allTags: [Tag]
+
     var imagesArray: [Meme] = []
-    //
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return imagesArray.count
-        //Replace imagesArray.count with the actual array you’re using to hold the images.
-    }
 
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -69,26 +74,10 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         setupCollectionViewLayout()
         collectionView.delegate = self
         collectionView.prefetchDataSource = self //enable prefetching so app only loads what is seen
-
-//        Task {
-//            await DataManager.loadMemes { [weak self] loadedMemes in
-//                self?.imagesArray = loadedMemes
-//                self?.collectionView.reloadData()
-//            }
-//        }
-
-        //dummy images
-//        let configuration = UIImage.SymbolConfiguration(pointSize: 100, weight: .regular)
-//        if let symbolImage = UIImage(systemName: "person.circle.fill", withConfiguration: configuration)?
-//               .withTintColor(.black, renderingMode: .alwaysOriginal) {
-//            imagesArray = memes//Array(repeating: symbolImage, count: 10)
-//        }
-        //end dummy images
         collectionView.reloadData()
     }
+    //LOAD MEMES FROM DATA
     private var hasLoadedMemes = false
-
-    var loadingIndicator: UIActivityIndicatorView?
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         //setupLoadingIndicator()
@@ -104,55 +93,39 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             }
         }
     }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        self.searchText = searchText
+        collectionView.reloadData()  //reload to reflect the filtered memes
+    }
+
+    //returns the desired meme array
+    //var modelContext: ModelContext
+    var filteredMemes: [Meme] {
+        //setContext(modelContext)
+        logger.log("Filtering Memes")
+        //guard let context = self.context
+//        else {
+//            logger.log("No context, returning All Giggles")
+//            return imagesArray
+//        }
+        if searchText.isEmpty {
+            logger.log("Memes Filtered, returning All Giggles")
+            return imagesArray
+        } else {
+            logger.log("Memes Filtered, returning subset")
+            //return []//temp
+            return DataManager.findSimilarEntries(query: searchText, context: context, limit: 10, tagName: nil)
+        }
+    }
+
     //clear imagesArray to free up memory when needed
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         logger.log("Received memory warning, clearing imagesArray.")
-        imagesArray.removeAll()
+        //imagesArray.removeAll()
         collectionView.reloadData()
     }
-
-
-//    func setupLoadingIndicator() {
-//        loadingIndicator = UIActivityIndicatorView(style: .medium)
-//        loadingIndicator?.center = view.center
-//        if let loadingIndicator = loadingIndicator {
-//            view.addSubview(loadingIndicator)
-//        }
-//    }
-//
-//    func showLoadingIndicator() {
-//        loadingIndicator?.startAnimating()
-//    }
-//
-//    func hideLoadingIndicator() {
-//        loadingIndicator?.stopAnimating()
-//    }
-
-//    func loadMemes() {
-//        logger.log("attempting to loadMemes")
-//
-//        imagesArray = memes
-//
-//        if imagesArray.isEmpty {
-//            logger.log("imagesArray is empty. Check data source for memes.")
-//        }
-//    }
-
-
-    //test image
-//    func loadMemes() {
-//        logger.log("Loading test memes for display")
-//
-//        // Add a static test meme to verify collectionView setup
-//        if let testImage = UIImage(systemName: "photo") {
-//            let testMeme = Meme(content: "Test Meme", tags: [], image: testImage)
-//            imagesArray = [testMeme]
-//        }
-//
-//        logger.log("Test imagesArray count: \(self.imagesArray.count)")
-//        collectionView.reloadData()
-//    }
 
     func setupCollectionViewLayout() {
         collectionView.collectionViewLayout = UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
@@ -172,23 +145,28 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             return section
         }
     }
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        let count = filteredMemes.count
+        logger.log("Number of items in section: \(count)")
+        return count
+    }
     //method for loading only what is on screen
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         for indexPath in indexPaths {
-            let meme = imagesArray[indexPath.item]
+            let meme = filteredMemes[indexPath.item]
             _ = meme.imageAsUIImage.thumbnail(maxWidth: 20) // Prefetch thumbnails for images about to appear
         }
     }
     //release images when they are not in view
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let imageCell = cell as? ImageCell, indexPath.item < imagesArray.count else { return }
+        guard let imageCell = cell as? ImageCell, indexPath.item < filteredMemes.count else { return }
         imageCell.imageView.image = nil
     }
     //private var imageCache = NSCache<NSString, UIImage>()
     //bring them back to good quality when they are in view
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let imageCell = cell as? ImageCell, indexPath.item < imagesArray.count else { return }
-        let meme = imagesArray[indexPath.item]
+        guard let imageCell = cell as? ImageCell, indexPath.item < filteredMemes.count else { return }
+        let meme = filteredMemes[indexPath.item]
 
         // Load high-quality image asynchronously and ensure it doesn’t get overridden
         DispatchQueue.global(qos: .utility).async {
@@ -209,8 +187,9 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     //thumnails
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageCell", for: indexPath) as! ImageCell
-        let meme = imagesArray[indexPath.item]
-        cell.imageView.image = meme.imageAsUIImage.thumbnail(maxWidth: 50) //call thumbnail function for opt//meme.imageAsUIImage
+        let meme = filteredMemes[indexPath.item]
+        cell.imageView.image = meme.imageAsUIImage.thumbnail(maxWidth: 50)
+        logger.log("Setting image for meme at index \(indexPath.item): \(meme.imageAsUIImage)")
         return cell
     }
 
@@ -222,7 +201,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             return
         }
 
-        let meme = imagesArray[indexPath.item]
+        let meme = filteredMemes[indexPath.item]
 
         let originalImage = meme.imageAsUIImage.fixedOrientation()//preserve orientation
 
@@ -301,3 +280,17 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     }
 
 }
+
+//struct MessagesViewControllerWrapper: UIViewControllerRepresentable {
+//    var modelContext: ModelContext  // Accept modelContext as an initializer parameter
+//
+//    func makeUIViewController(context: Context) -> MessagesViewController {
+//        let messagesVC = MessagesViewController()
+//        messagesVC.setContext(modelContext)  // Pass modelContext to MessagesViewController
+//        return messagesVC
+//    }
+//
+//    func updateUIViewController(_ uiViewController: MessagesViewController, context: Context) {
+//        // Implement if needed to respond to SwiftUI state changes
+//    }
+//}
