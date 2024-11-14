@@ -9,6 +9,8 @@ import Messages
 import OSLog
 import SwiftUI
 import SwiftData
+import Combine
+
 
 let logger = Logger(subsystem: "com.Giggle.Giggle", category: "MessagesViewController")
 //ADDED FUNCTIONS - Tamaer
@@ -36,20 +38,12 @@ extension UIImage {
 
 class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDataSourcePrefetching {
     @Environment(\.modelContext) private var context
-    //@State private var searchText = ""
-    //@Query private var memes: [Meme] = []
+
     var searchText: String = ""  // Store search text
-    //var meme: [Meme] = []  // Load memes here as needed
-//    private var context: ModelContext?  // Define context as optional to set it later
-//    func setContext(_ context: ModelContext) {
-//        self.context = context
-//        logger.log("Context set successfully.")
-//    }
-
-
-    //@Query(sort: \Tag.name) private var allTags: [Tag]
 
     var imagesArray: [Meme] = []
+    var filteredMemes: [Meme] = []  // Store filtered memes
+    private var searchDebounce: AnyCancellable?  // Combine publisher for debouncing
 
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -64,12 +58,9 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         searchBar.delegate = self
         collectionView.dataSource = self
 
-        //searchBar.barTintColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)
-        //searchBar.barTintColor = UIColor.purple
         searchBar.backgroundImage = UIImage() // Remove the default background image for a solid color
         searchBar.searchTextField.backgroundColor = UIColor.systemBackground
         view.backgroundColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)
-
 
         setupCollectionViewLayout()
         collectionView.delegate = self
@@ -88,34 +79,56 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
                 //showLoadingIndicator()
                 await DataManager.loadMemes { [weak self] loadedMemes in
                     self?.imagesArray = loadedMemes
+                    self?.filteredMemes = loadedMemes  // Initialize with all memes
                     self?.collectionView.reloadData()
                 }
             }
         }
     }
-
+//
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchText = searchText
-        collectionView.reloadData()  //reload to reflect the filtered memes
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            self.performSearch(query: searchText)
+        }
     }
 
-    //returns the desired meme array
-    //var modelContext: ModelContext
-    var filteredMemes: [Meme] {
-        //setContext(modelContext)
-        logger.log("Filtering Memes")
-        //guard let context = self.context
-//        else {
-//            logger.log("No context, returning All Giggles")
-//            return imagesArray
-//        }
-        if searchText.isEmpty {
-            logger.log("Memes Filtered, returning All Giggles")
-            return imagesArray
-        } else {
-            logger.log("Memes Filtered, returning subset")
-            //return []//temp
-            return DataManager.findSimilarEntries(query: searchText, context: context, limit: 10, tagName: nil)
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder() // Dismiss the keyboard
+        logger.log("Search button clicked. Keyboard dismissed.")
+    }
+
+
+    private func performSearch(query: String) {
+        logger.log("Running search for query: \(query)")
+
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+
+            let results: [Meme]
+            if query.isEmpty {
+                results = self.imagesArray
+                logger.log("Memes Filtered, returning All Giggles")
+            } else {
+                results = DataManager.findSimilarEntries(
+                    query: query,
+                    memes: self.imagesArray,
+                    limit: 5,
+                    tagName: nil
+                )
+                logger.log("Memes Filtered, returning subset")
+            }
+
+            // Log the size of the filtered results
+            logger.log("Search results count for query '\(query)': \(results.count)")
+
+            // Update the filtered array and UI on the main thread
+            DispatchQueue.main.async {
+                self.filteredMemes = results
+                logger.log("Filtered memes updated: \(self.filteredMemes.count) items.")
+                self.collectionView.reloadData()
+            }
         }
     }
 
@@ -189,7 +202,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageCell", for: indexPath) as! ImageCell
         let meme = filteredMemes[indexPath.item]
         cell.imageView.image = meme.imageAsUIImage.thumbnail(maxWidth: 50)
-        logger.log("Setting image for meme at index \(indexPath.item): \(meme.imageAsUIImage)")
+        //logger.log("Setting image for meme at index \(indexPath.item): \(meme.imageAsUIImage)")
         return cell
     }
 
@@ -214,6 +227,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         let message = MSMessage()
         message.layout = layout
 
+        searchBar.resignFirstResponder()
+
         // Insert the message into the conversation
         conversation.insert(message) { error in
             if let error = error {
@@ -221,8 +236,10 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             }
         }
 
-        // Minimize the extension view
-        requestPresentationStyle(.compact)
+        //ensure the extension view minimizes immediately on tap
+        DispatchQueue.main.async {
+            self.requestPresentationStyle(.compact)
+        }
     }
 
 

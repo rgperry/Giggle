@@ -50,6 +50,46 @@ class DataManager {
         return sortedEntries
     }
     
+    static func findSimilarEntries(query: String, memes: [Meme], limit: Int = 10, tagName: String?) -> [Meme] {
+        logger.debug("searching for similar entries \(query)")
+        let embedding = NLEmbedding.sentenceEmbedding(for: .english)
+        guard let embedding = embedding else {
+            return []
+        }
+    
+        
+        // First filter by tag if tagName is provided
+        let filteredEntries = tagName != nil ?
+        memes.filter { meme in
+                meme.tags.contains { $0.name == tagName }
+        } : memes
+        
+        // Calculate distances and sort
+        let entriesWithDistances = filteredEntries.compactMap { entry -> (Meme, Double)? in
+            let memeAsText = entry.content + " With tags " + entry.tags.map { $0.name }.joined(separator: ", ")
+            
+            let distance = embedding.distance(
+                between: query,
+                and: memeAsText,
+                distanceType: .cosine
+            )
+            logger.log("\(distance)")
+            // Only include entries with distance <= 1.27
+//            guard distance <= 1.27 else {
+//                return nil
+//            }
+            return (entry, distance)
+        }
+        
+        // Sort by similarity (lower distance = more similar)
+        let sortedEntries = entriesWithDistances
+            .sorted { $0.1 < $1.1 }
+            .prefix(limit)
+            .map { $0.0 }
+        
+        return sortedEntries
+    }
+    
     // Decorated with @MainActor to avoid concurrency issues with passing down the model context
     @MainActor
     static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
@@ -70,7 +110,7 @@ class DataManager {
         }
         completion()
     }
-    //TA 11/12/24
+    //Tamaer A. 11/12/24
     @MainActor
     static func loadMemes(completion: @escaping ([Meme]) -> Void) async {
         do {
@@ -93,7 +133,13 @@ class DataManager {
         }
     }
     //
+<<<<<<< HEAD
     static func getInfo(for image: UIImage) async -> ([Tag], String){
+=======
+//    static func getInfo(for image: UIImage) async -> ([Tag], String){
+        
+        
+>>>>>>> b95bcf2 (Imessage search, polish, loadMeme in Datastore)
         // Dummy values loaded for searching
         // load each image in then change tags and rebuild and load new image in until done.
 //
@@ -108,50 +154,135 @@ class DataManager {
         
         // commment below this out for dummy
         // Convert image to PNG data and base64 encode
-        guard let pngData = try? convertImageToPNG(image) else {
-            return ([], "Image conversion failed")
-        }
-        let base64Image = pngData.base64EncodedString()
-
-        // Prepare the URL and request
-        let url = URL(string: "https://3.138.136.6/imageInfo/?numTags=10&contentLength=200")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        // Create JSON payload
-        let body = [["Id": UUID().uuidString, "imageFile": base64Image]]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-        
-        // Debug: Print the JSON body
-        if let httpBody = request.httpBody {
-            print("Request Body: ", String(data: httpBody, encoding: .utf8) ?? "Invalid body")
-        }
-
-        // Perform the request
-        do {
-            let (data, _) = try await URLSession.shared.data(for: request)
-
-            // Debug: Check if data is received and print it
-            print("Received Data:", String(data: data, encoding: .utf8) ?? "Invalid data")
+//        guard let pngData = try? convertImageToPNG(image) else {
+//            return ([], "Image conversion failed")
+//        }
+//        let base64Image = pngData.base64EncodedString()
+//
+//        // Prepare the URL and request
+//        let url = URL(string: "https://3.138.136.6/imageInfo/?numTags=10&contentLength=200")!
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//
+//        // Create JSON payload
+//        let body = [["Id": UUID().uuidString, "imageFile": base64Image]]
+//        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+//        
+//        // Debug: Print the JSON body
+//        if let httpBody = request.httpBody {
+//            print("Request Body: ", String(data: httpBody, encoding: .utf8) ?? "Invalid body")
+//        }
+//
+//        // Perform the request
+//        do {
+//            let (data, _) = try await URLSession.shared.data(for: request)
+//
+//            // Debug: Check if data is received and print it
+//            print("Received Data:", String(data: data, encoding: .utf8) ?? "Invalid data")
+//            
+//            // Parse the response data
+//            if let responseArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+//               let firstResult = responseArray.first,
+//               let tags = firstResult["tags"] as? [String],
+//               let content = firstResult["content"] as? String {
+//                return (tags.map { Tag(name: $0) }, content)
+//            } else {
+//                print("Parsing Error: Response array is nil or has unexpected format")
+//            }
+//        } catch {
+//            print("Error in getInfo: \(error)")
+//        }
+//        return ([], "Error retrieving info") // Return empty data on failure
+//        // until here
+//        let url = URL(string: "https://random-word-api.herokuapp.com/word?number=10")
+//            var request = URLRequest(url: url!)
+//            request.httpMethod = "GET"
+//            do {
+//                let (data, _) = try await URLSession.shared.data(for: request)
+//                if let responseArray = try JSONSerialization.jsonObject(with: data) as? [String] {
+//                    return (responseArray.map { Tag(name: $0) }, "DUMMY CONTENT")
+//                }
+//                
+//            } catch {
+//                return ([Tag(name: "Error Tag")], "No content")
+//        }
+//            var tags = ["funny", "cute", "dog", "doberman"] //change to whatever tags you want image to be
+//    
+//            // convert all tags to lowercase and remove whitespace
+//            tags = tags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) }
+//    
+//            return (tags.map { Tag(name: $0) }, "Sample content based on image") // Mock data for now
+//        
+//    }
+    static func getInfo(for image: UIImage) async -> ([Tag], String){
+            // Dummy values loaded for searching
+            // load each image in then change tags and rebuild and load new image in until done.
+    //
+    //        var tags = ["funny", "cute", "dog", "doberman"] //change to whatever tags you want image to be
+    //
+    //        // convert all tags to lowercase and remove whitespace
+    //        tags = tags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) }
+    //
+    //        return (tags.map { Tag(name: $0) }, "Sample content based on image") // Mock data for now
             
-            // Parse the response data
-            if let responseArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
-               let firstResult = responseArray.first,
-               let tags = firstResult["tags"] as? [String],
-               let content = firstResult["content"] as? String {
-                return (tags.map { Tag(name: $0) }, content)
-            } else {
-                print("Parsing Error: Response array is nil or has unexpected format")
+            // Dummy values loaded for searching
+            
+            // commment below this out for dummy
+            // Convert image to PNG data and base64 encode
+            guard let pngData = try? convertImageToPNG(image) else {
+                return ([], "Image conversion failed")
             }
-        } catch {
-            print("Error in getInfo: \(error)")
+            let base64Image = pngData.base64EncodedString()
+
+            // Prepare the URL and request
+            let url = URL(string: "https://3.138.136.6/imageInfo/?numTags=10&contentLength=200")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            // Create JSON payload
+            let body = [["Id": UUID().uuidString, "imageFile": base64Image]]
+            request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+            
+            // Debug: Print the JSON body
+            if let httpBody = request.httpBody {
+                print("Request Body: ", String(data: httpBody, encoding: .utf8) ?? "Invalid body")
+            }
+
+            // Perform the request
+            do {
+                let (data, _) = try await URLSession.shared.data(for: request)
+
+                // Debug: Check if data is received and print it
+                print("Received Data:", String(data: data, encoding: .utf8) ?? "Invalid data")
+                
+                // Parse the response data
+                if let responseArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+                   let firstResult = responseArray.first,
+                   let tags = firstResult["tags"] as? [String],
+                   let content = firstResult["content"] as? String {
+                    return (tags.map { Tag(name: $0) }, content)
+                } else {
+                    print("Parsing Error: Response array is nil or has unexpected format")
+                }
+            } catch {
+                print("Error in getInfo: \(error)")
+            }
+            return ([], "Error retrieving info") // Return empty data on failure
+            // until here
         }
+<<<<<<< HEAD
         return ([], "Error retrieving info") // Return empty data on failure
         // until here
     }
     
     static func saveContext(context: ModelContext, success_message: String, fail_message: String, id: UUID) {
+=======
+    static func updateDateLastShared(for meme: Meme, context: ModelContext) {
+        meme.dateLastShared = Date()
+        
+>>>>>>> b95bcf2 (Imessage search, polish, loadMeme in Datastore)
         do {
             try context.save()
             print(success_message)
