@@ -59,6 +59,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         collectionView.dataSource = self
 
         searchBar.backgroundImage = UIImage() // Remove the default background image for a solid color
+        searchBar.backgroundColor = .clear // Make the search bar transparent
         searchBar.searchTextField.backgroundColor = UIColor.systemBackground
         view.backgroundColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)
 
@@ -84,6 +85,33 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
                 }
             }
         }
+    }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        adjustSearchBarWidth()
+        adjustCollectionViewHeight()
+    }
+
+    private func adjustSearchBarWidth() {
+        // Get the width of the collection view
+        let collectionViewWidth = collectionView.bounds.width
+
+        // Set the search bar width to match the collection view's width
+        searchBar.frame = CGRect(
+            x: collectionView.frame.origin.x - 2,
+            y: searchBar.frame.origin.y - 4,
+            width: collectionViewWidth + 4,
+            height: searchBar.frame.height
+        )
+    }
+    private func adjustCollectionViewHeight() {
+        collectionView.frame = CGRect(
+            x: collectionView.frame.origin.x,
+            y: collectionView.frame.origin.y - 16, // Move up
+            width: collectionView.frame.width,
+            height: collectionView.frame.height
+        )
     }
 //
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -154,6 +182,12 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
             let section = NSCollectionLayoutSection(group: group)
             section.interGroupSpacing = itemSpacing //row spacing equal to column spacing
+            section.contentInsets = NSDirectionalEdgeInsets(
+                top: itemSpacing,     // Space above the section
+                leading: itemSpacing, // Space on the left side
+                bottom: itemSpacing,  // Space below the section
+                trailing: itemSpacing // Space on the rwight side
+            )
 
             return section
         }
