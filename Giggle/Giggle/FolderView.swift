@@ -35,12 +35,25 @@ struct FolderView: View {
                     limit: Int(numSearchResults),
                     tagName: nil // No specific tag for "Recently Shared" search
                 )
+            
                 let recentlySharedMemes = memesToSearch
                         .filter { $0.dateLastShared != nil }
                         .sorted { $0.dateLastShared ?? Date.distantPast > $1.dateLastShared! }
                         .prefix(24)
                     
                 return Array(recentlySharedMemes)
+            
+            case "Favorites":
+                let memesToSearch = searchText.isEmpty ? memes : DataManager.findSimilarEntries(
+                    query: searchText,
+                    context: context,
+                    limit: Int(numSearchResults),
+                    tagName: nil // No specific tag for "Favorited" search
+                )
+            
+                let favoritedMemes = memesToSearch.filter({ $0.favorited })
+                
+                return favoritedMemes
 
             default:
                 // Filter by tag if `header` is not "All Giggles" or "Recently Shared"
@@ -69,7 +82,6 @@ struct FolderView: View {
 
             ScrollView {
                 LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.memeRowPadding) {
-                    // Display filtered results when searching
                     ForEach(filteredMemes) { meme in
                         GiggleItem(meme: meme)
                     }

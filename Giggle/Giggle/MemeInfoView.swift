@@ -8,9 +8,8 @@
 import SwiftUI
 
 struct MemeInfoView: View {
-    var meme: Meme
+    @Bindable var meme: Meme
 
-    @State private var isLiked = false
     @State private var navigateToAllGiggles = false
 
     var body: some View {
@@ -22,10 +21,10 @@ struct MemeInfoView: View {
                 Tags(tags: meme.tags)
                 MoreInfo(dateAdded: meme.dateAdded, source: "TODO")
                 
-//                DeleteButton(deleteAction: {
-//                    navigateToAllGiggles = true
-//                })
-                LikeButton(isLiked: $isLiked)
+                DeleteButton(deleteAction: {
+                    navigateToAllGiggles = true
+                })
+                FavoriteButton(favorited: $meme.favorited)
 
                 BottomNavBar()
             }
@@ -100,16 +99,15 @@ struct MoreInfo: View {
     }
 }
 
-// GRIFFIN ADDED THIS FOR HIS IMPLEMENTATION OF MEME INFO VIEW
-struct LikeButton: View {
-    @Binding var isLiked: Bool
+struct FavoriteButton: View {
+    @Binding var favorited: Bool
 
     var body: some View {
         Button(action: {
-            isLiked.toggle()
+            favorited.toggle()
         }) {
-            Image(systemName: isLiked ? "heart.fill" : "heart")
-                .foregroundColor(isLiked ? .red : .black)
+            Image(systemName: favorited ? "heart.fill" : "heart")
+                .foregroundColor(favorited ? .red : .black)
                 .font(.system(size: 35))
         }
     }

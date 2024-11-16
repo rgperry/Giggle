@@ -50,6 +50,7 @@ class Meme {
     var dateAdded: Date
     var dateLastShared: Date?
     var content: String
+    var favorited: Bool = false
 
     init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil) {
         // Use the provided id or generate a new UUID if none is provided
@@ -58,6 +59,7 @@ class Meme {
         self.dateLastShared = nil
         self.content = content
         self.tags = tags
+        self.favorited = false
         
         do {
             self.image = try convertImageToPNG(image)
@@ -217,6 +219,17 @@ class DataManager {
             print("Updated date last shared for meme")
         } catch {
             logger.error("Failed to update dateLastShared for Meme \(meme.id): \(error.localizedDescription)")
+        }
+    }
+    
+    static func updateFavorited(for meme: Meme, context: ModelContext) {
+        meme.favorited.toggle()
+        
+        do {
+            try context.save()
+            print("Updated favorited status for meme")
+        } catch {
+            logger.error("Failed to update favorited status for Meme \(meme.id): \(error.localizedDescription)")
         }
     }
     

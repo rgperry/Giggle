@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// FINISH: use this to create shared code between GiggleItem and FolderItem eventually
+// FINISH: use this to create shared code between GiggleItem and FolderItem eventually?
 //struct Item: View {
 //    let size: CGFloat = 150
 //    var image: UIImage
@@ -27,10 +27,9 @@ import SwiftUI
 struct GiggleItem: View {
     let size: CGFloat = 150
     
-    let meme: Meme
+    @Bindable var meme: Meme
     @Environment(\.modelContext) private var context
 
-    @State private var isLiked = false
     @State private var navigateToMemeInfo = false
 
     var body: some View {
@@ -64,10 +63,10 @@ struct GiggleItem: View {
                     }
 
                 Button(action: {
-                    isLiked.toggle()
+                    DataManager.updateFavorited(for: meme, context: context)
                 }) {
-                    Image(systemName: isLiked ? "heart.fill" : "heart")
-                        .foregroundColor(isLiked ? .red : .black)
+                    Image(systemName: meme.favorited ? "heart.fill" : "heart")
+                        .foregroundColor(meme.favorited ? .red : .black)
                         .font(.system(size: 50))
                 }
                 .offset(x: -72, y: -175)
