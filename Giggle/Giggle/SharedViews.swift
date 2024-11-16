@@ -7,10 +7,7 @@
 
 import SwiftUI
 import SwiftData
-import OSLog
 import UIKit
-
-let logger = Logger()
 
 struct FolderItem: View {
     var text: String
@@ -36,15 +33,15 @@ struct FolderItem: View {
                 }
                 .padding(.vertical, 20)
 
-                Button(action: {
-                    isPinned.toggle()
-                }) {
-                    Image(systemName: isPinned ? "pin.fill" : "pin")
+                if isPinned {
+                    Image(
+                        systemName: "pin.fill")
                         .foregroundColor(.gray)
-                        .font(.system(size: 55))
-                        .shadow(color: .black, radius: 4, x: 0, y: 0)
+                        .font(.system(size: 47))
+                        .shadow(color: .black, radius: 4, x: 0, y: 0
+                        )
+                    .offset(x: -65, y: -size / 2 - 13)
                 }
-                .offset(x: -65, y: -size / 2 - 10)
             }
         }
     }

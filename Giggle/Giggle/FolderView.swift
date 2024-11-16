@@ -18,44 +18,60 @@ struct FolderView: View {
     
     var filteredMemes: [Meme] {
         switch header {
+            case "Favorites":
+                let allMemes = getAllMemesWithSearch()
+                
+                // Technically don't need .distantPast comparison as favorited and dateFavorited
+                // should always be updated together
+                let favoritedMemes = allMemes
+                    .filter({ $0.favorited })
+                    .sorted { ($0.dateFavorited ?? .distantPast) > ($1.dateFavorited ?? .distantPast) }
+                
+                return favoritedMemes
+            
             case "All Giggles":
-                // If there's a search text, filter all memes by the search query
-                return searchText.isEmpty ? memes : DataManager.findSimilarEntries(
-                    query: searchText,
-                    context: context,
-                    limit: Int(numSearchResults),
-                    tagName: nil // No specific tag for "All Giggles" search
-                )
-
+                return getAllMemesWithSearch().sorted { $0.dateAdded > $1.dateAdded }
+            
             case "Recently Shared":
-                // Return the 24 most recent shared memes
-                let memesToSearch = searchText.isEmpty ? memes : DataManager.findSimilarEntries(
-                    query: searchText,
-                    context: context,
-                    limit: Int(numSearchResults),
-                    tagName: nil // No specific tag for "Recently Shared" search
-                )
-                let recentlySharedMemes = memesToSearch
-                        .filter { $0.dateLastShared != nil }
-                        .sorted { $0.dateLastShared ?? Date.distantPast > $1.dateLastShared! }
-                        .prefix(24)
+                let allMemes = getAllMemesWithSearch()
+                let recentlySharedMemes = allMemes
+                    .filter { $0.dateLastShared != nil }
+                    .sorted { $0.dateLastShared! > $1.dateLastShared! }
+                    .prefix(24)
                     
                 return Array(recentlySharedMemes)
-
+            
+            // Filter by tag if `header` is not a special folder
             default:
-                // Filter by tag if `header` is not "All Giggles" or "Recently Shared"
                 let tagFilteredMemes = memes.filter { meme in
                     meme.tags.contains { $0.name == header }
                 }
-
-                // Apply search filter if there's a search text
-                return searchText.isEmpty ? tagFilteredMemes : DataManager.findSimilarEntries(
+            
+                let filteredAgain = searchText.isEmpty ? tagFilteredMemes : DataManager.findSimilarEntries(
                     query: searchText,
                     context: context,
                     limit: Int(numSearchResults),
                     tagName: header.isEmpty ? nil : header
                 )
-            }
+            
+                return filteredAgain.sorted { $0.dateAdded > $1.dateAdded }
+        }
+    }
+    
+    // Used in the three special folders - Favorites, All Giggles, and Recently Shared.
+    // In other words, filter off the set of all memes rather than memes with a certain tag.
+    func getAllMemesWithSearch() -> [Meme]  {
+        // If there's a search text, filter all memes by it
+        if searchText.isEmpty {
+            return memes
+        }
+
+        return DataManager.findSimilarEntries(
+            query: searchText,
+            context: context,
+            limit: Int(numSearchResults),
+            tagName: nil
+        )
     }
 
     var body: some View {
@@ -69,7 +85,6 @@ struct FolderView: View {
 
             ScrollView {
                 LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.memeRowPadding) {
-                    // Display filtered results when searching
                     ForEach(filteredMemes) { meme in
                         GiggleItem(meme: meme)
                     }

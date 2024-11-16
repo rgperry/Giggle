@@ -18,6 +18,7 @@ struct ContentView: View {
     @Query private var memes: [Meme]
     @Query(sort: \Tag.name) private var allTags: [Tag]
     
+    // https://abdulahd1996.medium.com/appstorage-property-wrapper-2eab0fb5b8fa
     @AppStorage("numSearchResults") private var numSearchResults: Double = 10
 
     // Get top tags using @Query and computed property
@@ -34,7 +35,12 @@ struct ContentView: View {
             return memes
         } else {
 //            DataManager.clearDB(context: context)
-            return DataManager.findSimilarEntries(query: searchText, context: context, limit: Int(numSearchResults), tagName: nil)
+            return DataManager.findSimilarEntries(
+                query: searchText,
+                context: context,
+                limit: Int(numSearchResults),
+                tagName: nil
+            )
         }
     }
 
@@ -50,8 +56,8 @@ struct ContentView: View {
                             // If search bar is empty, show folders
                             if searchText.isEmpty {
                                 FolderItem(text: "Favorites", isPinned: true)
-                                FolderItem(text: "Recently Shared", isPinned: true)
                                 FolderItem(text: "All Giggles", isPinned: true)
+                                FolderItem(text: "Recently Shared", isPinned: true)
 
                                 // Display top 10 tags as folders
                                 ForEach(topTags, id: \.name) { tag in

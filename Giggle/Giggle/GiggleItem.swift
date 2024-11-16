@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-// FINISH: use this to create shared code between GiggleItem and FolderItem eventually
+// FINISH: use this to create shared code between GiggleItem and FolderItem eventually?
 //struct Item: View {
 //    let size: CGFloat = 150
 //    var image: UIImage
@@ -27,10 +27,9 @@ import SwiftUI
 struct GiggleItem: View {
     let size: CGFloat = 150
     
-    let meme: Meme
+    @Bindable var meme: Meme
     @Environment(\.modelContext) private var context
 
-    @State private var isLiked = false
     @State private var navigateToMemeInfo = false
 
     var body: some View {
@@ -50,24 +49,44 @@ struct GiggleItem: View {
                     .contextMenu {
                         Button(action: {
                             copyImage()
-                            DataManager.updateDateLastShared(for: meme, context: context)
+                            
+                            meme.dateLastShared = Date()
+                            DataManager.saveContext(
+                                context: context,
+                                success_message: "Successfully updated date shared",
+                                fail_message: "Failed to update date shared",
+                                id: meme.id
+                            )
                         }) {
                             Label("Copy", systemImage: "doc.on.doc")
                         }
 
                         Button(action: {
                             shareImage()
-                            DataManager.updateDateLastShared(for: meme, context: context)
+                            
+                            meme.dateLastShared = Date()
+                            DataManager.saveContext(
+                                context: context,
+                                success_message: "Successfully updated date shared",
+                                fail_message: "Failed to update date shared",
+                                id: meme.id
+                            )
                         }) {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
                     }
 
                 Button(action: {
-                    isLiked.toggle()
+                    meme.toggleFavorited()
+                    DataManager.saveContext(
+                        context: context,
+                        success_message: "Successfully updated favorited status and date favorited",
+                        fail_message: "Failed to update favorited status or date favorited",
+                        id: meme.id
+                    )
                 }) {
-                    Image(systemName: isLiked ? "heart.fill" : "heart")
-                        .foregroundColor(isLiked ? .red : .black)
+                    Image(systemName: meme.favorited ? "heart.fill" : "heart")
+                        .foregroundColor(meme.favorited ? .red : .black)
                         .font(.system(size: 50))
                 }
                 .offset(x: -72, y: -175)
