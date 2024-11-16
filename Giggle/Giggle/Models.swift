@@ -54,15 +54,19 @@ class Meme {
     var dateLastShared: Date?
     var content: String
     var favorited: Bool = false
+    var dateFavorited: Date?
 
     init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
         self.dateAdded = Date()
+        
         self.dateLastShared = nil
         self.content = content
         self.tags = tags
+        
         self.favorited = false
+        self.dateFavorited = nil
         
         do {
             self.image = try convertImageToPNG(image)
@@ -78,6 +82,16 @@ class Meme {
             return UIImage(systemName: "photo") ?? UIImage()
         }
         return UIImage(data: imageData) ?? UIImage()
+    }
+    
+    func toggleFavorited() {
+        self.favorited.toggle()
+        
+        if self.favorited {
+            self.dateFavorited = Date()
+        } else {
+            self.dateFavorited = nil
+        }
     }
 }
 

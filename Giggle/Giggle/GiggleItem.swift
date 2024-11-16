@@ -77,11 +77,11 @@ struct GiggleItem: View {
                     }
 
                 Button(action: {
-                    meme.favorited.toggle()
+                    meme.toggleFavorited()
                     DataManager.saveContext(
                         context: context,
-                        success_message: "Successfully updated favorited status",
-                        fail_message: "Failed to update favorited status",
+                        success_message: "Successfully updated favorited status and date favorited",
+                        fail_message: "Failed to update favorited status or date favorited",
                         id: meme.id
                     )
                 }) {
