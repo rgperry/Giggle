@@ -11,8 +11,6 @@ import UniformTypeIdentifiers
 import SwiftData
 import OSLog
 
-let logger = Logger()
-
 class ShareViewController: UIViewController {
     
     override func viewDidLoad() {

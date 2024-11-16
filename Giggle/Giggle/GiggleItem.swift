@@ -49,21 +49,41 @@ struct GiggleItem: View {
                     .contextMenu {
                         Button(action: {
                             copyImage()
-                            DataManager.updateDateLastShared(for: meme, context: context)
+                            
+                            meme.dateLastShared = Date()
+                            DataManager.saveContext(
+                                context: context,
+                                success_message: "Successfully updated date shared",
+                                fail_message: "Failed to update date shared",
+                                id: meme.id
+                            )
                         }) {
                             Label("Copy", systemImage: "doc.on.doc")
                         }
 
                         Button(action: {
                             shareImage()
-                            DataManager.updateDateLastShared(for: meme, context: context)
+                            
+                            meme.dateLastShared = Date()
+                            DataManager.saveContext(
+                                context: context,
+                                success_message: "Successfully updated date shared",
+                                fail_message: "Failed to update date shared",
+                                id: meme.id
+                            )
                         }) {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
                     }
 
                 Button(action: {
-                    DataManager.updateFavorited(for: meme, context: context)
+                    meme.favorited.toggle()
+                    DataManager.saveContext(
+                        context: context,
+                        success_message: "Successfully updated favorited status",
+                        fail_message: "Failed to update favorited status",
+                        id: meme.id
+                    )
                 }) {
                     Image(systemName: meme.favorited ? "heart.fill" : "heart")
                         .foregroundColor(meme.favorited ? .red : .black)

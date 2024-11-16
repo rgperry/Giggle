@@ -7,10 +7,7 @@
 
 import SwiftUI
 import SwiftData
-import OSLog
 import UIKit
-
-let logger = Logger()
 
 struct FolderItem: View {
     var text: String
