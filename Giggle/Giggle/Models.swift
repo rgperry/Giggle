@@ -2,7 +2,7 @@
 //  Models.swift
 //  Giggle
 //
-//  Created by Karan Arora on 11/16/24.
+//  Created by Matthew Drutis
 //
 
 import SwiftUI
