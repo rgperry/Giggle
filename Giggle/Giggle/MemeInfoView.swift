@@ -14,20 +14,29 @@ struct MemeInfoView: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack { // VStack instead of ScrollView to remove scrolling
+                // Header
                 PageHeader(text: "Giggle")
 
+                // Meme Image
                 MemeImageView(image: meme.imageAsUIImage)
-                Tags(tags: meme.tags)
-                MoreInfo(dateAdded: meme.dateAdded, source: "TODO")
-                
-                DeleteButton(deleteAction: {
-                    navigateToAllGiggles = true
-                })
-                FavoriteButton(favorited: $meme.favorited)
 
+                // Tags and More Info Section (White Background Container)
+                ContentWithWhiteBackground(
+                    tags: meme.tags,
+                    dateAdded: meme.dateAdded,
+                    source: "Giggle App",
+                    addTagAction: { newTag in
+                        meme.addTag(newTag)
+                    }
+                )
+                // This moves the ContentWithWhiteBackground further above the bottom nav bar
+                .padding(.bottom, 65)
+
+                Spacer() // Spacer ensures the BottomNavBar stays at the bottom
                 BottomNavBar()
             }
+            
             .background(Colors.backgroundColor.ignoresSafeArea())
             .navigationDestination(isPresented: $navigateToAllGiggles) {
                 FolderView(header: "All Giggles")
@@ -36,54 +45,108 @@ struct MemeInfoView: View {
     }
 }
 
-struct Tags: View {
+
+struct ContentWithWhiteBackground: View {
     var tags: [Tag]
+    var dateAdded: Date
+    var source: String
+    var addTagAction: (String) -> Void
+    @State private var newTag: String = ""
 
     var body: some View {
-        HStack {
+        VStack(alignment: .leading, spacing: 10) {
+            // Tags Section
             VStack(alignment: .leading, spacing: 5) {
-                Text("Tags")
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                HStack {
+                    Text("Tags")
+                        .font(.title3)
+                        .fontWeight(.semibold)
 
-                HStack(spacing: 8) {
-                    ForEach(tags, id: \.self) { tag in
-                        Text("#\(tag.name)")
-                            .padding(.vertical, 6)
-                            .padding(.horizontal, 12)
-                            .background(Colors.backgroundColor.ignoresSafeArea())
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                    }
+                    Spacer()
 
                     Button(action: {
-                        // Action for add tag button
+                        guard !newTag.isEmpty else { return }
+                        addTagAction(newTag)
+                        newTag = ""
                     }) {
                         Image(systemName: "plus")
-                            .font(.system(size: 20))
+                            .font(.system(size: 15))
                             .foregroundColor(.black)
-                            .padding(8)
-                            .background(Circle().fill(.white))
-                            .overlay(Circle().stroke(.black, lineWidth: 1))
+                            .frame(width: 25, height: 25)
+                            .background(
+                                Circle()
+                                    .fill(Color.clear) // Transparent fill
+                            )
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.black, lineWidth: 2) // Black circular border
+                            )
+                    }
+                }
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(tags, id: \.self) { tag in
+                            Text("#\(tag.name)")
+                                .font(.caption)
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(Colors.backgroundColor.ignoresSafeArea())
+                                .foregroundColor(.white)
+                        }
                     }
                 }
             }
-            .background(.white)
-            .cornerRadius(5)
+
+            // More Info Section
+            MoreInfo(dateAdded: dateAdded, source: source)
+
+            // Action Buttons (Heart and Delete)
+            HStack {
+                Spacer()
+                Button(action: {
+                    // Add heart action here
+                }) {
+                    Image(systemName: "heart")
+                        .font(.system(size: 25))
+                        .foregroundColor(.black)
+                        .padding(10)
+                }
+                Spacer()
+                Button(action: {
+                    // Add delete action here
+                }) {
+                    Image(systemName: "trash")
+                        .font(.system(size: 25))
+                        .foregroundColor(.black)
+                        .padding(10)
+                }
+                Spacer()
+            }
         }
+        .padding(15) // Padding inside the box
+        .background(
+            RoundedRectangle(cornerRadius: 20) // Rounded rectangle background
+                .fill(.white)
+                .shadow(radius: 2) // Subtle shadow
+        )
+        .frame(maxWidth: UIScreen.main.bounds.width * 0.9) // Constrain width to 90% of the screen
+        .padding(.horizontal) // Center the white box with spacing
     }
 }
+
+
 
 struct MoreInfo: View {
     var dateAdded: Date
     var source: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 5) {
             Text("More Info")
                 .font(.title2)
                 .fontWeight(.semibold)
-                .padding(.top, 10)
+                .padding(.top, 15)
 
             HStack {
                 Text("Date Saved:")
@@ -96,6 +159,8 @@ struct MoreInfo: View {
                 Text(source)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(5)
     }
 }
 
@@ -113,11 +178,23 @@ struct FavoriteButton: View {
     }
 }
 
-//#Preview {
-//    MemeInfoView(
-//        memeImage: Image("exercise_meme"),
-//        tags: ["dog", "exercise", "fat"],
-//        dateSaved: "10/7/24",
-//        source: "Dalle3"
-//    )
-//}
+// this preview is for you to see how everything looks like
+#Preview {
+    MemeInfoView(
+        meme: Meme(
+            content: "This is a sample meme for preview purposes",
+            tags: [
+                Tag(name: "dog"),
+                Tag(name: "exercise"),
+                Tag(name: "funny"),
+                Tag(name: "hi"),
+                Tag(name: "hello"),
+                Tag(name: "yo"),
+            ],
+            image: UIImage(systemName: "photo") ?? UIImage()
+        )
+    )
+}
+
+
+// .background(Colors.backgroundColor.ignoresSafeArea())
