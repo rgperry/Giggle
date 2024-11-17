@@ -33,70 +33,68 @@ struct GiggleItem: View {
     @State private var navigateToMemeInfo = false
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                Image(uiImage: meme.imageAsUIImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: size, height: size)
-                    .foregroundColor(.black)
-                    .background(.white)
-                    .cornerRadius(18)
-                    .shadow(radius: 4)
-                    .onTapGesture {
-                        navigateToMemeInfo = true
-                    }
-                    .contextMenu {
-                        Button(action: {
-                            copyImage()
-                            meme.dateLastShared = Date()
-                            
-                            DataManager.saveContext(
-                                context: context,
-                                success_message: "Successfully updated date shared",
-                                fail_message: "Failed to update date shared",
-                                id: meme.id
-                            )
-                        }) {
-                            Label("Copy", systemImage: "doc.on.doc")
-                        }
-
-                        Button(action: {
-                            shareImage()
-                            meme.dateLastShared = Date()
-                            
-                            DataManager.saveContext(
-                                context: context,
-                                success_message: "Successfully updated date shared",
-                                fail_message: "Failed to update date shared",
-                                id: meme.id
-                            )
-                        }) {
-                            Label("Share", systemImage: "square.and.arrow.up")
-                        }
-                    }
-
-                Button(action: {
-                    meme.toggleFavorited()
-                    
-                    DataManager.saveContext(
-                        context: context,
-                        success_message: "Successfully updated favorited status and date favorited",
-                        fail_message: "Failed to update favorited status or date favorited",
-                        id: meme.id
-                    )
-                }) {
-                    Image(systemName: meme.favorited ? "heart.fill" : "heart")
-                        .foregroundColor(meme.favorited ? .red : .black)
-                        .font(.system(size: 50))
+        VStack {
+            Image(uiImage: meme.imageAsUIImage)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size, height: size)
+                .foregroundColor(.black)
+                .background(.white)
+                .cornerRadius(18)
+                .shadow(radius: 4)
+                .onTapGesture {
+                    navigateToMemeInfo = true
                 }
-                .offset(x: -72, y: -175)
-            }
-            .navigationDestination(isPresented: $navigateToMemeInfo) {
-                MemeInfoView(
-                    meme: meme
+                .contextMenu {
+                    Button(action: {
+                        copyImage()
+                        meme.dateLastShared = Date()
+                        
+                        DataManager.saveContext(
+                            context: context,
+                            success_message: "Successfully updated date shared",
+                            fail_message: "Failed to update date shared",
+                            id: meme.id
+                        )
+                    }) {
+                        Label("Copy", systemImage: "doc.on.doc")
+                    }
+
+                    Button(action: {
+                        shareImage()
+                        meme.dateLastShared = Date()
+                        
+                        DataManager.saveContext(
+                            context: context,
+                            success_message: "Successfully updated date shared",
+                            fail_message: "Failed to update date shared",
+                            id: meme.id
+                        )
+                    }) {
+                        Label("Share", systemImage: "square.and.arrow.up")
+                    }
+                }
+
+            Button(action: {
+                meme.toggleFavorited()
+                
+                DataManager.saveContext(
+                    context: context,
+                    success_message: "Successfully updated favorited status and date favorited",
+                    fail_message: "Failed to update favorited status or date favorited",
+                    id: meme.id
                 )
+            }) {
+                Image(systemName: meme.favorited ? "heart.fill" : "heart")
+                    .foregroundColor(meme.favorited ? .red : .black)
+                    .font(.system(size: 50))
             }
+            .offset(x: -72, y: -175)
+        }
+        .navigationDestination(isPresented: $navigateToMemeInfo) {
+            MemeInfoView(
+                meme: meme
+            )
         }
     }
 

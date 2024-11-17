@@ -9,33 +9,30 @@ import SwiftUI
 
 struct MemeInfoView: View {
     @Bindable var meme: Meme
-    @State private var navigateToAllGiggles = false
     
     @Environment(\.modelContext) private var context
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                PageHeader(text: "Giggle")
-                MemeImageView(image: meme.imageAsUIImage)
+        VStack {
+            PageHeader(text: "Giggle")
+            MemeImageView(image: meme.imageAsUIImage)
 
-                // Tags and More Info Section
-                ContentWithWhiteBackground(
-                    tags: meme.tags,
-                    dateAdded: meme.dateAdded,
-                    source: "TODO",
-                    addTagAction: addTag
-                ).offset(y: -62)
+            ContentWithWhiteBackground(
+                tags: $meme.tags,
+                favorited: $meme.favorited,
+                dateAdded: meme.dateAdded,
+                source: "TODO",
+                addTagAction: addTag,
+                favoriteAction: favoriteMeme,
+                deleteAction: deleteMeme,
+                dismissAction: dismiss
+            ).offset(y: -62)
 
-                Spacer()
-                BottomNavBar()
-            }
-            
-            .background(Colors.backgroundColor.ignoresSafeArea())
-            .navigationDestination(isPresented: $navigateToAllGiggles) {
-                FolderView(header: "All Giggles")
-            }
+            Spacer()
+            BottomNavBar()
         }
+        .background(Colors.backgroundColor.ignoresSafeArea())
     }
     
     private func addTag(newTag: String) {
@@ -48,14 +45,42 @@ struct MemeInfoView: View {
             id: meme.id
         )
     }
+    
+    private func favoriteMeme() {
+        meme.toggleFavorited()
+        
+        DataManager.saveContext(
+            context: context,
+            success_message: "Successfully updated favorited status and date favorited",
+            fail_message: "Failed to update favorited status or date favorited",
+            id: meme.id
+        )
+    }
+    
+    private func deleteMeme() {
+        context.delete(meme)
+        
+        DataManager.saveContext(
+            context: context,
+            success_message: "Successfully deleted meme",
+            fail_message: "Failed to delete meme",
+            id: meme.id
+        )
+    }
 }
 
-
 struct ContentWithWhiteBackground: View {
-    var tags: [Tag]
+    @Binding var tags: [Tag]
+    @Binding var favorited: Bool
+    
     var dateAdded: Date
     var source: String
+    
     var addTagAction: (String) -> Void
+    var favoriteAction: () -> Void
+    var deleteAction: () -> Void
+    var dismissAction: DismissAction
+    
     @State private var newTag: String = ""
 
     var body: some View {
@@ -64,8 +89,9 @@ struct ContentWithWhiteBackground: View {
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
                     Text("Tags")
-                        .font(.title3)
+                        .font(.title2)
                         .fontWeight(.semibold)
+                        .underline()
 
                     Button(action: {
                         guard !newTag.isEmpty else { return }
@@ -77,25 +103,27 @@ struct ContentWithWhiteBackground: View {
                             .foregroundColor(.black)
                             .frame(width: 25, height: 25)
                             .background(
-                                Circle()
-                                    .fill(Color.clear)
+                                Circle().fill(Color.clear)
                             )
                             .overlay(
-                                Circle()
-                                    .stroke(Color.black, lineWidth: 2)
+                                Circle().stroke(Color.black, lineWidth: 2)
                             )
                     }
                 }.padding(.bottom, 4)
 
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
+                    HStack(spacing: 6) {
                         ForEach(tags, id: \.self) { tag in
                             Text("#\(tag.name)")
-                                .font(.caption)
+                                .font(.system(size: 14))
                                 .padding(.vertical, 8)
                                 .padding(.horizontal, 12)
-                                .background(Colors.backgroundColor.ignoresSafeArea())
+                                .background(
+                                    RoundedRectangle(cornerRadius: 15)
+                                        .fill(Colors.backgroundColor)
+                                )
                                 .foregroundColor(.white)
+                                .bold()
                         }
                     }
                 }
@@ -103,26 +131,31 @@ struct ContentWithWhiteBackground: View {
 
             MoreInfo(dateAdded: dateAdded, source: source)
 
-            // Action Buttons (Heart and Delete)
+            // Action buttons
             HStack {
+                // Heart button
                 Spacer()
                 Button(action: {
-                    // Add heart action here
+                    favoriteAction()
                 }) {
-                    Image(systemName: "heart")
-                        .font(.system(size: 25))
-                        .foregroundColor(.black)
+                    Image(systemName: favorited ? "heart.fill" : "heart")
+                        .font(.system(size: 43))
+                        .foregroundColor(favorited ? .red : .black)
                         .padding(10)
                 }
+                
+                // Delete button
                 Spacer()
                 Button(action: {
-                    // Add delete action here
+                    deleteAction()
+                    // dismissAction()
                 }) {
                     Image(systemName: "trash")
-                        .font(.system(size: 25))
+                        .font(.system(size: 43))
                         .foregroundColor(.black)
                         .padding(10)
                 }
+                
                 Spacer()
             }
         }
@@ -132,7 +165,8 @@ struct ContentWithWhiteBackground: View {
                 .fill(Colors.giggleWhite)
                 .shadow(radius: 10)
         )
-        .frame(maxWidth: UIScreen.main.bounds.width * 0.95) // Constrain width to 95% of the screen
+        // Constrain width to 95% of the screen
+        .frame(maxWidth: UIScreen.main.bounds.width * 0.95)
         .padding(.horizontal)
     }
 }
@@ -146,35 +180,20 @@ struct MoreInfo: View {
             Text("More Info")
                 .font(.title2)
                 .fontWeight(.semibold)
-                .padding(.top, 15)
+                .padding(.top, 10)
+                .underline()
 
             HStack {
-                Text("Date Saved:")
-                    .fontWeight(.bold)
+                Text("Date Saved:").fontWeight(.bold)
                 Text(dateAdded.formatted(date: .abbreviated, time: .shortened))
             }
             HStack {
-                Text("Source:")
-                    .fontWeight(.bold)
+                Text("Source:").fontWeight(.bold)
                 Text(source)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(5)
-    }
-}
-
-struct FavoriteButton: View {
-    @Binding var favorited: Bool
-
-    var body: some View {
-        Button(action: {
-            favorited.toggle()
-        }) {
-            Image(systemName: favorited ? "heart.fill" : "heart")
-                .foregroundColor(favorited ? .red : .black)
-                .font(.system(size: 35))
-        }
     }
 }
 
