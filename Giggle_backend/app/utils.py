@@ -73,7 +73,7 @@ def extract_tags(image_data, num_tags=10):
         image.save(buffered, format="PNG")
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-        prompt = f"Generate {num_tags} descriptive tags for this image."
+        prompt = f"Generate {num_tags} descriptive tags for this image. Return the tags in a comma separated list."
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
