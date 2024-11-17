@@ -16,7 +16,7 @@ struct BottomNavBar: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             Rectangle()
-                .fill(Color(white: 0.98))
+                .fill(Colors.giggleWhite)
                 .frame(height: 127)
                 .edgesIgnoringSafeArea(.bottom)
 

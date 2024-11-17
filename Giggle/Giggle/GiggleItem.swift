@@ -49,8 +49,8 @@ struct GiggleItem: View {
                     .contextMenu {
                         Button(action: {
                             copyImage()
-                            
                             meme.dateLastShared = Date()
+                            
                             DataManager.saveContext(
                                 context: context,
                                 success_message: "Successfully updated date shared",
@@ -63,8 +63,8 @@ struct GiggleItem: View {
 
                         Button(action: {
                             shareImage()
-                            
                             meme.dateLastShared = Date()
+                            
                             DataManager.saveContext(
                                 context: context,
                                 success_message: "Successfully updated date shared",
@@ -78,6 +78,7 @@ struct GiggleItem: View {
 
                 Button(action: {
                     meme.toggleFavorited()
+                    
                     DataManager.saveContext(
                         context: context,
                         success_message: "Successfully updated favorited status and date favorited",

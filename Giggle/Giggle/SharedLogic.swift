@@ -9,6 +9,7 @@ import SwiftUI
 
 struct Colors {
     static let backgroundColor = Color(red: 104/255, green: 86/255, blue: 182/255)
+    static let giggleWhite = Color(white: 0.98)
 }
 
 struct GridStyle {

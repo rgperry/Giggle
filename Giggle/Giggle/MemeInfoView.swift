@@ -9,31 +9,25 @@ import SwiftUI
 
 struct MemeInfoView: View {
     @Bindable var meme: Meme
-
     @State private var navigateToAllGiggles = false
+    
+    @Environment(\.modelContext) private var context
 
     var body: some View {
         NavigationStack {
-            VStack { // VStack instead of ScrollView to remove scrolling
-                // Header
+            VStack {
                 PageHeader(text: "Giggle")
-
-                // Meme Image
                 MemeImageView(image: meme.imageAsUIImage)
 
-                // Tags and More Info Section (White Background Container)
+                // Tags and More Info Section
                 ContentWithWhiteBackground(
                     tags: meme.tags,
                     dateAdded: meme.dateAdded,
-                    source: "Giggle App",
-                    addTagAction: { newTag in
-                        meme.addTag(newTag)
-                    }
-                )
-                // This moves the ContentWithWhiteBackground further above the bottom nav bar
-                .padding(.bottom, 65)
+                    source: "TODO",
+                    addTagAction: addTag
+                ).offset(y: -62)
 
-                Spacer() // Spacer ensures the BottomNavBar stays at the bottom
+                Spacer()
                 BottomNavBar()
             }
             
@@ -42,6 +36,17 @@ struct MemeInfoView: View {
                 FolderView(header: "All Giggles")
             }
         }
+    }
+    
+    private func addTag(newTag: String) {
+        meme.addTag(newTag)
+                
+        DataManager.saveContext(
+            context: context,
+            success_message: "Successfully added tag \(newTag) to meme",
+            fail_message: "Failed to add tag \(newTag) to meme",
+            id: meme.id
+        )
     }
 }
 
@@ -62,8 +67,6 @@ struct ContentWithWhiteBackground: View {
                         .font(.title3)
                         .fontWeight(.semibold)
 
-                    Spacer()
-
                     Button(action: {
                         guard !newTag.isEmpty else { return }
                         addTagAction(newTag)
@@ -75,21 +78,21 @@ struct ContentWithWhiteBackground: View {
                             .frame(width: 25, height: 25)
                             .background(
                                 Circle()
-                                    .fill(Color.clear) // Transparent fill
+                                    .fill(Color.clear)
                             )
                             .overlay(
                                 Circle()
-                                    .stroke(Color.black, lineWidth: 2) // Black circular border
+                                    .stroke(Color.black, lineWidth: 2)
                             )
                     }
-                }
+                }.padding(.bottom, 4)
 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(tags, id: \.self) { tag in
                             Text("#\(tag.name)")
                                 .font(.caption)
-                                .padding(.vertical, 6)
+                                .padding(.vertical, 8)
                                 .padding(.horizontal, 12)
                                 .background(Colors.backgroundColor.ignoresSafeArea())
                                 .foregroundColor(.white)
@@ -98,7 +101,6 @@ struct ContentWithWhiteBackground: View {
                 }
             }
 
-            // More Info Section
             MoreInfo(dateAdded: dateAdded, source: source)
 
             // Action Buttons (Heart and Delete)
@@ -126,16 +128,14 @@ struct ContentWithWhiteBackground: View {
         }
         .padding(15) // Padding inside the box
         .background(
-            RoundedRectangle(cornerRadius: 20) // Rounded rectangle background
-                .fill(.white)
-                .shadow(radius: 2) // Subtle shadow
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Colors.giggleWhite)
+                .shadow(radius: 10)
         )
-        .frame(maxWidth: UIScreen.main.bounds.width * 0.9) // Constrain width to 90% of the screen
-        .padding(.horizontal) // Center the white box with spacing
+        .frame(maxWidth: UIScreen.main.bounds.width * 0.95) // Constrain width to 95% of the screen
+        .padding(.horizontal)
     }
 }
-
-
 
 struct MoreInfo: View {
     var dateAdded: Date
@@ -178,7 +178,6 @@ struct FavoriteButton: View {
     }
 }
 
-// this preview is for you to see how everything looks like
 #Preview {
     MemeInfoView(
         meme: Meme(
@@ -195,6 +194,3 @@ struct FavoriteButton: View {
         )
     )
 }
-
-
-// .background(Colors.backgroundColor.ignoresSafeArea())
