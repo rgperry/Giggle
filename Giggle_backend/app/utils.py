@@ -86,7 +86,8 @@ def extract_tags(image_data, num_tags=10):
                     "text": f"You are tasked with generate {num_tags} descriptive tags for this image. 
                         Make sure to take into account the emotion/sentiment of the image, as well as the content 
                         of the image. If there is any text or key info also make a descriptive tag for it.
-                         Return the tags in a comma separated list.",
+                         Return the tags in a comma separated list. I repeat your response to this message should ONLY be 
+                         a list of the tags that you have generated, separated by commas. No brackets necessary",
                     },
                     {
                     "type": "image_url",

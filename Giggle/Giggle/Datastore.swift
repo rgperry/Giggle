@@ -82,13 +82,22 @@ class DataManager {
             let content: String
         }
         
-        try? await AF.upload(multipartFormData: { mpFD in
+        let response = try? await AF.upload(multipartFormData: { mpFD in
             if let jpegImage = image.jpegData(compressionQuality: 1.0) {
                 mpFD.append(jpegImage, withName: "image", fileName: "giggleImage", mimeType: "image/jpeg")
             }
         }, to: apiUrl, method: .post).responseDecodable(of: [ResponseBody].self) { response in
             debugPrint(response)
         }
+        // .serializingDecodable([ResponseBody].self).value
+        return ([], "Nullish")
+//        guard let firstResponse = response!.first else {
+//            print("No response data in array")
+//            return ([Tag(name: "HELP")], "No content generated")
+//        }
+//        
+//        let tags = firstResponse.tags.map { Tag(name: $0) }
+//        return (tags, firstResponse.content)
         
         
         
