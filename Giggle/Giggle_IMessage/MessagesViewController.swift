@@ -112,7 +112,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     private func adjustCollectionViewHeight() {
         collectionView.frame = CGRect(
             x: collectionView.frame.origin.x,
-            y: collectionView.frame.origin.y - 16, // Move up
+            y: collectionView.frame.origin.y - 14, // Move up
             width: collectionView.frame.width,
             height: collectionView.frame.height
         )
@@ -195,6 +195,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             return section
         }
     }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let count = filteredMemes.count
         logger.log("Number of items in section: \(count)")
@@ -330,5 +331,4 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         // Use this method to finalize any behaviors associated with the change in presentation style.
     }
-
 }
