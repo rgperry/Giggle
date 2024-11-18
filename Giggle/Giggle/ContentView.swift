@@ -7,14 +7,11 @@
 
 import SwiftUI
 import SwiftData
-import UIKit
-
-// TODO
-// Make ContentView a wrapper?
 
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @State private var searchText = ""
+
     @Query private var memes: [Meme]
     @Query(sort: \Tag.name) private var allTags: [Tag]
 
@@ -25,7 +22,6 @@ struct ContentView: View {
     private var topTags: [Tag] {
         let sortedTags = allTags.sorted { $0.memes.count > $1.memes.count }
         let folderLimit = 10
-
         return Array(sortedTags.prefix(folderLimit))
     }
 
@@ -44,7 +40,6 @@ struct ContentView: View {
         }
     }
 
-
     var body: some View {
         NavigationStack {
             VStack {
@@ -53,7 +48,6 @@ struct ContentView: View {
                 SearchBar(text: "Search for a Giggle", searchText: $searchText)
                     ScrollView {
                         LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
-
                             // If search bar is empty, show folders
                             if searchText.isEmpty {
                                 FolderItem(text: "Favorites", isPinned: true)
@@ -69,7 +63,6 @@ struct ContentView: View {
                                 }
 
                             }
-
                             // Else show memes for search query
                             else {
                                 ForEach(filteredMemes) { meme in
@@ -88,7 +81,6 @@ struct ContentView: View {
         .tint(.black)
         .navigationBarHidden(true)
     }
-
 }
 
 #Preview {
