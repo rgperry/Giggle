@@ -93,6 +93,9 @@ def image_info(request):
         images = []
         if 'image' in request.FILES:
             images.append(request.FILES['image'])
+        else:
+            return JsonResponse({"error": "No image file provided"}, status=400)
+
         
         # Validate input: limit batch size to 10 images
         if len(images) > 10:

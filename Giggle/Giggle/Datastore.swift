@@ -8,6 +8,7 @@
 import SwiftData
 import NaturalLanguage
 import SwiftUI
+import Alamofire
 
  // Utility Class
 class DataManager {
@@ -71,60 +72,62 @@ class DataManager {
     }
 
     static func getInfo(for image: UIImage) async -> ([Tag], String){
-        // Dummy values loaded for searching
-        // load each image in then change tags and rebuild and load new image in until done.
-//
-//        var tags = ["funny", "cute", "dog", "doberman"] //change to whatever tags you want image to be
-//
-//        // convert all tags to lowercase and remove whitespace
-//        tags = tags.map { $0.lowercased().trimmingCharacters(in: .whitespacesAndNewlines) }
-//        
-//        return (tags.map { Tag(name: $0) }, "Sample content based on image") // Mock data for now
-        
-        // Dummy values loaded for searching
-        
-        // commment below this out for dummy
-        // Convert image to PNG data and base64 encode
-        guard let pngData = try? convertImageToPNG(image) else {
-            return ([], "Image conversion failed")
+        guard let apiUrl = URL(string: "https://3.138.136.6/imageInfo/") else {
+            print("getInfo: bad url")
+            return ([], "NO CONTENT")
         }
-        let base64Image = pngData.base64EncodedString()
-
-        // Prepare the URL and request
-        let url = URL(string: "https://3.138.136.6/imageInfo/?numTags=10&contentLength=200")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-        // Create JSON payload
-        let body = [["Id": UUID().uuidString, "imageFile": base64Image]]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
         
-        // Debug: Print the JSON body
-        if let httpBody = request.httpBody {
-            print("Request Body: ", String(data: httpBody, encoding: .utf8) ?? "Invalid body")
+        struct ResponseBody: Decodable {
+            let tags: [String] // Add the properties that match your API response
+            let content: String
         }
-
-        // Perform the request
-        do {
-            let (data, _) = try await URLSession.shared.data(for: request)
-
-            // Debug: Check if data is received and print it
-            print("Received Data:", String(data: data, encoding: .utf8) ?? "Invalid data")
-            
-            // Parse the response data
-            if let responseArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
-               let firstResult = responseArray.first,
-               let tags = firstResult["tags"] as? [String],
-               let content = firstResult["content"] as? String {
-                return (tags.map { Tag(name: $0) }, content)
-            } else {
-                print("Parsing Error: Response array is nil or has unexpected format")
+        
+        try? await AF.upload(multipartFormData: { mpFD in
+            if let jpegImage = image.jpegData(compressionQuality: 0.1) {
+                mpFD.append(jpegImage, withName: "image", mimeType: "image/jpeg")
             }
-        } catch {
-            print("Error in getInfo: \(error)")
+        }, to: apiUrl, method: .post).responseDecodable(of: [ResponseBody].self) { response in
+            debugPrint(response)
         }
-        return ([], "Error retrieving info") // Return empty data on failure
+        
+        return ([], "Error retrieving info")
+        
+        
+//        // Prepare the URL and request
+//        let url = URL(string: "https://3.138.136.6/imageInfo/?numTags=10&contentLength=200")!
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//
+//        // Create JSON payload
+//        let body = [["Id": UUID().uuidString, "imageFile": base64Image]]
+//        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+//        
+//        // Debug: Print the JSON body
+//        if let httpBody = request.httpBody {
+//            print("Request Body: ", String(data: httpBody, encoding: .utf8) ?? "Invalid body")
+//        }
+//
+//        // Perform the request
+//        do {
+//            let (data, _) = try await URLSession.shared.data(for: request)
+//
+//            // Debug: Check if data is received and print it
+//            print("Received Data:", String(data: data, encoding: .utf8) ?? "Invalid data")
+//            
+//            // Parse the response data
+//            if let responseArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+//               let firstResult = responseArray.first,
+//               let tags = firstResult["tags"] as? [String],
+//               let content = firstResult["content"] as? String {
+//                return (tags.map { Tag(name: $0) }, content)
+//            } else {
+//                print("Parsing Error: Response array is nil or has unexpected format")
+//            }
+//        } catch {
+//            print("Error in getInfo: \(error)")
+//        }
+//        return ([], "Error retrieving info") // Return empty data on failure
         // until here
     }
     
@@ -140,6 +143,7 @@ class DataManager {
     // Used for testing
     static func clearDB(context: ModelContext) {
         do {
+            try context.delete(model: Tag.self)
             try context.delete(model: Meme.self)
         } catch {
             fatalError(error.localizedDescription)
