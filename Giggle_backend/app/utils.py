@@ -98,7 +98,7 @@ def extract_tags(image_data, num_tags=10):
                 }
             ],
             )
-        tags = response.choices[0].message['content'].strip().split(',')
+        tags = response.choices[0].strip().split(',')
         return [tag.strip() for tag in tags][:num_tags]
     except openai.error.AuthenticationError as e:
         print(f"Authentication Error: {e}")
