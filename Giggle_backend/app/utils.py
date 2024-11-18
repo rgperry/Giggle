@@ -99,21 +99,22 @@ def extract_content(image_data, content_length=200):
     """
     try:
         image = Image.open(image_data)
-        buffered = BytesIO()
-        image.save(buffered, format="PNG")
-        img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+        # buffered = BytesIO()
+        # image.save(buffered, format="PNG")
+        # img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-        prompt = f"Describe this image in up to {content_length} characters."
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are an image description assistant."},
-                {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
-            ],
-            max_tokens=200,
-            temperature=0.5
-        )
-        content = response.choices[0].message['content'].strip()
+        # prompt = f"Describe this image in up to {content_length} characters."
+        # response = openai.ChatCompletion.create(
+        #     model="gpt-3.5-turbo",
+        #     messages=[
+        #         {"role": "system", "content": "You are an image description assistant."},
+        #         {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
+        #     ],
+        #     max_tokens=200,
+        #     temperature=0.5
+        # )
+        # content = response.choices[0].message['content'].strip()
+        content = f"File width: {image.width}, height: {image.height}"
         return content[:content_length]
     except openai.error.AuthenticationError as e:
         print(f"Authentication Error: {e}")
