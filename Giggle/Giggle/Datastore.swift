@@ -90,7 +90,7 @@ class DataManager {
             debugPrint(response)
         }
         
-        return ([], "Error retrieving info")
+        
         
         
 //        // Prepare the URL and request
