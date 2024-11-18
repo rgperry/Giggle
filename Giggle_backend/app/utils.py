@@ -69,7 +69,7 @@ def extract_tags(image_data, num_tags=10):
     Extracts tags for an image using OpenAI's updated API.
     """
     try:
-        image = Image.open(image_data).resize((224, 224))
+        image = Image.open(image_data)
         buffered = BytesIO()
         image.save(buffered, format="JPEG")
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
