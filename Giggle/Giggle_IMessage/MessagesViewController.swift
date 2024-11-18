@@ -6,7 +6,6 @@
 
 import UIKit
 import Messages
-import OSLog
 import SwiftUI
 import SwiftData
 import Combine
@@ -193,7 +192,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             return section
         }
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let count = filteredMemes.count
         logger.log("Number of items in section: \(count)")

@@ -8,7 +8,6 @@
 import SwiftData
 import NaturalLanguage
 import SwiftUI
-import OSLog
 
  // Utility Class
 class DataManager {
