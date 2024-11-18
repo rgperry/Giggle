@@ -121,5 +121,5 @@ def extract_content(image_data, content_length=200):
         return "Authentication error in content extraction"
     except Exception as e:
         print(f"An error occurred in extract_content: {e}")
-        return "error in content extraction"
+        return f"error in content extraction {e}"
 
