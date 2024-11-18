@@ -83,7 +83,7 @@ class DataManager {
         }
         
         let response = try? await AF.upload(multipartFormData: { mpFD in
-            if let jpegImage = image.jpegData(compressionQuality: 1.0) {
+            if let jpegImage = image.jpegData(compressionQuality: 0.1) {
                 mpFD.append(jpegImage, withName: "image", fileName: "giggleImage", mimeType: "image/jpeg")
             }
         }, to: apiUrl, method: .post).responseDecodable(of: [ResponseBody].self) { response in

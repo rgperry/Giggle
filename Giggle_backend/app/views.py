@@ -141,5 +141,5 @@ def image_info(request):
         return JsonResponse({"error": "Invalid parameters for numTags or contentLength"}, status=400)
     except Exception as e:
         print(f"Unexpected error in image_info: {e}")
-        return JsonResponse({"error": "Internal Server Error"}, status=500)
+        return JsonResponse({"error": f"Internal Server Error {e}"}, status=500)
 
