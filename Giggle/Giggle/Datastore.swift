@@ -132,19 +132,8 @@ class DataManager {
             completion([])
         }
     }
-<<<<<<< HEAD
-    //
-<<<<<<< HEAD
-    static func getInfo(for image: UIImage) async -> ([Tag], String){
-=======
-//    static func getInfo(for image: UIImage) async -> ([Tag], String){
-
-
->>>>>>> b95bcf2 (Imessage search, polish, loadMeme in Datastore)
-=======
 
     static func getInfo(for image: UIImage) async -> ([Tag], String){
->>>>>>> fbbeefe (Fix Datastore)
         // Dummy values loaded for searching
         // load each image in then change tags and rebuild and load new image in until done.
 //
@@ -162,9 +151,7 @@ class DataManager {
         guard let pngData = try? convertImageToPNG(image) else {
             return ([], "Image conversion failed")
         }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
+
         let base64Image = pngData.base64EncodedString()
 
         // Prepare the URL and request
@@ -201,20 +188,13 @@ class DataManager {
         } catch {
             print("Error in getInfo: \(error)")
         }
->>>>>>> fbbeefe (Fix Datastore)
         return ([], "Error retrieving info") // Return empty data on failure
         // until here
     }
 
-<<<<<<< HEAD
-    static func saveContext(context: ModelContext, success_message: String, fail_message: String, id: UUID) {
-=======
-=======
->>>>>>> fbbeefe (Fix Datastore)
     static func updateDateLastShared(for meme: Meme, context: ModelContext) {
         meme.dateLastShared = Date()
 
->>>>>>> b95bcf2 (Imessage search, polish, loadMeme in Datastore)
         do {
             try context.save()
             print(success_message)
