@@ -68,7 +68,7 @@ def extract_tags(image_data, num_tags=10):
     Extracts tags for an image using OpenAI's updated API.
     """
     try:
-        image = Image.open(image_data).resize((512, 512))
+        image = Image.open(image_data).resize((224, 224))
         buffered = BytesIO()
         image.save(buffered, format="JPEG")
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
@@ -81,7 +81,7 @@ def extract_tags(image_data, num_tags=10):
                 {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
             ],
             max_tokens=100,
-            temperature=0.9
+            temperature=0.1
         )
         tags = response.choices[0].message['content'].strip().split(',')
         return [tag.strip() for tag in tags][:num_tags]
@@ -98,7 +98,7 @@ def extract_content(image_data, content_length=200):
     Extracts a text description for an image using OpenAI's updated API.
     """
     try:
-        image = Image.open(image_data).resize((512, 512))
+        image = Image.open(image_data).resize((224, 224))
         buffered = BytesIO()
         image.save(buffered, format="JPEG")
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
