@@ -8,7 +8,6 @@ from django.conf import settings
 
 
 openai.api_key = settings.OPENAI_API_KEY 
-client = OpenAI()
 
 def generate_image(description):
     """
@@ -69,6 +68,7 @@ def extract_tags(image_data, num_tags=10):
     Extracts tags for an image using OpenAI's updated API.
     """
     try:
+        client = OpenAI()
         image = Image.open(image_data).resize((512, 512))
         buffered = BytesIO()
         image.save(buffered, format="JPEG")
