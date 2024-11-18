@@ -1,4 +1,5 @@
 import openai
+from openai import OpenAI
 import requests
 from io import BytesIO
 from PIL import Image
@@ -7,7 +8,7 @@ from django.conf import settings
 
 
 openai.api_key = settings.OPENAI_API_KEY 
-
+client = OpenAI()
 
 def generate_image(description):
     """
@@ -74,15 +75,29 @@ def extract_tags(image_data, num_tags=10):
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
         prompt = f"Generate {num_tags} descriptive tags for this image. Return the tags in a comma separated list."
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a tagging assistant."},
-                {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
+                {
+                "role": "user",
+                "content": [
+                    {
+                    "type": "text",
+                    "text": f"You are tasked with generate {num_tags} descriptive tags for this image. 
+                        Make sure to take into account the emotion/sentiment of the image, as well as the content 
+                        of the image. If there is any text or key info also make a descriptive tag for it.
+                         Return the tags in a comma separated list.",
+                    },
+                    {
+                    "type": "image_url",
+                    "image_url": {
+                        "url":  f"data:image/jpeg;base64,{img_base64}"
+                    },
+                    },
+                ],
+                }
             ],
-            max_tokens=100,
-            temperature=0.8
-        )
+            )
         tags = response.choices[0].message['content'].strip().split(',')
         return [tag.strip() for tag in tags][:num_tags]
     except openai.error.AuthenticationError as e:
