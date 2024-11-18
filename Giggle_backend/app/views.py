@@ -92,7 +92,7 @@ def image_info(request):
         # Handle multiple images
         images = []
         if 'image' in request.FILES:
-            images.append(request.files['image'])
+            images.append(request.FILES['image'])
         
         # Validate input: limit batch size to 10 images
         if len(images) > 10:
