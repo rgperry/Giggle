@@ -11,11 +11,11 @@ import SwiftUI
 import SwiftData
 import Combine
 
-
 let logger = Logger(subsystem: "com.Giggle.Giggle", category: "MessagesViewController")
+
 //ADDED FUNCTIONS - Tamaer
 extension UIImage {
-    //generate lower quality thumbnails to save memory
+    // Generate lower quality thumbnails to save memory
     func thumbnail(maxWidth: CGFloat = 100) -> UIImage {
         let aspectRatio = size.height / size.width
         let targetSize = CGSize(width: maxWidth, height: maxWidth * aspectRatio)
@@ -24,6 +24,7 @@ extension UIImage {
         draw(in: CGRect(origin: .zero, size: targetSize))
         return UIGraphicsGetImageFromCurrentImageContext() ?? self
     }
+
     func fixedOrientation() -> UIImage {
         guard imageOrientation != .up else { return self }  // No need to adjust if already correct
 
@@ -68,6 +69,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         collectionView.prefetchDataSource = self //enable prefetching so app only loads what is seen
         collectionView.reloadData()
     }
+
     //LOAD MEMES FROM DATA
     private var hasLoadedMemes = false
     override func viewDidAppear(_ animated: Bool) {
@@ -86,6 +88,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             }
         }
     }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
@@ -105,6 +108,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             height: searchBar.frame.height
         )
     }
+
     private func adjustCollectionViewHeight() {
         collectionView.frame = CGRect(
             x: collectionView.frame.origin.x,
@@ -113,7 +117,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             height: collectionView.frame.height
         )
     }
-//
+
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchText = searchText
 
@@ -126,7 +130,6 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         searchBar.resignFirstResponder() // Dismiss the keyboard
         logger.log("Search button clicked. Keyboard dismissed.")
     }
-
 
     private func performSearch(query: String) {
         logger.log("Running search for query: \(query)")
@@ -197,6 +200,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         logger.log("Number of items in section: \(count)")
         return count
     }
+
     //method for loading only what is on screen
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         for indexPath in indexPaths {
@@ -204,11 +208,13 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             _ = meme.imageAsUIImage.thumbnail(maxWidth: 20) // Prefetch thumbnails for images about to appear
         }
     }
+
     //release images when they are not in view
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let imageCell = cell as? ImageCell, indexPath.item < filteredMemes.count else { return }
         imageCell.imageView.image = nil
     }
+
     //private var imageCache = NSCache<NSString, UIImage>()
     //bring them back to good quality when they are in view
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -229,9 +235,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             }
         }
     }
-    //
 
-    //thumnails
+    //thumbnails
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageCell", for: indexPath) as! ImageCell
         let meme = filteredMemes[indexPath.item]
@@ -240,7 +245,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         return cell
     }
 
-    // Attaches image to message box on tap
+    //for image attaching to imessage on tap
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // Ensure activeConversation is available
         guard let conversation = activeConversation else {
@@ -275,13 +280,9 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             self.requestPresentationStyle(.compact)
         }
     }
-
-
-    //
     //END OF ADDED FUNCTIONS - Tamaer
 
     // MARK: - Conversation Handling
-
     override func willBecomeActive(with conversation: MSConversation) {
         // Called when the extension is about to move from the inactive to active state.
         // This will happen when the extension is about to present UI.
@@ -331,17 +332,3 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     }
 
 }
-
-//struct MessagesViewControllerWrapper: UIViewControllerRepresentable {
-//    var modelContext: ModelContext  // Accept modelContext as an initializer parameter
-//
-//    func makeUIViewController(context: Context) -> MessagesViewController {
-//        let messagesVC = MessagesViewController()
-//        messagesVC.setContext(modelContext)  // Pass modelContext to MessagesViewController
-//        return messagesVC
-//    }
-//
-//    func updateUIViewController(_ uiViewController: MessagesViewController, context: Context) {
-//        // Implement if needed to respond to SwiftUI state changes
-//    }
-//}
