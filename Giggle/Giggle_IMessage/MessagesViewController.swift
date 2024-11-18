@@ -11,8 +11,6 @@ import SwiftUI
 import SwiftData
 import Combine
 
-let logger = Logger(subsystem: "com.Giggle.Giggle", category: "MessagesViewController")
-
 //ADDED FUNCTIONS - Tamaer
 extension UIImage {
     // Generate lower quality thumbnails to save memory

@@ -89,6 +89,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Datastore.swift,
+				Models.swift,
 			);
 			target = 4131856C2CCEB271000BC665 /* Giggle_IMessage */;
 		};
