@@ -81,7 +81,7 @@ def extract_tags(image_data, num_tags=10):
                 {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
             ],
             max_tokens=100,
-            temperature=0.5
+            temperature=0.9
         )
         tags = response.choices[0].message['content'].strip().split(',')
         return [tag.strip() for tag in tags][:num_tags]
@@ -111,7 +111,7 @@ def extract_content(image_data, content_length=200):
                 {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
             ],
             max_tokens=200,
-            temperature=0.5
+            temperature=0.9
         )
         content = response.choices[0].message['content'].strip()
         return content[:content_length]
