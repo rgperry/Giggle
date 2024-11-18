@@ -192,9 +192,7 @@ class DataManager {
         // until here
     }
 
-    static func updateDateLastShared(for meme: Meme, context: ModelContext) {
-        meme.dateLastShared = Date()
-
+    static func saveContext(context: ModelContext, success_message: String, fail_message: String, id: UUID) {
         do {
             try context.save()
             print(success_message)
