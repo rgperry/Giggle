@@ -106,20 +106,24 @@ struct FolderItem: View {
 struct SearchBar: View {
     var text: String
     @Binding var searchText: String
+    @Environment(\.colorScheme) var colorScheme // Tamaer A. - Detect Light/Dark Mode
 
     var body: some View {
         HStack {
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(.black)
+                    .foregroundColor(colorScheme == .dark ? .white : .black) // Tamaer A. -Adapts dynamically
+                    //.foregroundColor(.black)
 
                 TextField(text, text: $searchText)
                     .padding(8)
-                    .foregroundColor(.black)
+                    .foregroundColor(colorScheme == .dark ? .white : .black) // Tamaer A. - Adapts dynamically
+                    //.foregroundColor(.black)
             }
             .padding(.horizontal, 20)
             .frame(height: 45)
-            .background(.white)
+            //.background(.white)
+            .background(colorScheme == .dark ? Color.black : Color.white) // Tamaer A. - Adapts dynamically
             .cornerRadius(18)
             .shadow(radius: 2)
         }
@@ -129,13 +133,15 @@ struct SearchBar: View {
 
 struct PageHeader: View {
     var text: String
+    @Environment(\.colorScheme) var colorScheme // Tamaer A. - Detect Light/Dark Mode
 
     var body: some View {
         Text(text)
             .font(.system(size: 45, weight: .semibold, design: .rounded))
             .padding(.top, 10)
             .padding(.bottom, 15)
-            .foregroundColor(.white)
+            //.foregroundColor(.white)
+            .foregroundColor(colorScheme == .dark ? Color.black : Color.white) // Tamaer A - Adapts to Light/Dark Mode
     }
 }
 
