@@ -37,7 +37,8 @@ struct GiggleItem: View {
             VStack {
                 Image(uiImage: meme.imageAsUIImage)
                     .resizable()
-                    .aspectRatio(contentMode: .fit)
+                    //Tamaer A, madethis from .fit to .fill, looks cleaner in UI
+                    .aspectRatio(contentMode: .fill)
                     .frame(width: size, height: size)
                     .foregroundColor(.black)
                     .background(.white)

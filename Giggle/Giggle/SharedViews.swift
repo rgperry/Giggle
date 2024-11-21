@@ -3,49 +3,105 @@
 //  Giggle
 //
 //  Created by Karan Arora on 10/27/24.
+//  Adjusted for thumbnails/animations by Tamaer Al-Harastani 11/21/24
 //
 
 import SwiftUI
 import SwiftData
 import UIKit
 
+import SwiftUI
+
 struct FolderItem: View {
     var text: String
+    var memes: [Meme]
     let size: CGFloat = 150
     @State var isPinned = false
+
+    @State private var currentIndex: Int = 0
+    @State private var timer: Timer? = nil
+
+    let interval: TimeInterval = 3.0 // Thumbnail cycle interval
 
     var body: some View {
         NavigationLink(destination: FolderView(header: text)) {
             ZStack {
                 VStack {
-                    Image(systemName: "person.circle.fill")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: size, height: size)
-                        .foregroundColor(.black)
-                        .background(.white)
-                        .cornerRadius(18)
-                        .shadow(radius: 4)
+                    ZStack {
+                        if !memes.isEmpty {
+                            ZStack {
+                                ForEach(memes.indices, id: \.self) { index in
+                                    if index == currentIndex {
+                                        Image(uiImage: memes[index].imageAsUIImage)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill) // Make the image fill the space
+                                            .frame(width: size, height: size)
+                                            .clipped() // Ensure no overflow
+                                            .cornerRadius(18)
+                                            .shadow(radius: 4)
+                                            .transition(.opacity.animation(.easeInOut(duration: 1))) // Smooth fade
+//                                            .transition(.scale.combined(with: .opacity).animation(.easeInOut(duration: 0.5))) // Fade + Scale
+//                                            .transition(.asymmetric(
+//                                                insertion: .scale.animation(.easeOut(duration: 0.3)),
+//                                                removal: .opacity.animation(.easeInOut(duration: 0.7))
+//                                            )) //Pop Effect
+//                                            .transition(.scale.combined(with: .opacity).animation(.easeInOut(duration: 0.5)))
+                                    }
+                                }
+                            }
+                        } else {
+                            // Fallback image for empty folders
+                            Image(systemName: "person.circle.fill")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: size, height: size)
+                                .foregroundColor(.black)
+                                .background(.white)
+                                .cornerRadius(18)
+                                .shadow(radius: 4)
+                        }
+                    }
 
                     Text(text.capitalized)
                         .font(.headline)
                         .foregroundColor(.white)
+                        .padding(.vertical, 10)
                 }
                 .padding(.vertical, 20)
 
                 if isPinned {
-                    Image(
-                        systemName: "pin.fill")
+                    Image(systemName: "pin.fill")
                         .foregroundColor(.gray)
                         .font(.system(size: 47))
-                        .shadow(color: .black, radius: 4, x: 0, y: 0
-                        )
-                    .offset(x: -65, y: -size / 2 - 13)
+                        .shadow(color: .black, radius: 4, x: 0, y: 0)
+                        .offset(x: -65, y: -size / 2 - 13)
+                }
+            }
+        }
+        .onAppear {
+            startTimer()
+        }
+        .onDisappear {
+            stopTimer()
+        }
+    }
+
+    private func startTimer() {
+        if !memes.isEmpty {
+            timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
+                withAnimation {
+                    currentIndex = (currentIndex + 1) % memes.count
                 }
             }
         }
     }
+
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
 }
+
 
 struct SearchBar: View {
     var text: String

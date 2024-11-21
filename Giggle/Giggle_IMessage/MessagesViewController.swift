@@ -40,7 +40,11 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     var searchText: String = ""  // Store search text
 
     var imagesArray: [Meme] = []
+    var allMemes: [Meme] = [] // Original, unfiltered memes
+
     private var searchDebounce: AnyCancellable?  // Combine publisher for debouncing
+    
+    private var resetSearchTimer: Timer?
 
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
@@ -80,12 +84,16 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         switch sender.selectedSegmentIndex {
         case 1:
             currentTab = .favorites
+            searchBar.placeholder = "Search Favorite Giggles"
         case 2:
             currentTab = .recentlyShared
+            searchBar.placeholder = "Search Recent Giggles"
         default:
             currentTab = .allGiggles
+            searchBar.placeholder = "Search All Giggles"
         }
     }
+
 
     let dynamicBackgroundColor = UIColor { traitCollection in
         return traitCollection.userInterfaceStyle == .dark ?
@@ -114,7 +122,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         searchBar.delegate = self
         collectionView.dataSource = self
-
+        
+        searchBar.placeholder = "Search All Giggles"
         searchBar.backgroundImage = UIImage() // Remove the default background image for a solid color
         searchBar.backgroundColor = .clear // Make the search bar transparent
         searchBar.searchTextField.backgroundColor = UIColor.systemBackground
@@ -151,7 +160,21 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -6)
         ])
 
+        resetSearchTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(resetIfSearchEmpty), userInfo: nil, repeats: true)
+
     }
+    //reset to all giggles if search bar is empty. auto reload kinda
+    @objc private func resetIfSearchEmpty() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if self.searchText.isEmpty && self.imagesArray != self.allMemes {
+                logger.log("Search is empty. Resetting to all memes.")
+                self.imagesArray = self.allMemes
+                self.collectionView.reloadData()
+            }
+        }
+    }
+
 
     //LOAD MEMES FROM DATA
     private var hasLoadedMemes = false
@@ -164,8 +187,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             Task {
                 //showLoadingIndicator()
                 await DataManager.loadMemes { [weak self] loadedMemes in
-                    self?.imagesArray = loadedMemes
-                    //self?.filteredMemes = loadedMemes  // Initialize with all memes
+                    self?.allMemes = loadedMemes // Store all memes
+                    self?.imagesArray = loadedMemes // Initialize with all memes
                     self?.currentTab = .allGiggles
                     self?.collectionView.reloadData()
                 }
@@ -206,7 +229,16 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         self.searchText = searchText
 
         DispatchQueue.global(qos: .userInitiated).async {
-            self.performSearch(query: searchText)
+            if searchText.isEmpty {
+                self.imagesArray = self.allMemes
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+                logger.log("Search Bar empty, returning All Giggles")
+            }
+            else{
+                self.performSearch(query: searchText)
+            }
         }
     }
 
@@ -223,7 +255,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
             let results: [Meme]
             if query.isEmpty {
-                results = self.imagesArray
+                results = self.allMemes //resets to full list of mems
                 logger.log("Memes Filtered, returning All Giggles")
             } else {
                 results = DataManager.findSimilarEntries(
