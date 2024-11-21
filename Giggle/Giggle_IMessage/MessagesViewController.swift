@@ -40,11 +40,70 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     var searchText: String = ""  // Store search text
 
     var imagesArray: [Meme] = []
-    var filteredMemes: [Meme] = []  // Store filtered memes
     private var searchDebounce: AnyCancellable?  // Combine publisher for debouncing
 
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
+    
+    var filteredMemes: [Meme] {
+        switch currentTab {
+        case .favorites:
+            return imagesArray
+                .filter { $0.favorited }
+                .sorted { ($0.dateFavorited ?? .distantPast) > ($1.dateFavorited ?? .distantPast) }
+            
+        case .recentlyShared:
+            return imagesArray
+                .filter { $0.dateLastShared != nil }
+                .sorted { $0.dateLastShared! > $1.dateLastShared! }
+                .prefix(24)
+                .map { $0 }
+            
+        case .allGiggles:
+            return imagesArray.sorted { $0.dateAdded > $1.dateAdded }
+        }
+    }
+    
+    enum MemeTab {
+        case favorites
+        case recentlyShared
+        case allGiggles
+    }
+    
+    var currentTab: MemeTab = .allGiggles {
+        didSet {
+            collectionView.reloadData()
+        }
+    }
+
+    @objc func tabChanged(_ sender: UISegmentedControl) {
+        switch sender.selectedSegmentIndex {
+        case 1:
+            currentTab = .favorites
+        case 2:
+            currentTab = .recentlyShared
+        default:
+            currentTab = .allGiggles
+        }
+    }
+
+    let dynamicBackgroundColor = UIColor { traitCollection in
+        return traitCollection.userInterfaceStyle == .dark ?
+            UIColor.black : // Dark Mode color
+            UIColor.white // Light Mode color
+    }
+
+    let dynamicSelectedTintColor = UIColor { traitCollection in
+        return traitCollection.userInterfaceStyle == .dark ?
+            UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0) ://UIColor.systemGray6 : // Light color for Dark Mode
+            UIColor.systemGray4  // Light Mode color
+    }
+
+    let dynamicTextColor = UIColor { traitCollection in
+        return traitCollection.userInterfaceStyle == .dark ?
+            UIColor.lightGray : // White text for Dark Mode
+            UIColor.black  // Black text for Light Mode
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,6 +124,33 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         collectionView.delegate = self
         collectionView.prefetchDataSource = self //enable prefetching so app only loads what is seen
         collectionView.reloadData()
+        //tabs
+        let segmentedControl = UISegmentedControl(items: ["All Giggles", "Favorites", "Recents"])
+        segmentedControl.selectedSegmentIndex = 0
+        segmentedControl.addTarget(self, action: #selector(tabChanged(_:)), for: .valueChanged)
+        segmentedControl.translatesAutoresizingMaskIntoConstraints = false
+
+        // Set background and tint
+        segmentedControl.backgroundColor = dynamicBackgroundColor // Dynamic background color
+        segmentedControl.selectedSegmentTintColor = .clear // Ensure selected tint does not obscure text
+
+        // Ensure the text attributes are applied for visibility
+        segmentedControl.setTitleTextAttributes([.foregroundColor: dynamicTextColor], for: .normal)
+        segmentedControl.setTitleTextAttributes([
+            .foregroundColor: UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0),
+            .font: UIFont.boldSystemFont(ofSize: 16) // Optional: Adjust font style
+        ], for: .selected)
+
+        // Add to view
+        view.addSubview(segmentedControl)
+
+        // Add constraints
+        NSLayoutConstraint.activate([
+            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 38),
+            segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6),
+            segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -6)
+        ])
+
     }
 
     //LOAD MEMES FROM DATA
@@ -79,7 +165,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
                 //showLoadingIndicator()
                 await DataManager.loadMemes { [weak self] loadedMemes in
                     self?.imagesArray = loadedMemes
-                    self?.filteredMemes = loadedMemes  // Initialize with all memes
+                    //self?.filteredMemes = loadedMemes  // Initialize with all memes
+                    self?.currentTab = .allGiggles
                     self?.collectionView.reloadData()
                 }
             }
@@ -153,8 +240,9 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
             // Update the filtered array and UI on the main thread
             DispatchQueue.main.async {
-                self.filteredMemes = results
-                logger.log("Filtered memes updated: \(self.filteredMemes.count) items.")
+//                self.filteredMemes = results
+//                logger.log("Filtered memes updated: \(self.filteredMemes.count) items.")
+                self.imagesArray = results // Update the source data
                 self.collectionView.reloadData()
             }
         }
@@ -183,7 +271,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             let section = NSCollectionLayoutSection(group: group)
             section.interGroupSpacing = itemSpacing //row spacing equal to column spacing
             section.contentInsets = NSDirectionalEdgeInsets(
-                top: itemSpacing,     // Space above the section
+                top: itemSpacing + 38,     // Space above the section
                 leading: itemSpacing, // Space on the left side
                 bottom: itemSpacing,  // Space below the section
                 trailing: itemSpacing // Space on the rwight side
@@ -271,6 +359,18 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             if let error = error {
                 logger.log("Failed to insert message: \(error.localizedDescription)")
             }
+            //UPDATE SHARE DATE
+            // Update the dateLastShared for the sent meme
+            meme.dateLastShared = Date()
+
+            // Persist the updated meme data
+            //DataManager.updateMeme(meme)
+
+            // Reload the collection view to reflect the updated order
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
+            }
+            //
         }
 
         //ensure the extension view minimizes immediately on tap
