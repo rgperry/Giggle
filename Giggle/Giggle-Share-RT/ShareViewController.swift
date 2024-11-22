@@ -21,14 +21,14 @@ class ShareViewController: UIViewController {
 
     private func showSaveConfirmation() {
         print("Showing save options alert.")
-         let alertController = UIAlertController(title: "Save to Giggle?", message: "Where do you want to save this?", preferredStyle: .alert)
+         let alertController = UIAlertController(title: "Save to Giggle?", message: "Where u wanna put this?", preferredStyle: .alert)
 
-         let saveToAllAction = UIAlertAction(title: "Save to All Giggles", style: .default) { [weak self] _ in
+         let saveToAllAction = UIAlertAction(title: "All Giggles", style: .default) { [weak self] _ in
              print("Save to All Giggles selected.")
              self?.processSharedItems(saveAsFavorite: false)
          }
 
-         let saveToFavoritesAction = UIAlertAction(title: "Add to Giggle Favorites", style: .default) { [weak self] _ in
+         let saveToFavoritesAction = UIAlertAction(title: "All Giggles + Favorites", style: .default) { [weak self] _ in
              print("Save to Favorites selected.")
              self?.processSharedItems(saveAsFavorite: true)
          }

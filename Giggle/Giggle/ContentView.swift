@@ -47,61 +47,14 @@ struct ContentView: View {
 
                 SearchBar(text: "Search for a Giggle", searchText: $searchText)
                     ScrollView {
-//                        LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
-//                            // If search bar is empty, show folders
-//                            if searchText.isEmpty {
-//                                FolderItem(text: "Favorites", isPinned: true)
-//                                FolderItem(text: "All Giggles", isPinned: true)
-//                                FolderItem(text: "Recently Shared", isPinned: true)
-//
-//                                // Display top 10 tags as folders
-//                                ForEach(topTags, id: \.name) { tag in
-//                                    FolderItem(
-//                                        text: "\(tag.name)",
-//                                        isPinned: false
-//                                    )
-//                                }
-//
-//                            }
-//                            // Else show memes for search query
-//                            else {
-//                                ForEach(filteredMemes) { meme in
-//                                    GiggleItem(meme: meme)
-//                                }
-//                            }
-//                        }
                         LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
                             // If search bar is empty, show folders
                             if searchText.isEmpty {
                                 folderItemsView
-//                                FolderItem(
-//                                    text: "Favorites",
-//                                    memes: memes.filter { $0.favorited }, isPinned: true
-//                                )
-//                                FolderItem(
-//                                    text: "All Giggles",
-//                                    memes: memes, isPinned: true
-//                                )
-//                                FolderItem(
-//                                    text: "Recently Shared",
-//                                    memes: memes.filter { $0.dateLastShared != nil }, isPinned: true
-//                                )
-//
-//                                // Display top 10 tags as folders
-//                                ForEach(topTags, id: \.name) { tag in
-//                                    FolderItem(
-//                                        text: "\(tag.name)",
-//                                        isPinned: false,
-//                                        memes: memes.filter { $0.tags.contains(where: { $0.name == tag.name }) }
-//                                    )
-//                                }
                             }
                             // Else show memes for search query
                             else {
                                 searchResultsView
-//                                ForEach(filteredMemes) { meme in
-//                                    GiggleItem(meme: meme)
-//                                }
                             }
                         }
 
