@@ -53,52 +53,112 @@ class DataManager {
     // Decorated with @MainActor to avoid concurrency issues with passing down the model context
     @MainActor
     static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
-        // Loop through each image
-        for (_, image) in images.enumerated() {
-            // Retrieve tags and content for each image
-            let (tags, content) = await DataManager.getInfo(for: image)
-            
-            let meme = Meme(content: content, tags: tags, image: image)
-            context.insert(meme)
-        }
-        
         do {
+            // Loop through each image
+            for (index, image) in images.enumerated() {
+                do {
+                    // Retrieve tags and content for each image
+                    let (tags, content) = try await DataManager.getInfo(for: image)
+                    
+                    let meme = Meme(content: content, tags: tags, image: image)
+                    context.insert(meme)
+                    
+                    logger.info("Successfully processed image \(index + 1) of \(images.count)")
+                } catch {
+                    logger.error("Error processing image \(index + 1): \(error.localizedDescription)")
+                    // Decide if you want to continue with other images or return early
+                    continue // This will skip the failed image and continue with others
+                }
+            }
+            
+            // Save all successfully processed memes
             try context.save()
-            logger.error("successfully saved \(images.count) memes")
+            logger.info("Successfully saved \(images.count) memes")
+            completion()
         } catch {
-            logger.error("Error in storeMemes: \(error.localizedDescription)")
+            logger.error("Error saving to context: \(error.localizedDescription)")
+            completion()
         }
-        completion()
     }
 
-    static func getInfo(for image: UIImage) async -> ([Tag], String){
-        guard let apiUrl = URL(string: "https://3.138.136.6/imageInfo/") else {
-            print("getInfo: bad url")
-            return ([], "NO CONTENT")
-        }
-        
-        struct ResponseBody: Decodable {
-            let tags: [String] // Add the properties that match your API response
-            let content: String
-        }
-        
-        let response = try? await AF.upload(multipartFormData: { mpFD in
-            if let jpegImage = image.jpegData(compressionQuality: 0.1) {
-                mpFD.append(jpegImage, withName: "image", fileName: "giggleImage", mimeType: "image/jpeg")
-            }
-        }, to: apiUrl, method: .post).responseDecodable(of: [ResponseBody].self) { response in
-            debugPrint(response)
-        }
-        // .serializingDecodable([ResponseBody].self).value
-        return ([], "Nullish")
-//        guard let firstResponse = response!.first else {
+//    static func getInfo(for image: UIImage) async throws -> ([Tag], String) {
+//        guard let apiUrl = URL(string: "https://3.138.136.6/imageInfo/") else {
+//            print("getInfo: bad url")
+//            return ([], "NO CONTENT")
+//        }
+//        
+//        struct ResponseBody: Decodable {
+//            let tags: [String]
+//            let content: String
+//        }
+//        
+//        var returnedResponse: ResponseBody
+//        
+//        let response = try await AF.upload(multipartFormData: { mpFD in
+//            if let jpegImage = image.jpegData(compressionQuality: 0.8) {
+//                mpFD.append(jpegImage, withName: "image", fileName: "giggleImage.jpg", mimeType: "image/jpeg")
+//            }
+//        }, to: apiUrl, method: .post).responseData { response in
+//            guard let data = response.data, response.error == nil else {
+//                logger.error("Networking error in getInfo")
+//                return
+//            }
+//            if let httpStatus = response.response, httpStatus.statusCode != 200 {
+//                print("imageInfo: HTTP STATUS: \(httpStatus.statusCode)")
+//                return
+//            }
+//            guard let jsonObj = try? JSONSerialization.jsonObject(with: data) as? [Any] else {
+//                print("getChatts: failed JSON deserialization")
+//                return
+//            }
+//            returnedResponse = jsonObj.first as? ResponseBody ?? nil
+//        }
+//        
+//        guard let firstResponse = response.first else {
 //            print("No response data in array")
 //            return ([Tag(name: "HELP")], "No content generated")
 //        }
 //        
 //        let tags = firstResponse.tags.map { Tag(name: $0) }
 //        return (tags, firstResponse.content)
+//    }
+    
+    static func getInfo(for image: UIImage) async throws -> ([Tag], String) {
+        guard let apiUrl = URL(string: "https://3.138.136.6/imageInfo/") else {
+            print("getInfo: Bad URL")
+            return ([], "NO CONTENT")
+        }
+        
+        struct ResponseBody: Decodable {
+            let tags: [String]
+            let content: String
+        }
+        
+        do {
+            // Upload image and parse response
+            let response = try await AF.upload(multipartFormData: { mpFD in
+                if let jpegImage = image.jpegData(compressionQuality: 0.8) {
+                    mpFD.append(jpegImage, withName: "image", fileName: "giggleImage.jpg", mimeType: "image/jpeg")
+                }
+            }, to: apiUrl, method: .post)
+            .validate() // Ensure only successful responses (2xx) are processed
+            .serializingDecodable(ResponseBody.self)
+            .value // Await and extract the decoded value
+            
+            // Convert tags to Tag struct
+            let tags = response.tags.map { Tag(name: $0) }
+            return (tags, response.content)
+            
+        } catch let error as AFError {
+            print("Alamofire error: \(error.localizedDescription)")
+            throw error
+        } catch {
+            print("Unknown error: \(error.localizedDescription)")
+            throw error
+        }
     }
+
+
     
     static func saveContext(context: ModelContext, success_message: String, fail_message: String, id: UUID) {
         do {

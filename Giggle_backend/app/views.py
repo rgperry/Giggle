@@ -96,23 +96,23 @@ def image_info(request):
             tags = extract_tags(image, num_tags=num_tags)
             content = extract_content(image, content_length=content_length)
             
-            response_data = [{
+            response_data = {
                 "tags": tags,
                 "content": content
-            }]
+            }
             
             return JsonResponse(response_data, safe=False)
             
         except Exception as e:
             print(f"Error processing image: {str(e)}")
-            return JsonResponse([{
+            return JsonResponse({
                 "error": f"Failed to process image: {str(e)}"
-            }], safe=False, status=500)
+            }, safe=False, status=500)
             
     except Exception as e:
-        return JsonResponse([{
+        return JsonResponse({
             "error": f"Server error: {str(e)}"
-        }], safe=False, status=500)
+        }, safe=False, status=500)
             
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON data"}, status=400)
