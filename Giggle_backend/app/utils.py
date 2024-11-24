@@ -45,6 +45,7 @@ def analyze_sentiment(message):
         return "Error in analyzing sentiment"
 
     try:
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
         completion = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
