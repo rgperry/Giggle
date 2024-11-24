@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+import SwiftUI
+
 struct MemeInfoView: View {
     @Bindable var meme: Meme
     
@@ -25,7 +27,8 @@ struct MemeInfoView: View {
                 source: "TODO",
                 addTagAction: addTag,
                 favoriteAction: favoriteMeme,
-                deleteAction: deleteMeme,
+                deleteAction: deleteMeme, // Updated delete action
+                shareAction: shareMeme,
                 dismissAction: dismiss
             ).offset(y: -62)
 
@@ -57,6 +60,21 @@ struct MemeInfoView: View {
         )
     }
     
+    private func shareMeme() {
+        let activityItems: [Any] = [meme.imageAsUIImage] // Include meme image or other content
+        let activityVC = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+        UIApplication.shared.windows.first?.rootViewController?.present(activityVC, animated: true) {
+            // Update the "last shared" date
+            meme.dateLastShared = Date()
+            DataManager.saveContext(
+                context: context,
+                success_message: "Successfully updated the last shared date",
+                fail_message: "Failed to update the last shared date",
+                id: meme.id
+            )
+        }
+    }
+    
     private func deleteMeme() {
         context.delete(meme)
         
@@ -66,8 +84,11 @@ struct MemeInfoView: View {
             fail_message: "Failed to delete meme",
             id: meme.id
         )
+        
+        dismiss() // Redirect to the previous view
     }
 }
+
 
 struct ContentWithWhiteBackground: View {
     @Binding var tags: [Tag]
@@ -79,97 +100,136 @@ struct ContentWithWhiteBackground: View {
     var addTagAction: (String) -> Void
     var favoriteAction: () -> Void
     var deleteAction: () -> Void
+    var shareAction: () -> Void
     var dismissAction: DismissAction
     
     @State private var newTag: String = ""
+    @State private var showAddTagPopup = false
+    @State private var showDeleteTagAlert = false
+    @State private var selectedTagToDelete: Tag?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Tags Section
-            VStack(alignment: .leading, spacing: 5) {
-                HStack {
-                    Text("Tags")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                        .underline()
+        ZStack {
+            VStack(alignment: .leading, spacing: 10) {
+                // Tags Section
+                VStack(alignment: .leading, spacing: 5) {
+                    HStack {
+                        Text("Tags")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .underline()
 
-                    Button(action: {
-                        guard !newTag.isEmpty else { return }
-                        addTagAction(newTag)
-                        newTag = ""
-                    }) {
-                        Image(systemName: "plus")
-                            .font(.system(size: 15))
-                            .foregroundColor(.black)
-                            .frame(width: 25, height: 25)
-                            .background(
-                                Circle().fill(Color.clear)
-                            )
-                            .overlay(
-                                Circle().stroke(Color.black, lineWidth: 2)
-                            )
-                    }
-                }.padding(.bottom, 4)
-
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(tags, id: \.self) { tag in
-                            Text("#\(tag.name)")
-                                .font(.system(size: 14))
-                                .padding(.vertical, 8)
-                                .padding(.horizontal, 12)
+                        Button(action: {
+                            showAddTagPopup = true // Show iOS alert
+                        }) {
+                            Image(systemName: "plus")
+                                .font(.system(size: 15))
+                                .foregroundColor(.black)
+                                .frame(width: 25, height: 25)
                                 .background(
-                                    RoundedRectangle(cornerRadius: 15)
-                                        .fill(Colors.backgroundColor)
+                                    Circle().fill(Color.clear)
                                 )
-                                .foregroundColor(.white)
-                                .bold()
+                                .overlay(
+                                    Circle().stroke(Color.black, lineWidth: 2)
+                                )
+                        }
+                    }
+                    .padding(.bottom, 4)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(tags, id: \.self) { tag in
+                                Button(action: {
+                                    showDeleteTagAlert = true
+                                    selectedTagToDelete = tag
+                                }) {
+                                    Text("#\(tag.name)")
+                                        .font(.system(size: 14))
+                                        .padding(.vertical, 8)
+                                        .padding(.horizontal, 12)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 15)
+                                                .fill(Colors.backgroundColor)
+                                        )
+                                        .foregroundColor(.white)
+                                        .bold()
+                                }
+                                .confirmationDialog("Delete Tag?", isPresented: $showDeleteTagAlert, titleVisibility: .visible) {
+                                    Button("Delete", role: .destructive) {
+                                        guard let tagToDelete = selectedTagToDelete else { return }
+                                        tags.removeAll { $0 == tagToDelete }
+                                    }
+                                    Button("Cancel", role: .cancel) {}
+                                }
+                            }
                         }
                     }
                 }
+
+                MoreInfo(dateAdded: dateAdded, source: source)
+
+                // Action buttons
+                HStack {
+                    Spacer()
+                    // Favorite button
+                    Button(action: {
+                        favoriteAction()
+                    }) {
+                        Image(systemName: favorited ? "heart.fill" : "heart")
+                            .font(.system(size: 43))
+                            .foregroundColor(favorited ? .red : .black)
+                            .padding(10)
+                    }
+                    
+                    Spacer()
+                    // Share button
+                    Button(action: {
+                        shareAction()
+                    }) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 43))
+                            .foregroundColor(.black)
+                            .padding(10)
+                    }
+
+                    Spacer()
+                    // Delete button
+                    Button(action: {
+                        deleteAction()
+                    }) {
+                        Image(systemName: "trash")
+                            .font(.system(size: 43))
+                            .foregroundColor(.black)
+                            .padding(10)
+                    }
+                    Spacer()
+                }
             }
-
-            MoreInfo(dateAdded: dateAdded, source: source)
-
-            // Action buttons
-            HStack {
-                // Heart button
-                Spacer()
-                Button(action: {
-                    favoriteAction()
-                }) {
-                    Image(systemName: favorited ? "heart.fill" : "heart")
-                        .font(.system(size: 43))
-                        .foregroundColor(favorited ? .red : .black)
-                        .padding(10)
-                }
-                
-                // Delete button
-                Spacer()
-                Button(action: {
-                    deleteAction()
-                    // dismissAction()
-                }) {
-                    Image(systemName: "trash")
-                        .font(.system(size: 43))
-                        .foregroundColor(.black)
-                        .padding(10)
-                }
-                
-                Spacer()
+            .padding(15)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Colors.giggleWhite)
+                    .shadow(radius: 10)
+            )
+            .frame(maxWidth: UIScreen.main.bounds.width * 0.95)
+            .padding(.horizontal)
+        }
+        // iOS Native Alert for Adding a Tag
+        .alert("Add New Tag", isPresented: $showAddTagPopup) {
+            TextField("Enter tag name", text: $newTag)
+            Button("Add") {
+                guard !newTag.isEmpty else { return }
+                addTagAction(newTag)
+                newTag = "" // Reset input field
+            }
+            Button("Cancel", role: .cancel) {
+                newTag = "" // Reset input field if canceled
             }
         }
-        .padding(15) // Padding inside the box
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(Colors.giggleWhite)
-                .shadow(radius: 10)
-        )
-        // Constrain width to 95% of the screen
-        .frame(maxWidth: UIScreen.main.bounds.width * 0.95)
-        .padding(.horizontal)
     }
 }
+
+
 
 struct MoreInfo: View {
     var dateAdded: Date
