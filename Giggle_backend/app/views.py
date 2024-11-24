@@ -90,48 +90,39 @@ def image_info(request):
         # data = json.loads(request.body)
 
         # Handle multiple images
-        images = []
         if 'image' in request.FILES:
-            images.append(request.FILES['image'])
+            image = request.FILES['image']
         else:
             return JsonResponse({"error": "No image file provided"}, status=400)
 
         
-        # Validate input: limit batch size to 10 images
-        if len(images) > 10:
-            return JsonResponse({"error": "Batch size exceeds limit of 10 images"}, status=400)
+        # # Validate input: limit batch size to 10 images
+        # if len(images) > 10:
+        #     return JsonResponse({"error": "Batch size exceeds limit of 10 images"}, status=400)
         
         response_data = []
-        for image_file in images:
-            # image_id = image_data.get('Id')
-            # image_base64 = image_data.get('imageFile')
+        response_data.append({
+                # "id": image_id,
+                "error": "Made it this far"
+            })
+        return JsonResponse(response_data, safe=False)
 
-            # # Validate fields
-            # if not image_id or not image_base64:
-            #     return JsonResponse({"error": f"Invalid data for image ID {image_id}"}, status=400)
-
-            # # Decode the base64 image
-            # try:
-            #     image_bytes = base64.b64decode(image_base64)
-            #     image = BytesIO(image_bytes)
-            # except Exception:
-            #     return JsonResponse({"error": f"Invalid base64 encoding for image ID {image_id}"}, status=400)
        
-            # Process the image to extract tags and content
-            try:
-                tags = extract_tags(image_file, num_tags=num_tags)  # Custom function to generate tags
-                content = extract_content(image_file, content_length=content_length)  # Custom function to generate content
-                response_data.append({
-                    # "id": image_id,
-                    "tags": tags,   
-                    "content": content
-                })
-            except Exception as e:
-                # print(f"Error processing image ID {image_id}: {e}")
-                response_data.append({
-                    # "id": image_id,
-                    "error": "Failed to process image"
-                })
+        # Process the image to extract tags and content
+        try:
+            tags = extract_tags(image, num_tags=num_tags)  # Custom function to generate tags
+            content = extract_content(image, content_length=content_length)  # Custom function to generate content
+            response_data.append({
+                # "id": image_id,
+                "tags": tags,   
+                "content": content
+            })
+        except Exception as e:
+            # print(f"Error processing image ID {image_id}: {e}")
+            response_data.append({
+                # "id": image_id,
+                "error": "Failed to process image"
+            })
         
         return JsonResponse(response_data, safe=False)
             
