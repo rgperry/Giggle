@@ -1,3 +1,10 @@
+//
+//  SettingsView.swift
+//  Giggle
+//
+//  Created by Karan Arora on 11/10/24.
+//
+
 import SwiftUI
 import SwiftData
 
