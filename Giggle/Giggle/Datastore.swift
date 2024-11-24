@@ -123,39 +123,73 @@ class DataManager {
 //        return (tags, firstResponse.content)
 //    }
     
-    static func getInfo(for image: UIImage) async throws -> ([Tag], String) {
+    static func getInfo(for image: UIImage) async -> ([Tag], String) {
         guard let apiUrl = URL(string: "https://3.138.136.6/imageInfo/") else {
-            print("getInfo: Bad URL")
+            print("getInfo: bad url")
             return ([], "NO CONTENT")
         }
         
         struct ResponseBody: Decodable {
-            let tags: [String]
+            let tags: [String] // Add the properties that match your API response
             let content: String
         }
         
-        do {
-            // Upload image and parse response
-            let response = try await AF.upload(multipartFormData: { mpFD in
-                if let jpegImage = image.jpegData(compressionQuality: 0.8) {
-                    mpFD.append(jpegImage, withName: "image", fileName: "giggleImage.jpg", mimeType: "image/jpeg")
-                }
-            }, to: apiUrl, method: .post)
-            .validate() // Ensure only successful responses (2xx) are processed
-            .serializingDecodable(ResponseBody.self)
-            .value // Await and extract the decoded value
-            
-            // Convert tags to Tag struct
-            let tags = response.tags.map { Tag(name: $0) }
-            return (tags, response.content)
-            
-        } catch let error as AFError {
-            print("Alamofire error: \(error.localizedDescription)")
-            throw error
-        } catch {
-            print("Unknown error: \(error.localizedDescription)")
-            throw error
+        let response = try? await AF.upload(multipartFormData: { mpFD in
+            if let jpegImage = image.jpegData(compressionQuality: 0.1) {
+                mpFD.append(jpegImage, withName: "image", fileName: "giggleImage", mimeType: "image/jpeg")
+            }
+        }, to: apiUrl, method: .post).responseDecodable(of: ResponseBody.self) { response in
+            debugPrint(response)
         }
+        // .serializingDecodable([ResponseBody].self).value
+        return ([], "Nullish")
+//        guard let firstResponse = response!.first else {
+//            print("No response data in array")
+//            return ([Tag(name: "HELP")], "No content generated")
+//        }
+//
+//        let tags = firstResponse.tags.map { Tag(name: $0) }
+//        return (tags, firstResponse.content)
+        
+        
+        
+        
+//        // Prepare the URL and request
+//        let url = URL(string: "https://3.138.136.6/imageInfo/?numTags=10&contentLength=200")!
+//        var request = URLRequest(url: url)
+//        request.httpMethod = "POST"
+//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//
+//        // Create JSON payload
+//        let body = [["Id": UUID().uuidString, "imageFile": base64Image]]
+//        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
+//
+//        // Debug: Print the JSON body
+//        if let httpBody = request.httpBody {
+//            print("Request Body: ", String(data: httpBody, encoding: .utf8) ?? "Invalid body")
+//        }
+//
+//        // Perform the request
+//        do {
+//            let (data, _) = try await URLSession.shared.data(for: request)
+//
+//            // Debug: Check if data is received and print it
+//            print("Received Data:", String(data: data, encoding: .utf8) ?? "Invalid data")
+//
+//            // Parse the response data
+//            if let responseArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
+//               let firstResult = responseArray.first,
+//               let tags = firstResult["tags"] as? [String],
+//               let content = firstResult["content"] as? String {
+//                return (tags.map { Tag(name: $0) }, content)
+//            } else {
+//                print("Parsing Error: Response array is nil or has unexpected format")
+//            }
+//        } catch {
+//            print("Error in getInfo: \(error)")
+//        }
+//        return ([], "Error retrieving info") // Return empty data on failure
+        // until here
     }
 
 
