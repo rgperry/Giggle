@@ -8,16 +8,13 @@
 import SwiftUI
 import SwiftData
 
-// TODO
-// Make ContentView a wrapper?
-
 struct ContentView: View {
     @Environment(\.modelContext) private var context
     @State private var searchText = ""
-    
+
     @Query private var memes: [Meme]
     @Query(sort: \Tag.name) private var allTags: [Tag]
-    
+
     // https://abdulahd1996.medium.com/appstorage-property-wrapper-2eab0fb5b8fa
     @AppStorage("numSearchResults") private var numSearchResults: Double = 10
 
@@ -25,7 +22,6 @@ struct ContentView: View {
     private var topTags: [Tag] {
         let sortedTags = allTags.sorted { $0.memes.count > $1.memes.count }
         let folderLimit = 10
-        
         return Array(sortedTags.prefix(folderLimit))
     }
 
@@ -52,7 +48,6 @@ struct ContentView: View {
                 SearchBar(text: "Search for a Giggle", searchText: $searchText)
                     ScrollView {
                         LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
-                            
                             // If search bar is empty, show folders
                             if searchText.isEmpty {
                                 FolderItem(text: "Favorites", isPinned: true)
@@ -68,7 +63,6 @@ struct ContentView: View {
                                 }
 
                             }
-                            
                             // Else show memes for search query
                             else {
                                 ForEach(filteredMemes) { meme in

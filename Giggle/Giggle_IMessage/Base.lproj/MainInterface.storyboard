@@ -22,7 +22,7 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <searchBar contentMode="redraw" placeholder="Search All Giggles" translatesAutoresizingMaskIntoConstraints="NO" id="mKk-Tj-yvv">
+                            <searchBar contentMode="redraw" text="" placeholder="Search All Giggles" translatesAutoresizingMaskIntoConstraints="NO" id="mKk-Tj-yvv">
                                 <rect key="frame" x="0.0" y="15" width="320" height="44"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="BP1-u7-yvq"/>
@@ -32,8 +32,8 @@
                                     <outlet property="delegate" destination="ObA-dk-sSI" id="RtY-z7-EeE"/>
                                 </connections>
                             </searchBar>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="9Jk-wO-in2">
-                                <rect key="frame" x="0.0" y="67" width="320" height="461"/>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="9Jk-wO-in2">
+                                <rect key="frame" x="0.0" y="59" width="320" height="469"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="SEN-g4-YCP">
                                     <size key="itemSize" width="128" height="128"/>

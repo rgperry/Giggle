@@ -71,6 +71,14 @@
 			);
 			target = 417DE2832CE1B41F00DC18EF /* Giggle-Share-RT */;
 		};
+		41AFE5112CE4233300165079 /* Exceptions for "Giggle_IMessage" folder in "Giggle" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ImageCell.swift,
+				MessagesViewController.swift,
+			);
+			target = BB2FDABB2CCBF4E800A5BD7B /* Giggle */;
+		};
 		41DCAC4C2CE1CC7A00D7CB4B /* Exceptions for "Giggle" folder in "Giggle-Share-RT" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -79,9 +87,10 @@
 			);
 			target = 417DE2832CE1B41F00DC18EF /* Giggle-Share-RT */;
 		};
-		BB80186A2CE873CE00003986 /* Exceptions for "Giggle" folder in "Giggle_IMessage" target */ = {
+		41DCACBA2CE2C41600D7CB4B /* Exceptions for "Giggle" folder in "Giggle_IMessage" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Datastore.swift,
 				Models.swift,
 			);
 			target = 4131856C2CCEB271000BC665 /* Giggle_IMessage */;
@@ -92,6 +101,7 @@
 		413185712CCEB271000BC665 /* Giggle_IMessage */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				41AFE5112CE4233300165079 /* Exceptions for "Giggle_IMessage" folder in "Giggle" target */,
 				413185802CCEB276000BC665 /* Exceptions for "Giggle_IMessage" folder in "Giggle_IMessage" target */,
 			);
 			path = Giggle_IMessage;
@@ -108,7 +118,7 @@
 		BB2FDABE2CCBF4E800A5BD7B /* Giggle */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				BB80186A2CE873CE00003986 /* Exceptions for "Giggle" folder in "Giggle_IMessage" target */,
+				41DCACBA2CE2C41600D7CB4B /* Exceptions for "Giggle" folder in "Giggle_IMessage" target */,
 				41DCAC4C2CE1CC7A00D7CB4B /* Exceptions for "Giggle" folder in "Giggle-Share-RT" target */,
 			);
 			path = Giggle;
@@ -366,6 +376,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				CODE_SIGN_ENTITLEMENTS = Giggle_IMessage/Giggle_IMessage.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
@@ -393,6 +404,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				CODE_SIGN_ENTITLEMENTS = Giggle_IMessage/Giggle_IMessage.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
