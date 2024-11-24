@@ -9,7 +9,7 @@ from django.conf import settings
 
 openai.api_key = settings.OPENAI_API_KEY 
 
-client = OpenAI(api_key=settings.OPENAI_API_KEY)
+
 
 def generate_image(description):
     """
@@ -69,12 +69,12 @@ def extract_tags(image_data, num_tags=10):
     Extracts tags for an image using OpenAI's updated API.
     """
     try:
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
         image = Image.open(image_data).resize((512, 512))
         buffered = BytesIO()
         image.save(buffered, format="JPEG")
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-        prompt = f"Generate {num_tags} descriptive tags for this image. Return the tags in a comma separated list."
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
@@ -111,6 +111,7 @@ def extract_content(image_data, content_length=200):
     Extracts a text description for an image using OpenAI's updated API.
     """
     try:
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
         image = Image.open(image_data).resize((512, 512))
         buffered = BytesIO()
         image.save(buffered, format="JPEG")

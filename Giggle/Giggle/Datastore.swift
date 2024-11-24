@@ -98,46 +98,6 @@ class DataManager {
 //        
 //        let tags = firstResponse.tags.map { Tag(name: $0) }
 //        return (tags, firstResponse.content)
-        
-        
-        
-        
-//        // Prepare the URL and request
-//        let url = URL(string: "https://3.138.136.6/imageInfo/?numTags=10&contentLength=200")!
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//
-//        // Create JSON payload
-//        let body = [["Id": UUID().uuidString, "imageFile": base64Image]]
-//        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-//        
-//        // Debug: Print the JSON body
-//        if let httpBody = request.httpBody {
-//            print("Request Body: ", String(data: httpBody, encoding: .utf8) ?? "Invalid body")
-//        }
-//
-//        // Perform the request
-//        do {
-//            let (data, _) = try await URLSession.shared.data(for: request)
-//
-//            // Debug: Check if data is received and print it
-//            print("Received Data:", String(data: data, encoding: .utf8) ?? "Invalid data")
-//            
-//            // Parse the response data
-//            if let responseArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
-//               let firstResult = responseArray.first,
-//               let tags = firstResult["tags"] as? [String],
-//               let content = firstResult["content"] as? String {
-//                return (tags.map { Tag(name: $0) }, content)
-//            } else {
-//                print("Parsing Error: Response array is nil or has unexpected format")
-//            }
-//        } catch {
-//            print("Error in getInfo: \(error)")
-//        }
-//        return ([], "Error retrieving info") // Return empty data on failure
-        // until here
     }
     
     static func saveContext(context: ModelContext, success_message: String, fail_message: String, id: UUID) {
