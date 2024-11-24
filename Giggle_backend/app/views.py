@@ -93,12 +93,12 @@ def image_info(request):
         
         try:
             # Process the image to extract tags and content
-            tags = extract_tags(image, num_tags=num_tags)
-            content = extract_content(image, content_length=content_length)
+            # tags = extract_tags(image, num_tags=num_tags)
+            # content = extract_content(image, content_length=content_length)
             
             response_data = {
-                "tags": tags,
-                "content": content
+                "tags": ["tags"],
+                "content": "content"
             }
             
             return JsonResponse(response_data, safe=False)
