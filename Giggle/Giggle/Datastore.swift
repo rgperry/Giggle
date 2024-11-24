@@ -81,50 +81,9 @@ class DataManager {
         }
     }
 
-//    static func getInfo(for image: UIImage) async throws -> ([Tag], String) {
-//        guard let apiUrl = URL(string: "https://3.138.136.6/imageInfo/") else {
-//            print("getInfo: bad url")
-//            return ([], "NO CONTENT")
-//        }
-//        
-//        struct ResponseBody: Decodable {
-//            let tags: [String]
-//            let content: String
-//        }
-//        
-//        var returnedResponse: ResponseBody
-//        
-//        let response = try await AF.upload(multipartFormData: { mpFD in
-//            if let jpegImage = image.jpegData(compressionQuality: 0.8) {
-//                mpFD.append(jpegImage, withName: "image", fileName: "giggleImage.jpg", mimeType: "image/jpeg")
-//            }
-//        }, to: apiUrl, method: .post).responseData { response in
-//            guard let data = response.data, response.error == nil else {
-//                logger.error("Networking error in getInfo")
-//                return
-//            }
-//            if let httpStatus = response.response, httpStatus.statusCode != 200 {
-//                print("imageInfo: HTTP STATUS: \(httpStatus.statusCode)")
-//                return
-//            }
-//            guard let jsonObj = try? JSONSerialization.jsonObject(with: data) as? [Any] else {
-//                print("getChatts: failed JSON deserialization")
-//                return
-//            }
-//            returnedResponse = jsonObj.first as? ResponseBody ?? nil
-//        }
-//        
-//        guard let firstResponse = response.first else {
-//            print("No response data in array")
-//            return ([Tag(name: "HELP")], "No content generated")
-//        }
-//        
-//        let tags = firstResponse.tags.map { Tag(name: $0) }
-//        return (tags, firstResponse.content)
-//    }
-    
-    static func getInfo(for image: UIImage) async -> ([Tag], String) {
-        guard let apiUrl = URL(string: "https://3.138.136.6/imageInfo/") else {
+
+    static func getInfo(for image: UIImage) async throws -> ([Tag], String) {
+        guard let apiUrl = URL(string: "https://3.138.136.6/imageInfo/?contentLength=100") else {
             print("getInfo: bad url")
             return ([], "NO CONTENT")
         }
@@ -134,62 +93,17 @@ class DataManager {
             let content: String
         }
         
-        let response = try? await AF.upload(multipartFormData: { mpFD in
-            if let jpegImage = image.jpegData(compressionQuality: 0.1) {
-                mpFD.append(jpegImage, withName: "image", fileName: "giggleImage", mimeType: "image/jpeg")
-            }
-        }, to: apiUrl, method: .post).responseDecodable(of: ResponseBody.self) { response in
-            debugPrint(response)
-        }
-        // .serializingDecodable([ResponseBody].self).value
-        return ([], "Nullish")
-//        guard let firstResponse = response!.first else {
-//            print("No response data in array")
-//            return ([Tag(name: "HELP")], "No content generated")
-//        }
-//
-//        let tags = firstResponse.tags.map { Tag(name: $0) }
-//        return (tags, firstResponse.content)
+        let response = try await AF.upload(multipartFormData: { mpFD in
+                if let jpegImage = image.jpegData(compressionQuality: 0.8) {
+                    mpFD.append(jpegImage, withName: "image", fileName: "giggleImage.jpg", mimeType: "image/jpeg")
+                }
+        }, to: apiUrl, method: .post)
+            .serializingDecodable(ResponseBody.self)
+            .value
         
-        
-        
-        
-//        // Prepare the URL and request
-//        let url = URL(string: "https://3.138.136.6/imageInfo/?numTags=10&contentLength=200")!
-//        var request = URLRequest(url: url)
-//        request.httpMethod = "POST"
-//        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//
-//        // Create JSON payload
-//        let body = [["Id": UUID().uuidString, "imageFile": base64Image]]
-//        request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: .prettyPrinted)
-//
-//        // Debug: Print the JSON body
-//        if let httpBody = request.httpBody {
-//            print("Request Body: ", String(data: httpBody, encoding: .utf8) ?? "Invalid body")
-//        }
-//
-//        // Perform the request
-//        do {
-//            let (data, _) = try await URLSession.shared.data(for: request)
-//
-//            // Debug: Check if data is received and print it
-//            print("Received Data:", String(data: data, encoding: .utf8) ?? "Invalid data")
-//
-//            // Parse the response data
-//            if let responseArray = try JSONSerialization.jsonObject(with: data) as? [[String: Any]],
-//               let firstResult = responseArray.first,
-//               let tags = firstResult["tags"] as? [String],
-//               let content = firstResult["content"] as? String {
-//                return (tags.map { Tag(name: $0) }, content)
-//            } else {
-//                print("Parsing Error: Response array is nil or has unexpected format")
-//            }
-//        } catch {
-//            print("Error in getInfo: \(error)")
-//        }
-//        return ([], "Error retrieving info") // Return empty data on failure
-        // until here
+        debugPrint(response)
+        let tags = response.tags.map { Tag(name: $0) }
+        return (tags, response.content)
     }
 
 
