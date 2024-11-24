@@ -85,46 +85,34 @@ def image_info(request):
         num_tags = int(request.GET.get('numTags', 10))
         content_length = int(request.GET.get('contentLength', 200))
             
-        # no longer need to do this
-        # # Parse the request body
-        # data = json.loads(request.body)
-
-        # Handle multiple images
-        if 'image' in request.FILES:
-            image = request.FILES['image']
-        else:
+        # Handle image upload
+        if 'image' not in request.FILES:
             return JsonResponse({"error": "No image file provided"}, status=400)
-
         
-        # # Validate input: limit batch size to 10 images
-        # if len(images) > 10:
-        #     return JsonResponse({"error": "Batch size exceeds limit of 10 images"}, status=400)
+        image = request.FILES['image']
         
-        response_data = []
-        response_data.append({
-                # "id": image_id,
-                "error": "Made it this far"
-            })
-        return JsonResponse(response_data, safe=False)
-
-       
-        # Process the image to extract tags and content
         try:
-            tags = extract_tags(image, num_tags=num_tags)  # Custom function to generate tags
-            content = extract_content(image, content_length=content_length)  # Custom function to generate content
-            response_data.append({
-                # "id": image_id,
-                "tags": tags,   
+            # Process the image to extract tags and content
+            tags = extract_tags(image, num_tags=num_tags)
+            content = extract_content(image, content_length=content_length)
+            
+            response_data = [{
+                "tags": tags,
                 "content": content
-            })
+            }]
+            
+            return JsonResponse(response_data, safe=False)
+            
         except Exception as e:
-            # print(f"Error processing image ID {image_id}: {e}")
-            response_data.append({
-                # "id": image_id,
-                "error": "Failed to process image"
-            })
-        
-        return JsonResponse(response_data, safe=False)
+            print(f"Error processing image: {str(e)}")
+            return JsonResponse([{
+                "error": f"Failed to process image: {str(e)}"
+            }], safe=False, status=500)
+            
+    except Exception as e:
+        return JsonResponse([{
+            "error": f"Server error: {str(e)}"
+        }], safe=False, status=500)
             
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON data"}, status=400)
