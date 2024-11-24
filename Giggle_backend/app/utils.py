@@ -1,4 +1,5 @@
 import openai
+from openai import OpenAI
 import requests
 from io import BytesIO
 from PIL import Image
@@ -7,6 +8,7 @@ from django.conf import settings
 
 
 openai.api_key = settings.OPENAI_API_KEY 
+
 
 
 def generate_image(description):
@@ -34,7 +36,6 @@ def generate_image(description):
         print(f"An error occurred in generate_image: {e}")
         return None
 
-
 def analyze_sentiment(message):
     """
     Calls the OpenAI API to perform sentiment analysis on a given message.
@@ -44,17 +45,18 @@ def analyze_sentiment(message):
         return "Error in analyzing sentiment"
 
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a sentiment analysis assistant."},
-                {"role": "user", "content": f"Analyze the sentiment of this message: {message}"}
-            ],
-            max_tokens=50,
-            temperature=0.5
+                {"role": "system", "content": "You are a helpful assistant, and ."},
+                {
+                    "role": "user",
+                    "content": "Anaylze the following message based on it's content and sentiment, and generate a short description of its sentiment"
+                }
+            ]
         )
-        sentiment = response.choices[0].message['content'].strip()
-        return sentiment
+        return completion.choices[0].message
     except openai.error.AuthenticationError as e:
         print(f"Authentication Error: {e}")
         return "Authentication error in analyzing sentiment"
@@ -68,29 +70,41 @@ def extract_tags(image_data, num_tags=10):
     Extracts tags for an image using OpenAI's updated API.
     """
     try:
-        image = Image.open(image_data)
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        image = Image.open(image_data).resize((512, 512))
         buffered = BytesIO()
-        image.save(buffered, format="PNG")
+        image.save(buffered, format="JPEG")
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-        prompt = f"Generate {num_tags} descriptive tags for this image."
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a tagging assistant."},
-                {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
+                {
+                "role": "user",
+                "content": [
+                    {
+                    "type": "text",
+                    "text": f"You are tasked with generate {num_tags} descriptive tags for this image." 
+                        "Make sure to take into account the emotion/sentiment of the image, as well as the content" 
+                        "of the image. If there is any text or key info also make a descriptive tag for it."
+                        " Return the tags in a comma separated list. I repeat your response to this message should ONLY be "
+                         "a list of the tags that you have generated, separated by commas. No brackets necessary",
+                    },
+                    {
+                    "type": "image_url",
+                    "image_url": {
+                        "url":  f"data:image/jpeg;base64,{img_base64}"
+                    },
+                    },
+                ],
+                }
             ],
-            max_tokens=100,
-            temperature=0.5
-        )
-        tags = response.choices[0].message['content'].strip().split(',')
+            )
+        tags = response.choices[0].message.content.strip().split(',')
         return [tag.strip() for tag in tags][:num_tags]
-    except openai.error.AuthenticationError as e:
-        print(f"Authentication Error: {e}")
-        return ["Authentication error"]
     except Exception as e:
         print(f"An error occurred in extract_tags: {e}")
-        return ["error"]
+        return [f"error is {e}"]
 
 
 def extract_content(image_data, content_length=200):
@@ -98,27 +112,36 @@ def extract_content(image_data, content_length=200):
     Extracts a text description for an image using OpenAI's updated API.
     """
     try:
-        image = Image.open(image_data)
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        image = Image.open(image_data).resize((512, 512))
         buffered = BytesIO()
-        image.save(buffered, format="PNG")
+        image.save(buffered, format="JPEG")
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-        prompt = f"Describe this image in up to {content_length} characters."
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are an image description assistant."},
-                {"role": "user", "content": f"{prompt} Image data: {img_base64}"}
+                {
+                "role": "user",
+                "content": [
+                    {
+                    "type": "text",
+                    "text": f"You are tasked with generating a {content_length} word description of what"
+                    " is going on in this meme. In your description please analyze the sentiment, and if there is "
+                    " any text in the image, include it in your description of the meme.",
+                    },
+                    {
+                    "type": "image_url",
+                    "image_url": {
+                        "url":  f"data:image/jpeg;base64,{img_base64}"
+                    },
+                    },
+                ],
+                }
             ],
-            max_tokens=200,
-            temperature=0.5
-        )
-        content = response.choices[0].message['content'].strip()
-        return content[:content_length]
-    except openai.error.AuthenticationError as e:
-        print(f"Authentication Error: {e}")
-        return "Authentication error in content extraction"
+            )
+        return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"An error occurred in extract_content: {e}")
-        return "error in content extraction"
-
+        return [f"error is {e}"]
+    
