@@ -12,10 +12,17 @@ struct MemeInfoView: View {
     
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    
+    var header: String
 
     var body: some View {
         VStack {
-            PageHeader(text: "Giggle")
+            // PageHeader(text: "Giggle")
+            Text(header)
+                .font(.system(size: 35, weight: .semibold, design: .rounded))
+                .foregroundColor(.white)
+                .padding(.bottom, -1)
+            
             MemeImageView(image: meme.imageAsUIImage)
 
             ContentWithWhiteBackground(
@@ -29,7 +36,7 @@ struct MemeInfoView: View {
                 shareAction: { shareMeme(meme: meme, context: context) },
                 copyAction: { copyMeme(meme: meme, context: context) },
                 dismissAction: dismiss
-            ).offset(y: -62)
+            ).padding(.bottom, 62)
 
             Spacer()
             BottomNavBar()
@@ -262,6 +269,7 @@ struct MoreInfo: View {
                 Tag(name: "yo"),
             ],
             image: UIImage(systemName: "photo") ?? UIImage()
-        )
+        ),
+        header: "All Giggles"
     )
 }

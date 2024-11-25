@@ -101,6 +101,26 @@ struct RefreshButton: View {
     }
 }
 
+struct DeleteButton: View {
+    let size: CGFloat = 40
+    var deleteAction: () -> Void
+
+    var body: some View {
+        Button(action: {
+            deleteAction()
+        }) {
+            Image(systemName: "xmark")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size * 0.4, height: size * 0.4) // Make the icon smaller within the circle
+                .foregroundColor(.white)
+                .frame(width: size, height: size)
+                .background(Circle().fill(Color.clear)) // Transparent fill for the circle
+                .overlay(Circle().stroke(Color.white, lineWidth: 2)) // White border
+        }
+    }
+}
+
 #Preview {
     MemeCreatedView(memeDescription: "Sample Meme Description")
 }

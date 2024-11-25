@@ -84,7 +84,6 @@ struct PageHeader: View {
 }
 
 struct MemeDescriptionField: View {
-    // Binding to use an external variable
     @Binding var memeDescription: String
 
     var body: some View {
@@ -94,6 +93,7 @@ struct MemeDescriptionField: View {
                 .background(Color.white)
                 .cornerRadius(15)
                 .padding(.horizontal, 30)
+            
             Spacer().frame(height: 20)
         }
     }
@@ -124,6 +124,7 @@ struct GenerateMemeButton: View {
                 .padding(.horizontal, 80)
                 .padding(.bottom, 30)
         }
+        
         Spacer().frame(height: 40)
     }
 }
@@ -132,35 +133,31 @@ struct MemeImageView: View {
     let image: UIImage
 
     var body: some View {
-        VStack {
-            Spacer()
-
+        // This lets you make the image have rounded corners and fill the space
+        // between the content above and below it. However, the image's aspect ratio
+        // will change (probably zoom in or out)
+        /*
+        GeometryReader { geometry in
+            Image(uiImage: image)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(
+                    width: geometry.size.width * 0.9, // Full width of the screen
+                    height: geometry.size.height * 1 // Force height to 70% of available space
+                )
+                .cornerRadius(20)
+                .shadow(radius: 7)
+        }
+         */
+        
+        GeometryReader { geometry in
             Image(uiImage: image)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                //.frame(width: 400, height: 400)
-
-            Spacer()
-        }
-    }
-}
-
-struct DeleteButton: View {
-    let size: CGFloat = 40
-    var deleteAction: () -> Void
-
-    var body: some View {
-        Button(action: {
-            deleteAction()
-        }) {
-            Image(systemName: "xmark")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size * 0.4, height: size * 0.4) // Make the icon smaller within the circle
-                .foregroundColor(.white)
-                .frame(width: size, height: size)
-                .background(Circle().fill(Color.clear)) // Transparent fill for the circle
-                .overlay(Circle().stroke(Color.white, lineWidth: 2)) // White border
+                .frame(maxWidth: geometry.size.width * 0.9, maxHeight: geometry.size.height * 0.97)
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .center)
+            // .cornerRadius(100)
+                .shadow(radius: 7)
         }
     }
 }

@@ -72,7 +72,7 @@ struct ContentView: View {
                             // Else show memes for search query
                             else {
                                 ForEach(filteredMemes) { meme in
-                                    GiggleItem(meme: meme)
+                                    GiggleItem(meme: meme, header: "Giggle")
                                 }
                             }
                         }

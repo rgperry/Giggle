@@ -86,7 +86,7 @@ struct FolderView: View {
             ScrollView {
                 LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.memeRowPadding) {
                     ForEach(filteredMemes) { meme in
-                        GiggleItem(meme: meme)
+                        GiggleItem(meme: meme, header: header.capitalized)
                     }
                 }
                 .padding(.horizontal, GridStyle.columnPadding)

@@ -25,10 +25,11 @@ import SwiftUI
 //}
 
 struct GiggleItem: View {
-    let size: CGFloat = 150
-    
     @Bindable var meme: Meme
     @Environment(\.modelContext) private var context
+    
+    let size: CGFloat = 150
+    var header: String
 
     @State private var navigateToMemeInfo = false
 
@@ -76,7 +77,8 @@ struct GiggleItem: View {
         }
         .navigationDestination(isPresented: $navigateToMemeInfo) {
             MemeInfoView(
-                meme: meme
+                meme: meme,
+                header: header
             )
         }
     }
