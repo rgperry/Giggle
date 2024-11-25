@@ -13,6 +13,7 @@
 		41DCAC4F2CE1DB8600D7CB4B /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 41DCAC4E2CE1DB8600D7CB4B /* SDWebImage */; };
 		41DCAC512CE1DB8600D7CB4B /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 41DCAC502CE1DB8600D7CB4B /* SDWebImageMapKit */; };
 		41DCAC542CE1DBAB00D7CB4B /* SDWebImageWebPCoder in Frameworks */ = {isa = PBXBuildFile; productRef = 41DCAC532CE1DBAB00D7CB4B /* SDWebImageWebPCoder */; };
+		BB273DB62CF3D49600C7AE58 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = BB273DB52CF3D49600C7AE58 /* Alamofire */; };
 		D6B6B5FB2CEABDA300E8D7EB /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = D6B6B5FA2CEABDA300E8D7EB /* Alamofire */; };
 		D6D4DEC52CEAB8EE0054A5FC /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = D6D4DEC42CEAB8EE0054A5FC /* Alamofire */; };
 /* End PBXBuildFile section */
@@ -132,6 +133,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				413185702CCEB271000BC665 /* Messages.framework in Frameworks */,
+				BB273DB62CF3D49600C7AE58 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -206,6 +208,7 @@
 			);
 			name = Giggle_IMessage;
 			packageProductDependencies = (
+				BB273DB52CF3D49600C7AE58 /* Alamofire */,
 			);
 			productName = Giggle_IMessage;
 			productReference = 4131856D2CCEB271000BC665 /* Giggle_IMessage.appex */;
@@ -746,6 +749,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 41DCAC522CE1DBAB00D7CB4B /* XCRemoteSwiftPackageReference "SDWebImageWebPCoder" */;
 			productName = SDWebImageWebPCoder;
+		};
+		BB273DB52CF3D49600C7AE58 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Alamofire;
 		};
 		D6B6B5FA2CEABDA300E8D7EB /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
