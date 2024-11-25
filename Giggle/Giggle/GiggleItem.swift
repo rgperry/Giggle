@@ -68,14 +68,7 @@ struct GiggleItem: View {
                 }
 
             Button(action: {
-                meme.toggleFavorited()
-                
-                DataManager.saveContext(
-                    context: context,
-                    success_message: "Successfully updated favorited status and date favorited",
-                    fail_message: "Failed to update favorited status or date favorited",
-                    id: meme.id
-                )
+                favoriteMeme(meme: meme, context: context)
             }) {
                 Image(systemName: meme.favorited ? "heart.fill" : "heart")
                     .foregroundColor(meme.favorited ? .red : .black)

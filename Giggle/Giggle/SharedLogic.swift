@@ -45,3 +45,14 @@ public func shareMeme(meme: Meme, context: ModelContext) {
         )
     }
 }
+
+public func favoriteMeme(meme: Meme, context: ModelContext) {
+    meme.toggleFavorited()
+    
+    DataManager.saveContext(
+        context: context,
+        success_message: "Successfully updated favorited status and date favorited",
+        fail_message: "Failed to update favorited status or date favorited",
+        id: meme.id
+    )
+}

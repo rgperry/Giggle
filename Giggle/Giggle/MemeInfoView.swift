@@ -24,7 +24,7 @@ struct MemeInfoView: View {
                 dateAdded: meme.dateAdded,
                 source: "TODO",
                 addTagAction: addTag,
-                favoriteAction: favoriteMeme,
+                favoriteAction: { favoriteMeme(meme: meme, context: context) },
                 deleteAction: deleteMeme,
                 shareAction: { shareMeme(meme: meme, context: context) },
                 dismissAction: dismiss
@@ -47,17 +47,6 @@ struct MemeInfoView: View {
         )
     }
     
-    private func favoriteMeme() {
-        meme.toggleFavorited()
-        
-        DataManager.saveContext(
-            context: context,
-            success_message: "Successfully updated favorited status and date favorited",
-            fail_message: "Failed to update favorited status or date favorited",
-            id: meme.id
-        )
-    }
-        
     private func deleteMeme() {
         context.delete(meme)
         
@@ -199,13 +188,16 @@ struct ContentWithWhiteBackground: View {
         // iOS Native Alert for Adding a Tag
         .alert("Add New Tag", isPresented: $showAddTagPopup) {
             TextField("Enter tag name", text: $newTag)
+            
             Button("Add") {
                 guard !newTag.isEmpty else { return }
+                
                 addTagAction(newTag)
                 newTag = "" // Reset input field
             }
+            
             Button("Cancel", role: .cancel) {
-                newTag = "" // Reset input field if canceled
+                newTag = ""
             }
         }
     }
