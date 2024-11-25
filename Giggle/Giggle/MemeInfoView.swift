@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct MemeInfoView: View {
     @Bindable var meme: Meme
     
@@ -27,8 +25,8 @@ struct MemeInfoView: View {
                 source: "TODO",
                 addTagAction: addTag,
                 favoriteAction: favoriteMeme,
-                deleteAction: deleteMeme, // Updated delete action
-                shareAction: shareMeme,
+                deleteAction: deleteMeme,
+                shareAction: { shareMeme(meme: meme, context: context) },
                 dismissAction: dismiss
             ).offset(y: -62)
 
@@ -59,22 +57,7 @@ struct MemeInfoView: View {
             id: meme.id
         )
     }
-    
-    private func shareMeme() {
-        let activityItems: [Any] = [meme.imageAsUIImage] // Include meme image or other content
-        let activityVC = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-        UIApplication.shared.windows.first?.rootViewController?.present(activityVC, animated: true) {
-            // Update the "last shared" date
-            meme.dateLastShared = Date()
-            DataManager.saveContext(
-                context: context,
-                success_message: "Successfully updated the last shared date",
-                fail_message: "Failed to update the last shared date",
-                id: meme.id
-            )
-        }
-    }
-    
+        
     private func deleteMeme() {
         context.delete(meme)
         
@@ -88,7 +71,6 @@ struct MemeInfoView: View {
         dismiss() // Redirect to the previous view
     }
 }
-
 
 struct ContentWithWhiteBackground: View {
     @Binding var tags: [Tag]
@@ -228,8 +210,6 @@ struct ContentWithWhiteBackground: View {
         }
     }
 }
-
-
 
 struct MoreInfo: View {
     var dateAdded: Date

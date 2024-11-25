@@ -61,15 +61,7 @@ struct GiggleItem: View {
                     }
 
                     Button(action: {
-                        shareImage()
-                        meme.dateLastShared = Date()
-                        
-                        DataManager.saveContext(
-                            context: context,
-                            success_message: "Successfully updated date shared",
-                            fail_message: "Failed to update date shared",
-                            id: meme.id
-                        )
+                        shareMeme(meme: meme, context: context)
                     }) {
                         Label("Share", systemImage: "square.and.arrow.up")
                     }
@@ -101,14 +93,5 @@ struct GiggleItem: View {
     private func copyImage() {
         let imageToCopy = meme.imageAsUIImage
         UIPasteboard.general.image = imageToCopy
-    }
-
-    private func shareImage() {
-        let activityVC = UIActivityViewController(activityItems: [meme.imageAsUIImage], applicationActivities: nil)
-
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let rootVC = windowScene.windows.first?.rootViewController {
-            rootVC.present(activityVC, animated: true, completion: nil)
-        }
     }
 }

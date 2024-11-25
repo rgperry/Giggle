@@ -45,9 +45,9 @@ class Tag {
 }
 
 @Model
-class Meme {
+public class Meme {
     @Attribute(.externalStorage) var image: Data?
-    @Attribute(.unique) var id: UUID
+    @Attribute(.unique) public var id: UUID
     @Relationship(inverse: \Tag.memes) var tags: [Tag]
     
     var dateAdded: Date

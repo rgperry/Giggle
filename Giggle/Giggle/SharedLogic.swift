@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct Colors {
     static let backgroundColor = Color(red: 104/255, green: 86/255, blue: 182/255)
@@ -25,4 +26,22 @@ struct GridStyle {
     static let memeRowPadding: CGFloat = 0
 
     static let searchBarPadding: CGFloat = 28
+}
+
+public func shareMeme(meme: Meme, context: ModelContext) {
+    let activityVC = UIActivityViewController(activityItems: [meme.imageAsUIImage], applicationActivities: nil)
+
+    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+       let rootVC = windowScene.windows.first?.rootViewController {
+        rootVC.present(activityVC, animated: true, completion: nil)
+        
+        meme.dateLastShared = Date()
+        
+        DataManager.saveContext(
+            context: context,
+            success_message: "Successfully updated the last shared date",
+            fail_message: "Failed to update the last shared date",
+            id: meme.id
+        )
+    }
 }
