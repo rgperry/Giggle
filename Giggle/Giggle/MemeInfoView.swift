@@ -25,7 +25,7 @@ struct MemeInfoView: View {
                 source: "TODO",
                 addTagAction: addTag,
                 favoriteAction: { favoriteMeme(meme: meme, context: context) },
-                deleteAction: deleteMeme,
+                deleteAction: { deleteMeme(meme: meme, context: context) },
                 shareAction: { shareMeme(meme: meme, context: context) },
                 copyAction: { copyMeme(meme: meme, context: context) },
                 dismissAction: dismiss
@@ -46,19 +46,6 @@ struct MemeInfoView: View {
             fail_message: "Failed to add tag \(newTag) to meme",
             id: meme.id
         )
-    }
-    
-    private func deleteMeme() {
-        context.delete(meme)
-        
-        DataManager.saveContext(
-            context: context,
-            success_message: "Successfully deleted meme",
-            fail_message: "Failed to delete meme",
-            id: meme.id
-        )
-        
-        dismiss() // Redirect to the previous view
     }
 }
 
@@ -191,6 +178,7 @@ struct ContentWithWhiteBackground: View {
                     // Delete button
                     Button(action: {
                         deleteAction()
+                        dismissAction()
                     }) {
                         Image(systemName: "trash")
                             .font(.system(size: 43))

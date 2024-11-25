@@ -70,3 +70,14 @@ public func favoriteMeme(meme: Meme, context: ModelContext) {
         id: meme.id
     )
 }
+
+public func deleteMeme(meme: Meme, context: ModelContext) {
+    context.delete(meme)
+    
+    DataManager.saveContext(
+        context: context,
+        success_message: "Successfully deleted meme",
+        fail_message: "Failed to delete meme",
+        id: meme.id
+    )
+}

@@ -57,6 +57,12 @@ struct GiggleItem: View {
                     }) {
                         Label("Share", systemImage: "square.and.arrow.up")
                     }
+                    
+                    Button(action: {
+                        deleteMeme(meme: meme, context: context)
+                    }) {
+                        Label("Delete", systemImage: "trash")
+                    }
                 }
 
             Button(action: {
