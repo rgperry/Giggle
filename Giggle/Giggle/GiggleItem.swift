@@ -47,15 +47,7 @@ struct GiggleItem: View {
                 }
                 .contextMenu {
                     Button(action: {
-                        copyImage()
-                        meme.dateLastShared = Date()
-                        
-                        DataManager.saveContext(
-                            context: context,
-                            success_message: "Successfully updated date shared",
-                            fail_message: "Failed to update date shared",
-                            id: meme.id
-                        )
+                        copyMeme(meme: meme, context: context)
                     }) {
                         Label("Copy", systemImage: "doc.on.doc")
                     }
@@ -81,10 +73,5 @@ struct GiggleItem: View {
                 meme: meme
             )
         }
-    }
-
-    private func copyImage() {
-        let imageToCopy = meme.imageAsUIImage
-        UIPasteboard.general.image = imageToCopy
     }
 }

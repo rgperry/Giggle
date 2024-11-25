@@ -46,6 +46,20 @@ public func shareMeme(meme: Meme, context: ModelContext) {
     }
 }
 
+public func copyMeme(meme: Meme, context: ModelContext) {
+    let imageToCopy = meme.imageAsUIImage
+    UIPasteboard.general.image = imageToCopy
+    
+    meme.dateLastShared = Date()
+    
+    DataManager.saveContext(
+        context: context,
+        success_message: "Successfully updated date shared",
+        fail_message: "Failed to update date shared",
+        id: meme.id
+    )
+}
+
 public func favoriteMeme(meme: Meme, context: ModelContext) {
     meme.toggleFavorited()
     

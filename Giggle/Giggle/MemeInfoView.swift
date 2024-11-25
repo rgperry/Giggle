@@ -27,6 +27,7 @@ struct MemeInfoView: View {
                 favoriteAction: { favoriteMeme(meme: meme, context: context) },
                 deleteAction: deleteMeme,
                 shareAction: { shareMeme(meme: meme, context: context) },
+                copyAction: { copyMeme(meme: meme, context: context) },
                 dismissAction: dismiss
             ).offset(y: -62)
 
@@ -72,12 +73,14 @@ struct ContentWithWhiteBackground: View {
     var favoriteAction: () -> Void
     var deleteAction: () -> Void
     var shareAction: () -> Void
+    var copyAction: () -> Void
     var dismissAction: DismissAction
     
     @State private var newTag: String = ""
     @State private var showAddTagPopup = false
     @State private var showDeleteTagAlert = false
     @State private var selectedTagToDelete: Tag?
+    @State private var memeCopied = false
 
     var body: some View {
         ZStack {
@@ -142,6 +145,7 @@ struct ContentWithWhiteBackground: View {
                 // Action buttons
                 HStack {
                     Spacer()
+                    
                     // Favorite button
                     Button(action: {
                         favoriteAction()
@@ -150,9 +154,10 @@ struct ContentWithWhiteBackground: View {
                             .font(.system(size: 43))
                             .foregroundColor(favorited ? .red : .black)
                             .padding(10)
+                            .padding(.top, 12)
                     }
-                    
                     Spacer()
+                    
                     // Share button
                     Button(action: {
                         shareAction()
@@ -160,10 +165,29 @@ struct ContentWithWhiteBackground: View {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 43))
                             .foregroundColor(.black)
-                            .padding(10)
+                            .padding(8)
                     }
-
                     Spacer()
+                    
+                    // Copy button
+                    Button(action: {
+                        copyAction()
+                        memeCopied = true
+                    }) {
+                        ZStack {
+                            Image(systemName: "doc.on.doc")
+                                .font(.system(size: 43))
+                            
+                            Image(systemName: "checkmark.circle.fill")
+                                .opacity(memeCopied ? 1 : 0)
+                                .font(.system(size: 20))
+                                .foregroundColor(.black)
+                                .offset(x: 19, y: -20)
+                        }
+                        .padding(10)
+                    }
+                    Spacer()
+                    
                     // Delete button
                     Button(action: {
                         deleteAction()
@@ -172,6 +196,7 @@ struct ContentWithWhiteBackground: View {
                             .font(.system(size: 43))
                             .foregroundColor(.black)
                             .padding(10)
+                            .padding(.trailing, 10)
                     }
                     Spacer()
                 }
