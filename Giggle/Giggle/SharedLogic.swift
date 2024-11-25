@@ -74,10 +74,19 @@ public func favoriteMeme(meme: Meme, context: ModelContext) {
 public func deleteMeme(meme: Meme, context: ModelContext) {
     context.delete(meme)
     
+    let tagsToDelete = meme.tags.filter {
+        $0.memes.count == 1 && $0.memes.first?.id == meme.id
+    }
+    
+    tagsToDelete.forEach { tag in
+        print("Deleting tag: \(tag.name)")
+        context.delete(tag)
+    }
+    
     DataManager.saveContext(
         context: context,
-        success_message: "Successfully deleted meme",
-        fail_message: "Failed to delete meme",
+        success_message: "Successfully deleted meme and tags",
+        fail_message: "Failed to delete meme and tags",
         id: meme.id
     )
 }

@@ -67,7 +67,9 @@ struct ContentWithWhiteBackground: View {
     @State private var showAddTagPopup = false
     @State private var showDeleteTagAlert = false
     @State private var selectedTagToDelete: Tag?
+    
     @State private var memeCopied = false
+    @State private var memeDeleted = false
 
     var body: some View {
         ZStack {
@@ -177,8 +179,8 @@ struct ContentWithWhiteBackground: View {
                     
                     // Delete button
                     Button(action: {
-                        deleteAction()
                         dismissAction()
+                        memeDeleted = true
                     }) {
                         Image(systemName: "trash")
                             .font(.system(size: 43))
@@ -211,6 +213,11 @@ struct ContentWithWhiteBackground: View {
             
             Button("Cancel", role: .cancel) {
                 newTag = ""
+            }
+        }
+        .onDisappear {
+            if memeDeleted {
+                deleteAction()
             }
         }
     }
