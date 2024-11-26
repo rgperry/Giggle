@@ -12,6 +12,7 @@ import PhotosUI
 struct ImagePicker: UIViewControllerRepresentable {
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedImages: [UIImage]
+    @Binding var pickingIsDone: Bool
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
@@ -44,22 +45,29 @@ struct ImagePicker: UIViewControllerRepresentable {
         
         // Called when the user finishes selecting images
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            picker.dismiss(animated: true)
-            
-            // Iterate over the selected results and check if we can load the UIImage
-            for result in results {
-                if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
-                    result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
-                        // Update the selectedImages array
-                        if let uiImage = image as? UIImage {
-                            DispatchQueue.main.async {
-                                self.parent.selectedImages.append(uiImage)
+                picker.dismiss(animated: true)
+
+                var imagesToAppend: [UIImage] = []
+                
+                // Iterate over the selected results and check if we can load the UIImage
+                let group = DispatchGroup()  // To track all asynchronous loading tasks
+                for result in results {
+                    if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
+                        group.enter()
+                        result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
+                            if let uiImage = image as? UIImage {
+                                imagesToAppend.append(uiImage)
                             }
+                            group.leave()
                         }
                     }
                 }
+
+                // Once all images are loaded, update the state
+                group.notify(queue: .main) {
+                    self.parent.selectedImages.append(contentsOf: imagesToAppend)
+                    self.parent.pickingIsDone = true  // Signal that image selection is done
+                }
             }
-            
-        }
     }
 }

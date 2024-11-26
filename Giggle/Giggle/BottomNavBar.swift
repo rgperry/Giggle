@@ -10,6 +10,8 @@ import SwiftUI
 struct BottomNavBar: View {
     @State private var isImagePickerPresented = false
     @State private var selectedImages: [UIImage] = []
+    @State private var isStoring: Bool = false
+    @State private var pickingIsDone = false
     
     @Environment(\.modelContext) private var context
 
@@ -28,6 +30,8 @@ struct BottomNavBar: View {
                 BottomNavBarIcon(icon: "plus.circle.fill")
                     .onTapGesture {
                         isImagePickerPresented = true
+                        pickingIsDone = false
+                        
                     }
                 
                 NavigationLink(destination: GenerateMemeView()) {
@@ -40,19 +44,33 @@ struct BottomNavBar: View {
             }
             .padding(.leading, 25)
             .sheet(isPresented: $isImagePickerPresented) {
-                ImagePicker(selectedImages: $selectedImages)
+                ImagePicker(selectedImages: $selectedImages, pickingIsDone: $pickingIsDone)
             }
             .onChange(of: selectedImages) {
                 print("selected memes changed")
             // only add new memes when there are a few in the selectedPhotos. (this .onchange gets called twice bc we clear the selected images array.)
 //            guard selectedImages.isEmpty else { return }
-            Task {
-                // ignore the modelContext warning here - Matt (@MainActor decorator on storeMemes function fixed this)
-                await DataManager.storeMemes(context: context, images: selectedImages) {
-                    logger.info("Successfully store \(selectedImages.count) images to the swiftData database")
-                    selectedImages.removeAll()
+                guard !isStoring else { return }
+                guard pickingIsDone, !selectedImages.isEmpty else {
+                    logger.info("picking not done yet wait!!!!!")
+                    return
+                }
+                Task {
+                    
+                    isStoring = true
+                    defer { isStoring = false }
+                    do {
+                        try await MemeImportManager.storeMemes(context: context, images: selectedImages) {
+                            logger.info("Successfully stored \(selectedImages.count) images to the SwiftData database")
+                            DispatchQueue.main.async {
+                                selectedImages.removeAll()
+                            }
+                        }
+                    } catch {
+                        logger.error("Error storing \(selectedImages.count) memes: \(error)")
                     }
                 }
+                
             }
             .padding(.bottom, 59)
         }

@@ -10,6 +10,35 @@ import NaturalLanguage
 import SwiftUI
 import Alamofire
 
+actor MemeImportManager {
+    static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async throws {
+        guard !images.isEmpty else {
+            logger.log("NO IMAGES TO IMPORT")
+            return
+        }
+        
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for image in images {
+                group.addTask {
+                    let (tags, content) = try await DataManager.getInfo(for: image)
+                    
+                    // Direct insertion without actor synchronization
+                    let meme = Meme(content: content, tags: tags, image: image)
+                    context.insert(meme)
+                }
+            }
+            
+            // Wait for all tasks to complete
+            try await group.waitForAll()
+        }
+        
+        // Save outside of the task group
+        try context.save()
+        
+        completion()
+    }
+}
+
  // Utility Class
 class DataManager {
     static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10, tagName: String?) -> [Meme] {
@@ -175,13 +204,32 @@ class DataManager {
         }
     }
 
-    // Used for testing
     static func clearDB(context: ModelContext) {
         do {
-            try context.delete(model: Tag.self)
-            try context.delete(model: Meme.self)
+            // Create fetch descriptors for both models
+            let tagFetchDescriptor = FetchDescriptor<Tag>()
+            let memeFetchDescriptor = FetchDescriptor<Meme>()
+            
+            // Fetch all tags
+            let tags = try context.fetch(tagFetchDescriptor)
+            
+            // Delete all tags
+            for tag in tags {
+                context.delete(tag)
+            }
+            
+            // Fetch all memes
+            let memes = try context.fetch(memeFetchDescriptor)
+            
+            // Delete all memes
+            for meme in memes {
+                context.delete(meme)
+            }
+            
+            // Save the context to persist the deletions
+            try context.save()
         } catch {
-            fatalError(error.localizedDescription)
+            print("Error clearing database: \(error.localizedDescription)")
         }
     }
 }
