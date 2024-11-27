@@ -74,8 +74,9 @@ public func favoriteMeme(meme: Meme, context: ModelContext) {
 public func deleteMeme(meme: Meme, context: ModelContext) {
     context.delete(meme)
     
+    // This could probably be removed to deleteTag
     let tagsToDelete = meme.tags.filter {
-        $0.memes.count == 1 && $0.memes.first?.id == meme.id
+        $0.memes.count == 1 && $0.memes.first?.id == meme. // I don't think the ID check is necessary
     }
     
     tagsToDelete.forEach { tag in
@@ -89,4 +90,17 @@ public func deleteMeme(meme: Meme, context: ModelContext) {
         fail_message: "Failed to delete meme and tags",
         id: meme.id
     )
+}
+
+public func deleteTag(meme: Meme, context: ModelContext) {
+    // Remove tag overall fi
+    if let tag = meme.tags.first(where: { $0.name == tagName }) {
+        
+
+        // Check if this was the last meme using this tag
+        if tag.memes.count == 1 {
+            print("Deleting tag: \(tag.name)")
+            context.delete(tag)
+        }
+    }
 }

@@ -17,7 +17,6 @@ struct MemeInfoView: View {
 
     var body: some View {
         VStack {
-            // PageHeader(text: "Giggle")
             Text(header)
                 .font(.system(size: 35, weight: .semibold, design: .rounded))
                 .foregroundColor(.white)
@@ -31,6 +30,7 @@ struct MemeInfoView: View {
                 dateAdded: meme.dateAdded,
                 source: "TODO",
                 addTagAction: addTag,
+                removeTagAction: removeTag,
                 favoriteAction: { favoriteMeme(meme: meme, context: context) },
                 deleteAction: { deleteMeme(meme: meme, context: context) },
                 shareAction: { shareMeme(meme: meme, context: context) },
@@ -54,6 +54,20 @@ struct MemeInfoView: View {
             id: meme.id
         )
     }
+    
+    private func removeTag(tagName: String) {
+        // Remove tag from meme
+        meme.removeTag(tagName)
+        // Delete tag if it is not attached to any other memes
+        deleteTag(meme: meme, context: context)
+        
+        DataManager.saveContext(
+            context: context,
+            success_message: "Successfully removed tag \(tagName) from meme",
+            fail_message: "Failed to remove tag \(tagName) from meme",
+            id: meme.id
+        )
+    }
 }
 
 struct ContentWithWhiteBackground: View {
@@ -64,6 +78,8 @@ struct ContentWithWhiteBackground: View {
     var source: String
     
     var addTagAction: (String) -> Void
+    var removeTagAction: (String) -> Void
+    
     var favoriteAction: () -> Void
     var deleteAction: () -> Void
     var shareAction: () -> Void
@@ -124,10 +140,10 @@ struct ContentWithWhiteBackground: View {
                                         .foregroundColor(.white)
                                         .bold()
                                 }
-                                .confirmationDialog("Delete Tag?", isPresented: $showDeleteTagAlert, titleVisibility: .visible) {
+                                .confirmationDialog("Delete tag \"\(tag.name)\"?", isPresented: $showDeleteTagAlert, titleVisibility: .visible) {
                                     Button("Delete", role: .destructive) {
                                         guard let tagToDelete = selectedTagToDelete else { return }
-                                        tags.removeAll { $0 == tagToDelete }
+                                        removeTagAction(selectedTagToDelete!.name)
                                     }
                                     Button("Cancel", role: .cancel) {}
                                 }
