@@ -10,30 +10,32 @@ import NaturalLanguage
 import SwiftUI
 import Alamofire
 
+@ModelActor
 actor MemeImportManager {
-    static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async throws {
+    func storeMemes(images: [UIImage], completion: @escaping () -> Void) async throws {
         guard !images.isEmpty else {
             logger.log("NO IMAGES TO IMPORT")
             return
         }
         
-        try await withThrowingTaskGroup(of: Void.self) { group in
+        try await withThrowingTaskGroup(of: Meme.self) { group in
             for image in images {
                 group.addTask {
                     let (tags, content) = try await DataManager.getInfo(for: image)
                     
                     // Direct insertion without actor synchronization
                     let meme = Meme(content: content, tags: tags, image: image)
-                    context.insert(meme)
+                    return meme
                 }
             }
             
-            // Wait for all tasks to complete
-            try await group.waitForAll()
+            for try await item in group {
+                modelContext.insert(item)
+            }
         }
         
         // Save outside of the task group
-        try context.save()
+        try modelContext.save()
         
         completion()
     }
