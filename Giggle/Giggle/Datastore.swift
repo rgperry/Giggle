@@ -20,8 +20,6 @@ actor MemeImportManager {
         
         let startTime = Date()
         
-        var importedMemes: [Meme] = []
-        
         try await withThrowingTaskGroup(of: Meme.self) { group in
             for image in images {
                 group.addTask {
@@ -34,7 +32,6 @@ actor MemeImportManager {
             }
             
             for try await item in group {
-                importedMemes.append(item)
                 modelContext.insert(item)
             }
         }
