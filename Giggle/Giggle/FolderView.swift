@@ -47,12 +47,7 @@ struct FolderView: View {
                     meme.tags.contains { $0.name == header }
                 }
             
-                let filteredAgain = searchText.isEmpty ? tagFilteredMemes : DataManager.findSimilarEntries(
-                    query: searchText,
-                    context: context,
-                    limit: Int(numSearchResults),
-                    tagName: header.isEmpty ? nil : header
-                )
+            let filteredAgain = searchText.isEmpty ? tagFilteredMemes : tagFilteredMemes.filter { memeSearchPredicate(for: searchText).evaluate(with: $0) }
             
                 return filteredAgain.sorted { $0.dateAdded > $1.dateAdded }
         }
@@ -66,12 +61,7 @@ struct FolderView: View {
             return memes
         }
 
-        return DataManager.findSimilarEntries(
-            query: searchText,
-            context: context,
-            limit: Int(numSearchResults),
-            tagName: nil
-        )
+        return memes.filter { memeSearchPredicate(for: searchText).evaluate(with: $0) }
     }
 
     var body: some View {
