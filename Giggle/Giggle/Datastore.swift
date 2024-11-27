@@ -18,6 +18,10 @@ actor MemeImportManager {
             return
         }
         
+        let startTime = Date()
+        
+        var importedMemes: [Meme] = []
+        
         try await withThrowingTaskGroup(of: Meme.self) { group in
             for image in images {
                 group.addTask {
@@ -30,12 +34,21 @@ actor MemeImportManager {
             }
             
             for try await item in group {
+                importedMemes.append(item)
                 modelContext.insert(item)
             }
         }
         
         // Save outside of the task group
         try modelContext.save()
+        
+        let endTime = Date()
+        let totalTime = endTime.timeIntervalSince(startTime)
+        let averageTime = totalTime / Double(images.count)
+        
+        print("Total Import Time: \(String(format: "%.2f", totalTime)) seconds")
+        print("Average Time per Image: \(String(format: "%.2f", averageTime)) seconds")
+        print("Total Images Imported: \(images.count)")
         
         completion()
     }

@@ -60,7 +60,7 @@ struct BottomNavBar: View {
                     isStoring = true
                     defer { isStoring = false }
                     do {
-                        let importManager = MemeImportManager()
+                        let importManager = MemeImportManager(modelContainer: context.container)
                         try await importManager.storeMemes(images: selectedImages) {
                             logger.info("Successfully stored \(selectedImages.count) images to the SwiftData database")
                             DispatchQueue.main.async {
