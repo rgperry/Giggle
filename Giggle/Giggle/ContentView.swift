@@ -27,16 +27,19 @@ struct ContentView: View {
 
     var filteredMemes: [Meme] {
         if searchText.isEmpty {
-//            DataManager.clearDB(context: context)
             return memes
         } else {
-//            DataManager.clearDB(context: context)
-            return DataManager.findSimilarEntries(
-                query: searchText,
-                context: context,
-                limit: Int(numSearchResults),
-                tagName: nil
-            )
+            return memes.filter { meme in
+                // Check content for search text
+                let matchesContent = meme.content.localizedCaseInsensitiveContains(searchText)
+                
+                // tags for search text
+                let matchesTags = meme.tags.contains { tag in
+                    tag.name.localizedCaseInsensitiveContains(searchText)
+                }
+                // Include the meme if it matches either tag or content
+                return matchesContent || matchesTags
+            }
         }
     }
 
