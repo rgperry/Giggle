@@ -68,8 +68,7 @@ func memeSearchPredicate(for searchText: String) -> NSPredicate {
     }
 }
 
-
- // Utility Class
+// Utility Class
 class DataManager {
     // (no longer being used in the main app (may be useful though for sentiment search so I will leave it here for now))
     static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10, tagName: String?) -> [Meme] {
@@ -297,5 +296,6 @@ func regenerateMeme(description: String) async -> UIImage? {
     } catch {
         print("Error in regenerateMeme: \(error)")
     }
+    
     return nil // Return nil if the operation fails
 }

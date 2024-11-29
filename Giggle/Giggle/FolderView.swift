@@ -49,7 +49,7 @@ struct FolderView: View {
             
             let filteredAgain = searchText.isEmpty ? tagFilteredMemes : tagFilteredMemes.filter { memeSearchPredicate(for: searchText).evaluate(with: $0) }
             
-                return filteredAgain.sorted { $0.dateAdded > $1.dateAdded }
+            return filteredAgain.sorted { $0.dateAdded > $1.dateAdded }
         }
     }
     
