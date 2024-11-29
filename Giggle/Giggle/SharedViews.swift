@@ -10,18 +10,17 @@ import SwiftUI
 import SwiftData
 import UIKit
 
-import SwiftUI
-
 struct FolderItem: View {
     var text: String
     var memes: [Meme]
     let size: CGFloat = 150
+    
     @State var isPinned = false
-
     @State private var currentIndex: Int = 0
     @State private var timer: Timer? = nil
-
-    let interval: TimeInterval = 3.0 // Thumbnail cycle interval
+    
+    // Thumbnail cycle interval
+    let interval: TimeInterval = 10.0
 
     var body: some View {
         NavigationLink(destination: FolderView(header: text)) {
@@ -65,14 +64,14 @@ struct FolderItem: View {
                     Text(text.capitalized)
                         .font(.headline)
                         .foregroundColor(.white)
-                        .padding(.vertical, 10)
+                        .padding(.vertical, 3)
                 }
                 .padding(.vertical, 20)
 
                 if isPinned {
                     Image(systemName: "pin.fill")
                         .foregroundColor(.gray)
-                        .font(.system(size: 47))
+                        .font(.system(size: 35))
                         .shadow(color: .black, radius: 4, x: 0, y: 0)
                         .offset(x: -65, y: -size / 2 - 13)
                 }
@@ -102,28 +101,24 @@ struct FolderItem: View {
     }
 }
 
-
 struct SearchBar: View {
     var text: String
     @Binding var searchText: String
-    @Environment(\.colorScheme) var colorScheme // Tamaer A. - Detect Light/Dark Mode
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         HStack {
             HStack {
                 Image(systemName: "magnifyingglass")
-                    .foregroundColor(colorScheme == .dark ? .white : .black) // Tamaer A. -Adapts dynamically
-                    //.foregroundColor(.black)
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
 
                 TextField(text, text: $searchText)
                     .padding(8)
-                    .foregroundColor(colorScheme == .dark ? .white : .black) // Tamaer A. - Adapts dynamically
-                    //.foregroundColor(.black)
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
             }
             .padding(.horizontal, 20)
             .frame(height: 45)
-            //.background(.white)
-            .background(colorScheme == .dark ? Color.black : Color.white) // Tamaer A. - Adapts dynamically
+            .background(colorScheme == .dark ? Color.black : Color.white)
             .cornerRadius(18)
             .shadow(radius: 2)
         }
@@ -133,15 +128,14 @@ struct SearchBar: View {
 
 struct PageHeader: View {
     var text: String
-    @Environment(\.colorScheme) var colorScheme // Tamaer A. - Detect Light/Dark Mode
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         Text(text)
             .font(.system(size: 45, weight: .semibold, design: .rounded))
             .padding(.top, 10)
             .padding(.bottom, 15)
-            //.foregroundColor(.white)
-            .foregroundColor(colorScheme == .dark ? Color.black : Color.white) // Tamaer A - Adapts to Light/Dark Mode
+            .foregroundColor(colorScheme == .dark ? Color.black : Color.white)
     }
 }
 

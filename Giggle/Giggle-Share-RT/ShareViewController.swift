@@ -29,7 +29,7 @@ class ShareViewController: UIViewController {
          }
 
          let saveToFavoritesAction = UIAlertAction(title: "All Giggles + Favorites", style: .default) { [weak self] _ in
-             print("Save to Favorites selected.")
+             print("Save to All Giggles + Favorites selected.")
              self?.processSharedItems(saveAsFavorite: true)
          }
 

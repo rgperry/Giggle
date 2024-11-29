@@ -16,9 +16,12 @@ extension UIImage {
     func thumbnail(maxWidth: CGFloat = 100) -> UIImage {
         let aspectRatio = size.height / size.width
         let targetSize = CGSize(width: maxWidth, height: maxWidth * aspectRatio)
+        
         UIGraphicsBeginImageContextWithOptions(targetSize, false, 1.0)
         defer { UIGraphicsEndImageContext() }
+        
         draw(in: CGRect(origin: .zero, size: targetSize))
+        
         return UIGraphicsGetImageFromCurrentImageContext() ?? self
     }
 
@@ -51,20 +54,20 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     
     var filteredMemes: [Meme] {
         switch currentTab {
-        case .favorites:
-            return imagesArray
-                .filter { $0.favorited }
-                .sorted { ($0.dateFavorited ?? .distantPast) > ($1.dateFavorited ?? .distantPast) }
-            
-        case .recentlyShared:
-            return imagesArray
-                .filter { $0.dateLastShared != nil }
-                .sorted { $0.dateLastShared! > $1.dateLastShared! }
-                .prefix(24)
-                .map { $0 }
-            
-        case .allGiggles:
-            return imagesArray.sorted { $0.dateAdded > $1.dateAdded }
+            case .favorites:
+                return imagesArray
+                    .filter { $0.favorited }
+                    .sorted { ($0.dateFavorited ?? .distantPast) > ($1.dateFavorited ?? .distantPast) }
+                
+            case .recentlyShared:
+                return imagesArray
+                    .filter { $0.dateLastShared != nil }
+                    .sorted { $0.dateLastShared! > $1.dateLastShared! }
+                    .prefix(24)
+                    .map { $0 }
+                
+            case .allGiggles:
+                return imagesArray.sorted { $0.dateAdded > $1.dateAdded }
         }
     }
     
@@ -82,35 +85,36 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
     @objc func tabChanged(_ sender: UISegmentedControl) {
         switch sender.selectedSegmentIndex {
-        case 1:
-            currentTab = .favorites
-            searchBar.placeholder = "Search Favorite Giggles"
-        case 2:
-            currentTab = .recentlyShared
-            searchBar.placeholder = "Search Recent Giggles"
-        default:
-            currentTab = .allGiggles
-            searchBar.placeholder = "Search All Giggles"
+            case 1:
+                currentTab = .favorites
+                searchBar.placeholder = "Search Favorite Giggles"
+            
+            case 2:
+                currentTab = .recentlyShared
+                searchBar.placeholder = "Search Recently Shared"
+            
+            default:
+                currentTab = .allGiggles
+                searchBar.placeholder = "Search All Giggles"
         }
     }
 
-
     let dynamicBackgroundColor = UIColor { traitCollection in
         return traitCollection.userInterfaceStyle == .dark ?
-            UIColor.black : // Dark Mode color
-            UIColor.white // Light Mode color
+            UIColor.black :
+            UIColor.white
     }
 
     let dynamicSelectedTintColor = UIColor { traitCollection in
         return traitCollection.userInterfaceStyle == .dark ?
-            UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0) ://UIColor.systemGray6 : // Light color for Dark Mode
-            UIColor.systemGray4  // Light Mode color
+            UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0) :
+            UIColor.systemGray4
     }
 
     let dynamicTextColor = UIColor { traitCollection in
         return traitCollection.userInterfaceStyle == .dark ?
-            UIColor.lightGray : // White text for Dark Mode
-            UIColor.black  // Black text for Light Mode
+            UIColor.lightGray :
+            UIColor.black
     }
 
     override func viewDidLoad() {
@@ -133,6 +137,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         collectionView.delegate = self
         collectionView.prefetchDataSource = self //enable prefetching so app only loads what is seen
         collectionView.reloadData()
+        
         //tabs
         let segmentedControl = UISegmentedControl(items: ["All Giggles", "Favorites", "Recents"])
         segmentedControl.selectedSegmentIndex = 0
@@ -161,8 +166,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         ])
 
         resetSearchTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(resetIfSearchEmpty), userInfo: nil, repeats: true)
-
     }
+    
     //reset to all giggles if search bar is empty. auto reload kinda
     @objc private func resetIfSearchEmpty() {
         DispatchQueue.main.async { [weak self] in
@@ -175,12 +180,12 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         }
     }
 
-
     //LOAD MEMES FROM DATA
     private var hasLoadedMemes = false
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         //setupLoadingIndicator()
+        
         // Load memes only once when the view appears for the first time
         if !hasLoadedMemes {
             hasLoadedMemes = true
@@ -234,9 +239,10 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
                 DispatchQueue.main.async {
                     self.collectionView.reloadData()
                 }
+                
                 logger.log("Search Bar empty, returning All Giggles")
             }
-            else{
+            else {
                 self.performSearch(query: searchText)
             }
         }
@@ -244,6 +250,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder() // Dismiss the keyboard
+        
         logger.log("Search button clicked. Keyboard dismissed.")
     }
 
@@ -252,8 +259,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
-
             let results: [Meme]
+            
             if query.isEmpty {
                 results = self.allMemes //resets to full list of mems
                 logger.log("Memes Filtered, returning All Giggles")
@@ -316,6 +323,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let count = filteredMemes.count
         logger.log("Number of items in section: \(count)")
+        
         return count
     }
 
@@ -372,7 +380,6 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         }
 
         let meme = filteredMemes[indexPath.item]
-
         let originalImage = meme.imageAsUIImage.fixedOrientation()//preserve orientation
 
         // Configure the message layout with the meme's image

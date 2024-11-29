@@ -44,23 +44,22 @@ struct ContentView: View {
         NavigationStack {
             VStack {
                 PageHeader(text: "Giggle")
-
                 SearchBar(text: "Search for a Giggle", searchText: $searchText)
-                    ScrollView {
-                        LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
-                            // If search bar is empty, show folders
-                            if searchText.isEmpty {
-                                folderItemsView
-                            }
-                            // Else show memes for search query
-                            else {
-                                searchResultsView
-                            }
+                
+                ScrollView {
+                    LazyVGrid(columns: GridStyle.grid, spacing: GridStyle.folderRowPadding) {
+                        // If search bar is empty, show folders
+                        if searchText.isEmpty {
+                            folderItemsView
                         }
-
-                        .padding(.horizontal, GridStyle.columnPadding)
-                        .padding(.top, GridStyle.searchBarPadding)
+                        // Else show memes for search query
+                        else {
+                            searchResultsView
+                        }
                     }
+                    .padding(.horizontal, GridStyle.columnPadding)
+                    .padding(.top, GridStyle.searchBarPadding)
+                }
 
                 BottomNavBar()
             }
@@ -69,6 +68,7 @@ struct ContentView: View {
         .tint(.black)
         .navigationBarHidden(true)
     }
+    
     private var folderItemsView: some View {
         Group {
             FolderItem(
