@@ -51,8 +51,31 @@ actor MemeImportManager {
     }
 }
 
- // Utility Class
+func memeSearchPredicate(for searchText: String) -> NSPredicate {
+    NSPredicate { meme, _ in
+        guard let meme = meme as? Meme, !searchText.isEmpty else { return false }
+        
+        // Check content for search text
+        let matchesContent = meme.content.localizedCaseInsensitiveContains(searchText)
+        
+        // Split searchText into words
+        let searchWords = searchText.split(separator: " ").map { String($0) }
+
+        let matchesTags = meme.tags.contains { tag in
+            // Check if any word in search query matches the tag
+            searchWords.contains { word in
+                tag.name.localizedCaseInsensitiveContains(word)
+            }
+        }
+        
+        // Include the meme if it matches either tag or content
+        return matchesContent || matchesTags
+    }
+}
+
+// Utility Class
 class DataManager {
+    // (no longer being used in the main app (may be useful though for sentiment search so I will leave it here for now))
     static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10, tagName: String?) -> [Meme] {
         logger.debug("searching for similar entries \(query)")
         let embedding = NLEmbedding.sentenceEmbedding(for: .english)
@@ -278,5 +301,6 @@ func regenerateMeme(description: String) async -> UIImage? {
     } catch {
         print("Error in regenerateMeme: \(error)")
     }
+    
     return nil // Return nil if the operation fails
 }
