@@ -10,6 +10,47 @@ import NaturalLanguage
 import SwiftUI
 import Alamofire
 
+@ModelActor
+actor MemeImportManager {
+    func storeMemes(images: [UIImage], completion: @escaping () -> Void) async throws {
+        guard !images.isEmpty else {
+            logger.log("NO IMAGES TO IMPORT")
+            return
+        }
+        
+        let startTime = Date()
+        
+        try await withThrowingTaskGroup(of: Meme.self) { group in
+            for image in images {
+                group.addTask {
+                    let (tags, content) = try await DataManager.getInfo(for: image)
+                    
+                    // Direct insertion without actor synchronization
+                    let meme = Meme(content: content, tags: tags, image: image)
+                    return meme
+                }
+            }
+            
+            for try await item in group {
+                modelContext.insert(item)
+            }
+        }
+        
+        // Save outside of the task group
+        try modelContext.save()
+        
+        let endTime = Date()
+        let totalTime = endTime.timeIntervalSince(startTime)
+        let averageTime = totalTime / Double(images.count)
+        
+        print("Total Import Time: \(String(format: "%.2f", totalTime)) seconds")
+        print("Average Time per Image: \(String(format: "%.2f", averageTime)) seconds")
+        print("Total Images Imported: \(images.count)")
+        
+        completion()
+    }
+}
+
  // Utility Class
 class DataManager {
     static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10, tagName: String?) -> [Meme] {
@@ -175,13 +216,32 @@ class DataManager {
         }
     }
 
-    // Used for testing
     static func clearDB(context: ModelContext) {
         do {
-            try context.delete(model: Tag.self)
-            try context.delete(model: Meme.self)
+            // Create fetch descriptors for both models
+            let tagFetchDescriptor = FetchDescriptor<Tag>()
+            let memeFetchDescriptor = FetchDescriptor<Meme>()
+            
+            // Fetch all tags
+            let tags = try context.fetch(tagFetchDescriptor)
+            
+            // Delete all tags
+            for tag in tags {
+                context.delete(tag)
+            }
+            
+            // Fetch all memes
+            let memes = try context.fetch(memeFetchDescriptor)
+            
+            // Delete all memes
+            for meme in memes {
+                context.delete(meme)
+            }
+            
+            // Save the context to persist the deletions
+            try context.save()
         } catch {
-            fatalError(error.localizedDescription)
+            print("Error clearing database: \(error.localizedDescription)")
         }
     }
 }
