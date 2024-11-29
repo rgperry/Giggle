@@ -37,7 +37,6 @@ struct FolderView: View {
                 let recentlySharedMemes = allMemes
                     .filter { $0.dateLastShared != nil }
                     .sorted { $0.dateLastShared! > $1.dateLastShared! }
-                    .prefix(24)
                     
                 return Array(recentlySharedMemes)
             
@@ -47,9 +46,9 @@ struct FolderView: View {
                     meme.tags.contains { $0.name == header }
                 }
             
-            let filteredAgain = searchText.isEmpty ? tagFilteredMemes : tagFilteredMemes.filter { memeSearchPredicate(for: searchText).evaluate(with: $0) }
+                let filteredAgain = searchText.isEmpty ? tagFilteredMemes : tagFilteredMemes.filter { memeSearchPredicate(for: searchText).evaluate(with: $0) }
             
-            return filteredAgain.sorted { $0.dateAdded > $1.dateAdded }
+                return filteredAgain.sorted { $0.dateAdded > $1.dateAdded }
         }
     }
     
