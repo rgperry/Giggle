@@ -42,6 +42,7 @@ struct FolderView: View {
             
             // Filter by tag if `header` is not a special folder
             default:
+                // I think we could use getAllMemesWithSearch() in this case - super minor
                 let tagFilteredMemes = memes.filter { meme in
                     meme.tags.contains { $0.name == header }
                 }
