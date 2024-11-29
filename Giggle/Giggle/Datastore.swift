@@ -58,9 +58,14 @@ func memeSearchPredicate(for searchText: String) -> NSPredicate {
         // Check content for search text
         let matchesContent = meme.content.localizedCaseInsensitiveContains(searchText)
         
-        // Check tags for search text
+        // Split searchText into words
+        let searchWords = searchText.split(separator: " ").map { String($0) }
+
         let matchesTags = meme.tags.contains { tag in
-            tag.name.localizedCaseInsensitiveContains(searchText)
+            // Check if any word in search query matches the tag
+            searchWords.contains { word in
+                tag.name.localizedCaseInsensitiveContains(word)
+            }
         }
         
         // Include the meme if it matches either tag or content
