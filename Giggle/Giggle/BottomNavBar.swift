@@ -17,7 +17,7 @@ struct BottomNavBar: View {
         ZStack(alignment: .bottom) {
             Rectangle()
                 //.fill(Color(white: 0.98))
-                .fill(Color(UIColor.systemBackground)) // Tamaer A. - Adapts to Light/Dark Mode
+                .fill(Color(UIColor.systemBackground))
                 .frame(height: 127)
                 .edgesIgnoringSafeArea(.bottom)
 
@@ -72,7 +72,7 @@ struct BottomNavBarIcon: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
-                .foregroundColor(Color.primary) // Tamaer 11/21/24 - Adapts to Light/Dark Mode
+                .foregroundColor(Color.primary)
                 .padding(.trailing, 30)
         }
     }
