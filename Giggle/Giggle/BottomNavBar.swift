@@ -31,7 +31,6 @@ struct BottomNavBar: View {
                     .onTapGesture {
                         isImagePickerPresented = true
                         pickingIsDone = false
-                        
                     }
                 
                 NavigationLink(destination: GenerateMemeView()) {
@@ -56,9 +55,9 @@ struct BottomNavBar: View {
                     return
                 }
                 Task {
-                    
                     isStoring = true
                     defer { isStoring = false }
+                    
                     do {
                         let importManager = MemeImportManager(modelContainer: context.container)
                         try await importManager.storeMemes(images: selectedImages) {
@@ -71,7 +70,6 @@ struct BottomNavBar: View {
                         logger.error("Error storing \(selectedImages.count) memes: \(error)")
                     }
                 }
-                
             }
             .padding(.bottom, 59)
         }
