@@ -16,9 +16,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4131856C2CCEB271000BC665"
-               BuildableName = "Giggle_IMessage.appex"
-               BlueprintName = "Giggle_IMessage"
+               BlueprintIdentifier = "518B96472CCEC5C700AE458A"
+               BuildableName = "Giggle-Share.appex"
+               BlueprintName = "Giggle-Share"
                ReferencedContainer = "container:Giggle.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -59,14 +59,8 @@
       launchAutomaticallySubstyle = "2">
       <RemoteRunnable
          runnableDebuggingMode = "1"
-         BundleIdentifier = "com.apple.MobileSMS">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "4131856C2CCEB271000BC665"
-            BuildableName = "Giggle_IMessage.appex"
-            BlueprintName = "Giggle_IMessage"
-            ReferencedContainer = "container:Giggle.xcodeproj">
-         </BuildableReference>
+         BundleIdentifier = "com.apple.mobilesafari"
+         RemotePath = "/Library/Developer/CoreSimulator/Volumes/iOS_22A3351/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 18.0.simruntime/Contents/Resources/RuntimeRoot/Applications/MobileSafari.app">
       </RemoteRunnable>
       <MacroExpansion>
          <BuildableReference

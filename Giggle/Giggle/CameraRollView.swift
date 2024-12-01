@@ -8,15 +8,19 @@
 import Foundation
 import SwiftUI
 import PhotosUI
+import UniformTypeIdentifiers
 
 struct ImagePicker: UIViewControllerRepresentable {
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedImages: [UIImage]
+    @Binding var selectedVideos: [URL]
+    @Binding var selectedGIFs: [URL]
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
-        // Only show images
-        config.filter = .images
+        
+        config.filter = .any(of: [.images, .videos])
+        
         // Allow multiple selections
         config.selectionLimit = 0
 
@@ -58,8 +62,25 @@ struct ImagePicker: UIViewControllerRepresentable {
                         }
                     }
                 }
+                else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { (url, error) in
+                        if let url = url {
+                            DispatchQueue.main.async {
+                                self.parent.selectedVideos.append(url)
+                            }
+                        }
+                    }
+                }
+                else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.gif.identifier) {
+                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.gif.identifier) { (url, error) in
+                        if let url = url {
+                            DispatchQueue.main.async {
+                                self.parent.selectedGIFs.append(url)
+                            }
+                        }
+                    }
+                }
             }
-            
         }
     }
 }
