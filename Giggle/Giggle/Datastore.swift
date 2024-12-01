@@ -207,7 +207,7 @@ class DataManager {
     }
 
     static func getInfo(for image: UIImage) async throws -> ([Tag], String) {
-        guard let apiUrl = URL(string: "https://3.138.136.6/imageInfo/?contentLength=100") else {
+        guard let apiUrl = URL(string: "https://18.223.212.43/imageInfo/?contentLength=100") else {
             print("getInfo: bad url")
             return ([], "NO CONTENT")
         }
@@ -270,7 +270,7 @@ class DataManager {
 }
 
 func generateMeme(description: String) async -> UIImage? {
-    let urlString = "https://3.138.136.6/generateMeme/?description=\(description.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+    let urlString = "https://18.223.212.43/generateMeme/?description=\(description.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
     guard let url = URL(string: urlString) else { return nil }
 
     do {
@@ -283,7 +283,7 @@ func generateMeme(description: String) async -> UIImage? {
 }
 
 func regenerateMeme(description: String) async -> UIImage? {
-    let url = URL(string: "https://3.138.136.6/redoGeneration")!
+    let url = URL(string: "https://18.223.212.43/redoGeneration")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
