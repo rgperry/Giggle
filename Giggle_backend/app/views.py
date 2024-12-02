@@ -42,7 +42,7 @@ def redo_generation(request):
             return JsonResponse({"error": "No image file provided"}, status=400)
         
         # Get the uploaded image
-        image = request.FILES['image'].read()  # Read binary content from uploaded file
+        image = request.FILES['image'] 
 
         # Call the regenerate_image function
         base64_image = regenerate_image(image)
