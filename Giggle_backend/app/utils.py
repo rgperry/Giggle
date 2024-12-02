@@ -7,11 +7,6 @@ import base64
 from django.conf import settings
 import random
 
-OPENAI_API_KEY = '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'
-#openai.api_key = settings.OPENAI_API_KEY 
-
-
-
 def generate_image(description):
     """
     Generates an image based on a description using OpenAI's updated API.
@@ -22,7 +17,7 @@ def generate_image(description):
 
     style = random.choice(["vivid", "natural"])
     try:
-        client = OpenAI(api_key=OPENAI_API_KEY)
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
         response = client.images.generate(
             model="dall-e-3",
             prompt=description,
@@ -59,7 +54,7 @@ def regenerate_image(image_data):
         image_file.seek(0)  # Reset the file pointer to the beginning
 
         # Call the OpenAI API with the file-like object
-        client = openai.Client(api_key=OPENAI_API_KEY)
+        client = openai.Client(api_key=settings.OPENAI_API_KEY)
         response = client.images.create_variation(
             model="dall-e-2",
             image=image_file,  # Pass the file-like object
@@ -186,19 +181,3 @@ def extract_content(image_data, content_length=200):
         print(f"An error occurred in extract_content: {e}")
         return [f"error is {e}"]
     
-#output = generate_image("a cat with a hat")
-
-output = regenerate_image(Image.open("/Users/razeenmaroof/Desktop/test4.png"))
-if output:
-
-    # Decode the base64 string to binary
-    image_data = base64.b64decode(output)
-    
-    # Load the image into PIL
-    img = Image.open(BytesIO(image_data))
-    
-    # Save the image to the desktop
-    img.save("/Users/razeenmaroof/Desktop/test5.png")  # Replace 'yourusername' with your Mac username
-    print("Image saved to ~/Desktop/test.png")
-else:
-    print("Image generation failed.")
