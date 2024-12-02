@@ -20,21 +20,73 @@ def generate_image(description):
         return None
 
     try:
-        response = openai.Image.create(
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        response = client.images.generate(
+            model="dall-e-3",
             prompt=description,
+            size="1024x1024",
+            quality="standard",
             n=1,
-            size="512x512"
         )
-        image_url = response['data'][0]['url']
-        image_response = requests.get(image_url)
-        img = Image.open(BytesIO(image_response.content))
-        return img
+        image_url = response.data[0].url
+
+        # Fetch image from the URL
+        response = requests.get(image_url)
+        response.raise_for_status()  # Ensure the request was successful
+
+        # Encode the image in Base64
+        base64_image = base64.b64encode(response.content).decode('utf-8')
+
+        return base64_image  # Return the Base64 string
     except openai.error.AuthenticationError as e:
         print(f"Authentication Error: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Image fetch error: {e}")
         return None
     except Exception as e:
         print(f"An error occurred in generate_image: {e}")
         return None
+
+def regenerate_image(image_data):
+    """
+    Regenerate an image by creating a variation using OpenAI's DALL-E API.
+    """
+    try:
+        # Ensure the image is in the correct format (PNG)
+        img = Image.open(BytesIO(image_data))
+        
+        # Save the image to a BytesIO object as PNG
+        image_file = BytesIO()
+        img.save(image_file, format="PNG")
+        image_file.seek(0)  # Reset the file pointer to the beginning
+
+        # Call the OpenAI API with the file-like object
+        client = openai.Client(api_key=settings.OPENAI_API_KEY)
+        response = client.images.create_variation(
+            model="dall-e-2",
+            image=image_file,  # Pass the file-like object
+            n=1,
+            size="1024x1024"
+        )
+
+        # Extract the image URL from the response
+        image_url = response.data[0].url
+        
+        # Fetch image from the URL
+        response = requests.get(image_url)
+        response.raise_for_status()  # Ensure the request was successful
+
+        # Encode the image in Base64
+        base64_image = base64.b64encode(response.content).decode('utf-8')
+
+        return base64_image  # Return the Base64 string
+    except openai.error.AuthenticationError as e:
+        print(f"Authentication Error: {e}")
+        return "Authentication error in regenerating image"
+    except Exception as e:
+        print(f"An error occurred in regenerate_image: {e}")
+        return "Error in regenerating image"
 
 def analyze_sentiment(message):
     """
@@ -88,7 +140,7 @@ def extract_tags(image_data, num_tags=10):
                         "Make sure to take into account the emotion/sentiment of the image, as well as the content" 
                         "of the image. If there is any text or key info also make a descriptive tag for it."
                         " Return the tags in a comma separated list. I repeat your response to this message should ONLY be "
-                         "a list of the tags that you have generated, separated by commas. No brackets necessary",
+                        "a list of the tags that you have generated, separated by commas. No brackets necessary",
                     },
                     {
                     "type": "image_url",

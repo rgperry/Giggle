@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods
 import json
 import base64
 from io import BytesIO
-from .utils import generate_image, analyze_sentiment, extract_tags, extract_content
+from .utils import generate_image, regenerate_image, analyze_sentiment, extract_tags, extract_content
 from django.core.files.storage import FileSystemStorage
 import time
 
@@ -13,18 +13,17 @@ import time
 def generate_meme(request):
     """
     Endpoint to generate a meme based on description.
+    Returns a Base64-encoded image.
     """
     description = request.GET.get('description', '').strip()
     if not description:
         return JsonResponse({"error": "Description cannot be empty"}, status=400)
 
     try:
-        img = generate_image(description)
-        if img:
-            response = HttpResponse(content_type='image/png')
-            img.save(response, 'PNG')
-            response['Content-Disposition'] = 'attachment; filename="meme.png"'
-            return response
+        # Call the generate_image function
+        base64_image = generate_image(description)
+        if base64_image:
+            return JsonResponse({"image": base64_image}, status=200)
         else:
             return JsonResponse({"error": "Image generation failed"}, status=500)
     except Exception as e:
@@ -38,22 +37,19 @@ def redo_generation(request):
     Endpoint to redo meme generation.
     """
     try:
-        data = json.loads(request.body)
-        description = data.get('description', '').strip()
-        if not description:
-            return JsonResponse({"error": "Description cannot be empty"}, status=400)
+        # Handle image upload
+        if 'image' not in request.FILES:
+            return JsonResponse({"error": "No image file provided"}, status=400)
+        
+        # Get the uploaded image
+        image = request.FILES['image'].read()  # Read binary content from uploaded file
 
-        img = generate_image(description)
-        if img:
-            img_io = BytesIO()
-            img.save(img_io, 'PNG')
-            img_io.seek(0)
-            img_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
-            return JsonResponse({"imageFile": img_base64})
+        # Call the regenerate_image function
+        base64_image = regenerate_image(image)
+        if base64_image:
+            return JsonResponse({"image": base64_image})
         else:
-            return JsonResponse({"error": "Image generation failed"}, status=500)
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+            return JsonResponse({"error": "Image regeneration failed"}, status=500)
     except Exception as e:
         print(f"Error in redo_generation: {e}")
         return JsonResponse({"error": "Internal Server Error"}, status=500)
