@@ -101,14 +101,24 @@ struct MemeDescriptionField: View {
 
 struct GenerateMemeButton: View {
     @Binding var isClicked: Bool
+    @Binding var memeDescription: String
     var isEnabled: Bool
     var showAlertAction: () -> Void
+    @Binding var memeImage: UIImage?
 
     var body: some View {
         Button(action: {
             if isEnabled {
-                isClicked = true
                 print("Generate meme with Dalle3 AI!")
+                Task {
+                    let generatedImage = await generateMeme(description: memeDescription)
+                    guard let generatedImage else {
+                        logger.error("ERROR GENERATING IMAGE")
+                        return
+                    }
+                    isClicked = true
+                    memeImage = generatedImage
+                }
             } else {
                 // Trigger alert if no description
                 showAlertAction()

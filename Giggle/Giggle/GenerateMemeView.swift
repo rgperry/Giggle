@@ -11,6 +11,7 @@ struct GenerateMemeView: View {
     @State private var memeDescription: String = ""
     @State private var isClicked = false
     @State private var showAlert = false
+    @State private var memeImage: UIImage? = nil
 
     var body: some View {
         NavigationStack {
@@ -21,8 +22,10 @@ struct GenerateMemeView: View {
 
                 GenerateMemeButton(
                     isClicked: $isClicked,
+                    memeDescription: $memeDescription,
                     isEnabled: !memeDescription.isEmpty,
-                    showAlertAction: { showAlert = true }
+                    showAlertAction: { showAlert = true },
+                    memeImage: $memeImage
                 )
                 .alert(isPresented: $showAlert) {
                     Alert(
@@ -36,7 +39,7 @@ struct GenerateMemeView: View {
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
             .navigationDestination(isPresented: $isClicked) {
-                MemeCreatedView(memeDescription: memeDescription)
+                MemeCreatedView(memeDescription: memeDescription, memeImage: $memeImage)
             }
         }
         .tint(.black)
@@ -60,6 +63,6 @@ struct QuestionMark: View {
     }
 }
 
-#Preview {
-    GenerateMemeView()
-}
+//#Preview {
+//    GenerateMemeView()
+//}
