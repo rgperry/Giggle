@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import PhotosUI
+import UniformTypeIdentifiers
 
 struct ImagePicker: UIViewControllerRepresentable {
     @Environment(\.modelContext) private var modelContext
@@ -16,8 +17,9 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
-        // Only show images
-        config.filter = .images
+        
+        config.filter = .any(of: [.images, .videos])
+        
         // Allow multiple selections
         config.selectionLimit = 0
 
@@ -62,7 +64,6 @@ struct ImagePicker: UIViewControllerRepresentable {
                         }
                     }
                 }
-
                 // Once all images are loaded, update the state
                 group.notify(queue: .main) {
                     self.parent.selectedImages.append(contentsOf: imagesToAppend)
