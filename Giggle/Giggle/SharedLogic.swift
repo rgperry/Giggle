@@ -25,3 +25,9 @@ struct GridStyle {
 
     static let searchBarPadding: CGFloat = 28
 }
+
+//enum MemeMedia: Equatable {
+//    case image(UIImage)
+//    case video(URL)
+//    case gif(URL)
+//}

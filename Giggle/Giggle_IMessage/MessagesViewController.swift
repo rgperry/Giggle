@@ -199,7 +199,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         for indexPath in indexPaths {
             let meme = filteredMemes[indexPath.item]
-            _ = meme.imageAsUIImage.thumbnail(maxWidth: 20) // Prefetch thumbnails for images about to appear
+            _ = meme.memeAsUIImage.thumbnail(maxWidth: 20) // Prefetch thumbnails for images about to appear
         }
     }
 
@@ -217,7 +217,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         // Load high-quality image asynchronously and ensure it doesn’t get overridden
         DispatchQueue.global(qos: .utility).async {
-            let highQualityImage = meme.imageAsUIImage.thumbnail(maxWidth: 200)
+            let highQualityImage = meme.memeAsUIImage.thumbnail(maxWidth: 200)
 
             // Set high-quality image on main thread with a fade-in effect
             DispatchQueue.main.async {
@@ -234,7 +234,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageCell", for: indexPath) as! ImageCell
         let meme = filteredMemes[indexPath.item]
-        cell.imageView.image = meme.imageAsUIImage.thumbnail(maxWidth: 50)
+        cell.imageView.image = meme.memeAsUIImage.thumbnail(maxWidth: 50)
         //logger.log("Setting image for meme at index \(indexPath.item): \(meme.imageAsUIImage)")
         return cell
     }
@@ -249,7 +249,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         let meme = filteredMemes[indexPath.item]
 
-        let originalImage = meme.imageAsUIImage.fixedOrientation()//preserve orientation
+        let originalImage = meme.memeAsUIImage.fixedOrientation()//preserve orientation
 
         // Configure the message layout with the meme's image
         let layout = MSMessageTemplateLayout()

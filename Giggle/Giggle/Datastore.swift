@@ -10,10 +10,19 @@ import NaturalLanguage
 import SwiftUI
 import Alamofire
 
+enum MemeMedia: Equatable { //copy of enum type in SharedLogic.swift (commented out there)
+    case image(UIImage)
+    case video(URL)
+    case gif(URL)
+}
+
 @ModelActor
 actor MemeImportManager {
-    func storeMemes(images: [UIImage], completion: @escaping () -> Void) async throws {
-        guard !images.isEmpty else {
+    
+    
+    
+    func storeMemes(memes: [MemeMedia], completion: @escaping () -> Void) async throws {
+        guard !memes.isEmpty else {
             logger.log("NO IMAGES TO IMPORT")
             return
         }
@@ -21,12 +30,12 @@ actor MemeImportManager {
         let startTime = Date()
         
         try await withThrowingTaskGroup(of: Meme.self) { group in
-            for image in images {
+            for meme in memes {
                 group.addTask {
-                    let (tags, content) = try await DataManager.getInfo(for: image)
+                    let (tags, content) = try await DataManager.getInfo(for: meme) //update getInfo call so gif/vid works
                     
                     // Direct insertion without actor synchronization
-                    let meme = Meme(content: content, tags: tags, image: image)
+                    let meme = Meme(content: content, tags: tags, media: meme)
                     return meme
                 }
             }
@@ -41,11 +50,11 @@ actor MemeImportManager {
         
         let endTime = Date()
         let totalTime = endTime.timeIntervalSince(startTime)
-        let averageTime = totalTime / Double(images.count)
+        let averageTime = totalTime / Double(memes.count)
         
         print("Total Import Time: \(String(format: "%.2f", totalTime)) seconds")
         print("Average Time per Image: \(String(format: "%.2f", averageTime)) seconds")
-        print("Total Images Imported: \(images.count)")
+        print("Total Images Imported: \(memes.count)")
         
         completion()
     }
@@ -155,18 +164,18 @@ class DataManager {
 
     // Decorated with @MainActor to avoid concurrency issues with passing down the model context
     @MainActor
-    static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
+    static func storeMemes(context: ModelContext, memes: [MemeMedia], completion: @escaping () -> Void) async {
         do {
             // Loop through each image
-            for (index, image) in images.enumerated() {
+            for (index, meme) in memes.enumerated() {
                 do {
                     // Retrieve tags and content for each image
-                    let (tags, content) = try await DataManager.getInfo(for: image)
+                    let (tags, content) = try await DataManager.getInfo(for: meme) //update getInfo call so gif/vid works
                     
-                    let meme = Meme(content: content, tags: tags, image: image)
+                    let meme = Meme(content: content, tags: tags, media: meme)
                     context.insert(meme)
                     
-                    logger.info("Successfully processed image \(index + 1) of \(images.count)")
+                    logger.info("Successfully processed image \(index + 1) of \(memes.count)")
                 } catch {
                     logger.error("Error processing image \(index + 1): \(error.localizedDescription)")
                     continue // This will skip the failed image and continue with others
@@ -175,7 +184,7 @@ class DataManager {
             
             // Save all successfully processed memes
             try context.save()
-            logger.info("Successfully saved \(images.count) memes")
+            logger.info("Successfully saved \(memes.count) memes")
             completion()
         } catch {
             logger.error("Error saving to context: \(error.localizedDescription)")

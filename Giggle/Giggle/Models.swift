@@ -9,6 +9,7 @@ import SwiftUI
 import NaturalLanguage
 import SwiftData
 import OSLog
+import AVFoundation
 
 let logger = Logger()
 
@@ -45,7 +46,7 @@ class Tag {
 
 @Model
 class Meme {
-    @Attribute(.externalStorage) var image: Data?
+    @Attribute(.externalStorage) var mediaData: Data? //xxxxx
     @Attribute(.unique) var id: UUID
     @Relationship(inverse: \Tag.memes) var tags: [Tag]
     
@@ -54,8 +55,15 @@ class Meme {
     var content: String
     var favorited: Bool = false
     var dateFavorited: Date?
+    var mediaType: MediaType
 
-    init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil) {
+    enum MediaType: String, Codable {
+        case image
+        case gif
+        case video
+    }
+
+    init(content: String, tags: [Tag] = [], media: MemeMedia, id: UUID? = nil) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
         self.dateAdded = Date()
@@ -67,20 +75,56 @@ class Meme {
         self.favorited = false
         self.dateFavorited = nil
         
-        do {
-            self.image = try convertImageToPNG(image)
-        } catch {
-            logger.error("Image conversion failed for \(self.id)")
-            self.image = try? convertImageToPNG(UIImage(systemName: "photo"))
+        switch media {
+        case .image(let image):
+            self.mediaType = .image
+            do {
+                self.mediaData = try convertImageToPNG(image)
+            } catch {
+                logger.error("Image conversion failed for \(self.id)")
+                self.mediaData = try? convertImageToPNG(UIImage(systemName: "photo"))
+            }
+        case .gif(let url), .video(let url):
+            self.mediaType = media == .gif(url) ? .gif : .video
+            do {
+                self.mediaData = try Data(contentsOf: url) //Not sure if this is bad to store all this data here xxxxxxxxxxxxxxxxxxxxxxx
+            } catch {
+                logger.error("Failed to load media data from \(url) for \(self.id)")
+                self.mediaData = nil
+            }
         }
     }
     
-    // Computed property to get the UIImage from image Data
-    var imageAsUIImage: UIImage {
-        guard let imageData = image else {
-            return UIImage(systemName: "photo") ?? UIImage()
+    // Computed property to get the UIImage from meme Data
+    var memeAsUIImage: UIImage { //imageAsUIImage
+        switch mediaType {
+        case .image:
+            guard let imageData = mediaData else {
+                return UIImage(systemName: "photo") ?? UIImage()
+            }
+            return UIImage(data: imageData) ?? UIImage()
+        case .gif, .video:
+            return UIImage(systemName: "video") ?? UIImage() // Placeholder
         }
-        return UIImage(data: imageData) ?? UIImage()
+    }
+    
+    //https://developer.apple.com/documentation/avfoundation/avassetimagegenerator
+    private func extractFirstFrame(fromMediaAt data: Data?) -> UIImage? {
+        guard let data = data, let url = URL(dataRepresentation: data, relativeTo: nil) else { return nil }
+        
+        let asset = AVURLAsset(url: url)
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.appliesPreferredTrackTransform = true // Ensure correct orientation
+        
+        Task {
+            do {
+                let image = try imageGenerator.image(at: CMTime.zero)
+                return UIImage(cgImage: image.image)
+            } catch {
+                print("Failed to extract first frame: \(error)")
+                return nil
+            }
+        }
     }
     
     func toggleFavorited() {
