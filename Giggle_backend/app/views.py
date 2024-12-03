@@ -65,7 +65,7 @@ def get_sentiment(request):
     
     try:
         sentiment = analyze_sentiment(message)
-        return JsonResponse({"sentiment": sentiment})
+        return JsonResponse({"sentiment": sentiment}, status=200)
     except Exception as e:
         print(f"Error in get_sentiment: {e}")
         return JsonResponse({"error": "Internal Server Error"}, status=500)
