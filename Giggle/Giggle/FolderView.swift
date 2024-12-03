@@ -37,22 +37,17 @@ struct FolderView: View {
                 let recentlySharedMemes = allMemes
                     .filter { $0.dateLastShared != nil }
                     .sorted { $0.dateLastShared! > $1.dateLastShared! }
-                    .prefix(24)
                     
                 return Array(recentlySharedMemes)
             
             // Filter by tag if `header` is not a special folder
             default:
+                // I think we could use getAllMemesWithSearch() in this case - super minor
                 let tagFilteredMemes = memes.filter { meme in
                     meme.tags.contains { $0.name == header }
                 }
             
-                let filteredAgain = searchText.isEmpty ? tagFilteredMemes : DataManager.findSimilarEntries(
-                    query: searchText,
-                    context: context,
-                    limit: Int(numSearchResults),
-                    tagName: header.isEmpty ? nil : header
-                )
+                let filteredAgain = searchText.isEmpty ? tagFilteredMemes : tagFilteredMemes.filter { memeSearchPredicate(for: searchText).evaluate(with: $0) }
             
                 return filteredAgain.sorted { $0.dateAdded > $1.dateAdded }
         }
@@ -66,12 +61,7 @@ struct FolderView: View {
             return memes
         }
 
-        return DataManager.findSimilarEntries(
-            query: searchText,
-            context: context,
-            limit: Int(numSearchResults),
-            tagName: nil
-        )
+        return memes.filter { memeSearchPredicate(for: searchText).evaluate(with: $0) }
     }
 
     var body: some View {

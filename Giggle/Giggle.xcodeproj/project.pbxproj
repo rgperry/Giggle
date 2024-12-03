@@ -13,6 +13,9 @@
 		41DCAC4F2CE1DB8600D7CB4B /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 41DCAC4E2CE1DB8600D7CB4B /* SDWebImage */; };
 		41DCAC512CE1DB8600D7CB4B /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 41DCAC502CE1DB8600D7CB4B /* SDWebImageMapKit */; };
 		41DCAC542CE1DBAB00D7CB4B /* SDWebImageWebPCoder in Frameworks */ = {isa = PBXBuildFile; productRef = 41DCAC532CE1DBAB00D7CB4B /* SDWebImageWebPCoder */; };
+		BB273DB62CF3D49600C7AE58 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = BB273DB52CF3D49600C7AE58 /* Alamofire */; };
+		D6B6B5FB2CEABDA300E8D7EB /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = D6B6B5FA2CEABDA300E8D7EB /* Alamofire */; };
+		D6D4DEC52CEAB8EE0054A5FC /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = D6D4DEC42CEAB8EE0054A5FC /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +133,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				413185702CCEB271000BC665 /* Messages.framework in Frameworks */,
+				BB273DB62CF3D49600C7AE58 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,6 +142,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				41DCAC512CE1DB8600D7CB4B /* SDWebImageMapKit in Frameworks */,
+				D6B6B5FB2CEABDA300E8D7EB /* Alamofire in Frameworks */,
 				41DCAC4F2CE1DB8600D7CB4B /* SDWebImage in Frameworks */,
 				41DCAC542CE1DBAB00D7CB4B /* SDWebImageWebPCoder in Frameworks */,
 			);
@@ -147,6 +152,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6D4DEC52CEAB8EE0054A5FC /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -202,6 +208,7 @@
 			);
 			name = Giggle_IMessage;
 			packageProductDependencies = (
+				BB273DB52CF3D49600C7AE58 /* Alamofire */,
 			);
 			productName = Giggle_IMessage;
 			productReference = 4131856D2CCEB271000BC665 /* Giggle_IMessage.appex */;
@@ -227,6 +234,7 @@
 				41DCAC4E2CE1DB8600D7CB4B /* SDWebImage */,
 				41DCAC502CE1DB8600D7CB4B /* SDWebImageMapKit */,
 				41DCAC532CE1DBAB00D7CB4B /* SDWebImageWebPCoder */,
+				D6B6B5FA2CEABDA300E8D7EB /* Alamofire */,
 			);
 			productName = "Giggle-Share-RT";
 			productReference = 417DE2842CE1B41F00DC18EF /* Giggle-Share-RT.appex */;
@@ -252,6 +260,7 @@
 			);
 			name = Giggle;
 			packageProductDependencies = (
+				D6D4DEC42CEAB8EE0054A5FC /* Alamofire */,
 			);
 			productName = Giggle;
 			productReference = BB2FDABC2CCBF4E800A5BD7B /* Giggle.app */;
@@ -290,6 +299,7 @@
 			packageReferences = (
 				41DCAC4D2CE1DB8600D7CB4B /* XCRemoteSwiftPackageReference "SDWebImage" */,
 				41DCAC522CE1DBAB00D7CB4B /* XCRemoteSwiftPackageReference "SDWebImageWebPCoder" */,
+				D6D4DEC32CEAB8EE0054A5FC /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BB2FDABD2CCBF4E800A5BD7B /* Products */;
@@ -373,7 +383,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 44D7Z79LC8;
+				DEVELOPMENT_TEAM = U5F6M9HZ78;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Giggle_IMessage/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Giggle;
@@ -384,7 +394,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-IMessage";
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.Giggle.Giggle.Giggle-IMessage";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -401,7 +411,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = 44D7Z79LC8;
+				DEVELOPMENT_TEAM = U5F6M9HZ78;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Giggle_IMessage/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Giggle;
@@ -412,7 +422,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-IMessage";
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.Giggle.Giggle.Giggle-IMessage";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -427,7 +437,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Giggle-Share-RT/Giggle-Share-RT.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 44D7Z79LC8;
+				DEVELOPMENT_TEAM = U5F6M9HZ78;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Giggle-Share-RT/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Giggle-Share-RT";
@@ -439,7 +449,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-Share-RT";
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.Giggle.Giggle.Giggle-Share-RT";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -454,7 +464,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Giggle-Share-RT/Giggle-Share-RT.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 44D7Z79LC8;
+				DEVELOPMENT_TEAM = U5F6M9HZ78;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Giggle-Share-RT/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Giggle-Share-RT";
@@ -466,7 +476,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-Share-RT";
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.Giggle.Giggle.Giggle-Share-RT";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -603,7 +613,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Giggle/Preview Content\"";
-				DEVELOPMENT_TEAM = 44D7Z79LC8;
+				DEVELOPMENT_TEAM = U5F6M9HZ78;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Upload Memes";
@@ -617,7 +627,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = edu.umich.eecs441Giggle.Giggle;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.umich.Giggle.Giggle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -634,7 +644,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Giggle/Preview Content\"";
-				DEVELOPMENT_TEAM = 44D7Z79LC8;
+				DEVELOPMENT_TEAM = U5F6M9HZ78;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Upload Memes";
@@ -648,7 +658,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = edu.umich.eecs441Giggle.Giggle;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.umich.Giggle.Giggle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -714,6 +724,14 @@
 				minimumVersion = 0.14.6;
 			};
 		};
+		D6D4DEC32CEAB8EE0054A5FC /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.10.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -731,6 +749,20 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 41DCAC522CE1DBAB00D7CB4B /* XCRemoteSwiftPackageReference "SDWebImageWebPCoder" */;
 			productName = SDWebImageWebPCoder;
+		};
+		BB273DB52CF3D49600C7AE58 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Alamofire;
+		};
+		D6B6B5FA2CEABDA300E8D7EB /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D6D4DEC32CEAB8EE0054A5FC /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+		D6D4DEC42CEAB8EE0054A5FC /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D6D4DEC32CEAB8EE0054A5FC /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

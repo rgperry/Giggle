@@ -265,12 +265,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
                 results = self.allMemes //resets to full list of mems
                 logger.log("Memes Filtered, returning All Giggles")
             } else {
-                results = DataManager.findSimilarEntries(
-                    query: query,
-                    memes: self.imagesArray,
-                    limit: 5,
-                    tagName: nil
-                )
+                let filteredMemes = self.imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
+                results = filteredMemes.sorted { $0.dateAdded > $1.dateAdded }
                 logger.log("Memes Filtered, returning subset")
             }
 

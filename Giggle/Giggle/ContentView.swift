@@ -27,16 +27,9 @@ struct ContentView: View {
 
     var filteredMemes: [Meme] {
         if searchText.isEmpty {
-//            DataManager.clearDB(context: context)
             return memes
         } else {
-//            DataManager.clearDB(context: context)
-            return DataManager.findSimilarEntries(
-                query: searchText,
-                context: context,
-                limit: Int(numSearchResults),
-                tagName: nil
-            )
+            return memes.filter { memeSearchPredicate(for: searchText).evaluate(with: $0) }
         }
     }
 

@@ -33,7 +33,21 @@ struct SettingsView: View {
                     .padding(.horizontal, 40)
                     .tint(.white)
 
-             }
+                // Button that triggers async function
+                Button(action: {
+                    // Using Task to call the async function
+                    DataManager.clearDB(context: context)
+                }) {
+                    Text("Delete all giggles")
+                        .font(.headline)
+                        .foregroundColor(.blue)
+                        .padding()
+                        .background(Color.white)
+                        .cornerRadius(8)
+                }
+                .padding(.top, 20)
+
+            }
             .padding()
             .padding(.top, -10)
 
