@@ -5,11 +5,7 @@ from io import BytesIO
 from PIL import Image
 import base64
 from django.conf import settings
-
-
-openai.api_key = settings.OPENAI_API_KEY 
-
-
+import random
 
 def generate_image(description):
     """
@@ -19,22 +15,59 @@ def generate_image(description):
         print("Error: Description is empty.")
         return None
 
+    style = random.choice(["vivid", "natural"])
     try:
-        response = openai.Image.create(
+        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+        response = client.images.generate(
+            model="dall-e-3",
             prompt=description,
+            size="1024x1024",
+            response_format="b64_json",
+            quality="standard",
             n=1,
-            size="512x512"
+            style= style,
         )
-        image_url = response['data'][0]['url']
-        image_response = requests.get(image_url)
-        img = Image.open(BytesIO(image_response.content))
-        return img
+
+        image_b64 = response.data[0].b64_json
+        return image_b64
     except openai.error.AuthenticationError as e:
         print(f"Authentication Error: {e}")
+        return None
+    except requests.exceptions.RequestException as e:
+        print(f"Image fetch error: {e}")
         return None
     except Exception as e:
         print(f"An error occurred in generate_image: {e}")
         return None
+
+def regenerate_image(image_data):
+    """
+    Regenerate an image by creating a variation using OpenAI's DALL-E API.
+    """
+    try:
+        # # Ensure the image is in the correct format (PNG)
+        #img = Image.open(BytesIO(image_data))
+        
+        # # Save the image to a BytesIO object as PNG
+        image_file = BytesIO()
+        image_data.save(image_file, format="PNG")
+        image_file.seek(0)  # Reset the file pointer to the beginning
+
+        # Call the OpenAI API with the file-like object
+        client = openai.Client(api_key=settings.OPENAI_API_KEY)
+        response = client.images.create_variation(
+            model="dall-e-2",
+            image=image_file,  # Pass the file-like object
+            n=1,
+            response_format="b64_json",
+            size="1024x1024"
+        )
+        # Extract the image URL from the response
+        image_b64 = response.data[0].b64_json
+        return image_b64  # Return the Base64 string
+    except Exception as e:
+        print(f"An error occurred in regenerate_image: {e}")
+        return "Error in regenerating image"
 
 def analyze_sentiment(message):
     """
@@ -84,12 +117,15 @@ def extract_tags(image_data, num_tags=10):
                 "content": [
                     {
                     "type": "text",
-                    "text": f"You are tasked with generate {num_tags} descriptive tags for this image." 
-                        "Make sure to take into account the emotion/sentiment of the image, as well as the content" 
-                        "of the image. If there is any text or key info also make a descriptive tag for it."
-                        " Return the tags in a comma separated list. I repeat your response to this message should ONLY be "
-                         "a list of the tags that you have generated, separated by commas. No brackets necessary",
-                    },
+                    "text": f"You are tasked with generate {num_tags} descriptive tags for this image."
+                    "For some context, this image will most likely be a meme" 
+                    "Make sure to take into account the emotion/sentiment of the image, as well as the content" 
+                    "of the image. If there is any text or key info also make a descriptive tag for it. "
+                    "If there are any notable people or celebrities in the image make a tag for it. "
+                    "Also don't give any tags that could apply to any meme, like humor or relatable content for example. "
+                    "Don't include any general info in the tag like ___ meme. Just give the ___" 
+                    " Return the tags in a comma separated list. I repeat your response to this message should ONLY be " 
+                    "a list of the tags that you have generated, separated by commas. No brackets necessary", },
                     {
                     "type": "image_url",
                     "image_url": {

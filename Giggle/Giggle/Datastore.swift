@@ -277,17 +277,36 @@ class DataManager {
 
 func generateMeme(description: String) async -> UIImage? {
     let urlString = "https://18.223.212.43/generateMeme/?description=\(description.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
-    guard let url = URL(string: urlString) else { return nil }
+    guard let url = URL(string: urlString) else { 
+        print("Invalid URL")
+        return nil 
+    }
 
     do {
+        // Fetch data from the endpoint
         let (data, _) = try await URLSession.shared.data(from: url)
-        return UIImage(data: data)
+        
+        // Decode the JSON response
+        if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+            let base64String = json["image"] as? String {
+            
+            // Convert Base64 string to Data
+            if let imageData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters) {
+                // Create UIImage from Data
+                return UIImage(data: imageData)
+            } else {
+                print("Failed to convert Base64 string to Data")
+                return nil
+            }
+        } else {
+            print("Failed to parse JSON or find 'image' key")
+            return nil
+        }
     } catch {
         print("Error in generateMeme: \(error)")
         return nil
     }
 }
-
 func regenerateMeme(description: String) async -> UIImage? {
     let url = URL(string: "https://18.223.212.43/redoGeneration")!
     var request = URLRequest(url: url)
@@ -300,8 +319,8 @@ func regenerateMeme(description: String) async -> UIImage? {
     do {
         let (data, _) = try await URLSession.shared.data(for: request)
         if let json = try? JSONSerialization.jsonObject(with: data) as? [String: String],
-           let imageFile = json["imageFile"],
-           let imageData = Data(base64Encoded: imageFile) {
+            let imageFile = json["imageFile"],
+            let imageData = Data(base64Encoded: imageFile) {
             return UIImage(data: imageData)
         }
     } catch {
