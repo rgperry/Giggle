@@ -51,7 +51,8 @@ struct ImagePicker: UIViewControllerRepresentable {
 
                 var imagesToAppend: [UIImage] = []
                 
-                // Iterate over the selected results and check if we can load the UIImage
+            // reference for concurrency info. https://www.youtube.com/watch?v=U6lQustiTGE&t=45s
+            // Iterate over the selected results and check if we can load the UIImage
                 let group = DispatchGroup()  // To track all asynchronous loading tasks
                 for result in results {
                     if result.itemProvider.canLoadObject(ofClass: UIImage.self) {

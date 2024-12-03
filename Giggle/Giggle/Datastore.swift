@@ -10,6 +10,10 @@ import NaturalLanguage
 import SwiftUI
 import Alamofire
 
+
+// reference for using model actor to load memes in background: https://www.youtube.com/watch?v=B3JSgcXjsL8&list=PLvUWi5tdh92wZ5_iDMcBpenwTgFNan9T7&index=13
+
+// reference for concurrent API calls: https://www.youtube.com/watch?v=U6lQustiTGE&t=45s
 @ModelActor
 actor MemeImportManager {
     func storeMemes(images: [UIImage], completion: @escaping () -> Void) async throws {
@@ -51,6 +55,7 @@ actor MemeImportManager {
     }
 }
 
+// reference: https://developer.apple.com/documentation/foundation/nspredicate
 func memeSearchPredicate(for searchText: String) -> NSPredicate {
     NSPredicate { meme, _ in
         guard let meme = meme as? Meme, !searchText.isEmpty else { return false }
@@ -76,6 +81,7 @@ func memeSearchPredicate(for searchText: String) -> NSPredicate {
 // Utility Class
 class DataManager {
     // (no longer being used in the main app (may be useful though for sentiment search so I will leave it here for now))
+    // here is the reference for it anyways: https://developer.apple.com/documentation/naturallanguage/finding-similarities-between-pieces-of-text
     static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10, tagName: String?) -> [Meme] {
         logger.debug("searching for similar entries \(query)")
         let embedding = NLEmbedding.sentenceEmbedding(for: .english)
@@ -153,7 +159,7 @@ class DataManager {
         return sortedEntries
     }
 
-    // Decorated with @MainActor to avoid concurrency issues with passing down the model context
+    // Decorated with @MainActor to avoid concurrency issues with passing down the model context (NO LONGER BEING USED --> MemeImportManager handles this now)
     @MainActor
     static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
         do {

@@ -10,6 +10,12 @@ import NaturalLanguage
 import SwiftData
 import OSLog
 
+// here is my main reference for swiftData (youtube playlist from tundsdev)
+// https://www.youtube.com/watch?v=kLNNNXD8X2U&list=PLvUWi5tdh92wZ5_iDMcBpenwTgFNan9T7&index=1
+
+// This is the link to the swiftData docs, which I also used for this
+// https://developer.apple.com/documentation/swiftdata
+
 let logger = Logger()
 
 enum ImageConversionError: Error {
