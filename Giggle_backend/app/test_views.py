@@ -4,6 +4,8 @@ import io
 from django.test import TestCase, Client
 from django.urls import reverse
 from PIL import Image
+import tempfile
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 class ViewsTestCase(TestCase):
     def setUp(self):
@@ -164,3 +166,77 @@ class ViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertJSONEqual(response.content, {"error": "Invalid JSON data"})
 
+    def create_test_video(self):
+        """
+        temporary video file for testing.
+        """
+        temp_video = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False)
+        with open(temp_video.name, "wb") as video:
+            video.write(b"\x00" * 1024 * 1024)  
+        return temp_video.name
+
+
+    def test_video_info_success(self):
+        """
+        Test the video_info endpoint 
+        """
+        video_path = self.create_test_video()
+        with open(video_path, "rb") as video_file:
+            response = self.client.post(
+                reverse('video_info'),
+                {
+                    'video': SimpleUploadedFile("test_video.mp4", video_file.read(), content_type="video/mp4")
+                },
+                {'numTags': 5, 'frameSampleRate': 2},
+            )
+
+
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json()
+        self.assertIn("tags", response_data)
+        self.assertTrue(isinstance(response_data["tags"], list))
+        self.assertGreater(len(response_data["tags"]), 0)
+
+    def test_video_info_no_video(self):
+        """
+        Testing endpoint without providing a video file.
+        """
+        response = self.client.post(
+            reverse('video_info'),
+            data={},
+            content_type="multipart/form-data"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {"error": "No video file provided"})
+
+    def test_video_info_invalid_video_format(self):
+        """
+        Testing endpoint with invalid file format.
+        """
+        image_buffer = self.create_test_image()
+        response = self.client.post(
+            reverse('video_info'),
+            {
+                'video': SimpleUploadedFile(
+                    "test_image.png",
+                    image_buffer.getvalue(),
+                    content_type="image/png"
+                )
+            },
+            content_type="multipart/form-data"
+        )
+        self.assertEqual(response.status_code, 500) 
+        response_data = response.json()
+        self.assertIn("error", response_data)
+
+    def test_video_info_invalid_json_payload(self):
+        """
+        testing with invalid JSON payload 
+        """
+        response = self.client.post(
+            reverse('video_info'),
+            data="Invalid JSON data",
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {"error": "Invalid JSON data"})

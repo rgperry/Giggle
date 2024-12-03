@@ -6,6 +6,8 @@ import json
 import base64
 from io import BytesIO
 from .utils import generate_image, analyze_sentiment, extract_tags, extract_content
+import os
+from .utils import extract_tags  
 from django.core.files.storage import FileSystemStorage
 import time
 
@@ -122,3 +124,23 @@ def image_info(request):
         print(f"Unexpected error in image_info: {e}")
         return JsonResponse({"error": f"Internal Server Error {e}"}, status=500)
 
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def video_info(request):
+    """
+    Endpoint to get video tags for uploaded videos.
+    """
+    try:
+        num_tags = int(request.GET.get('numTags', 10))
+        frame_sample_rate = int(request.GET.get('frameSampleRate', 1))
+
+        if 'video' not in request.FILES:
+            return JsonResponse({"error": "No video file provided"}, status=400)
+
+        video = request.FILES['video']
+
+        tags = extract_video_tags(video, num_tags=num_tags, frame_sample_rate=frame_sample_rate)
+        return JsonResponse({"tags": tags})
+    except Exception as e:
+        return JsonResponse({"error": f"Failed to process video: {e}"}, status=500)

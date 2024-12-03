@@ -6,6 +6,13 @@ from PIL import Image
 import base64
 from django.conf import settings
 
+import logging
+logger = logging.getLogger(__name__)
+import cv2
+
+import ffmpeg
+import os
+
 
 openai.api_key = settings.OPENAI_API_KEY 
 
@@ -145,3 +152,47 @@ def extract_content(image_data, content_length=200):
         print(f"An error occurred in extract_content: {e}")
         return [f"error is {e}"]
     
+
+def extract_video_tags(video_file, num_tags=10, frame_sample_rate=1):
+    """
+    Extract tags from video content by analyzing frames using OpenCV.
+    """
+    try:
+        temp_video_path = f"/tmp/{video_file.name}"
+        with open(temp_video_path, "wb") as temp_file:
+            for chunk in video_file.chunks():
+                temp_file.write(chunk)
+
+
+        video = cv2.VideoCapture(temp_video_path)
+        frame_count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = int(video.get(cv2.CAP_PROP_FPS))
+
+        tags_aggregated = {}
+        for frame_idx in range(0, frame_count, frame_sample_rate * fps):
+            video.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+            ret, frame = video.read()
+            if not ret:
+                break
+
+
+            frame_path = f"/tmp/frame_{frame_idx}.jpg"
+            cv2.imwrite(frame_path, frame)
+
+            with open(frame_path, "rb") as frame_file:
+                frame_tags = extract_tags(frame_file, num_tags=num_tags)
+            for tag in frame_tags:
+                tags_aggregated[tag] = tags_aggregated.get(tag, 0) + 1
+
+            os.remove(frame_path)
+
+        sorted_tags = sorted(tags_aggregated.items(), key=lambda x: x[1], reverse=True)
+        top_tags = [tag for tag, count in sorted_tags[:num_tags]]
+
+        video.release()
+        os.remove(temp_video_path)
+
+        return top_tags
+    except Exception as e:
+        print(f"Error in extract_video_tags: {e}")
+        return []
