@@ -7,6 +7,7 @@ import base64
 from django.conf import settings
 import random
 
+# OpenAI Vision/images api reference: https://platform.openai.com/docs/api-reference/images
 def generate_image(description):
     """
     Generates an image based on a description using OpenAI's updated API.
@@ -69,6 +70,7 @@ def regenerate_image(image_data):
         print(f"An error occurred in regenerate_image: {e}")
         return "Error in regenerating image"
 
+# OpenAI Chat reference: https://platform.openai.com/docs/api-reference/chat 
 def analyze_sentiment(message):
     """
     Calls the OpenAI API to perform sentiment analysis on a given message.
@@ -79,17 +81,24 @@ def analyze_sentiment(message):
 
     try:
         client = OpenAI(api_key=settings.OPENAI_API_KEY)
-        completion = client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant, and ."},
+                {"role": "system", "content": "You are a helpful assistant."},
                 {
                     "role": "user",
-                    "content": "Anaylze the following message based on it's content and sentiment, and generate a short description of its sentiment"
+                    "content": "You are tasked with generating 10 descriptive tags for the following message. You can generate more if you think it is necessary"
+                    " The message that we will give you will be sent in a conversation. For context, We have a list of tags for memes stored in a database. The tags that you generate "
+                    " will be used in order to find a meme that matches the sentiment/emotion of the text message. So if the message is 'I'm really excited to see you', some of the tags "
+                    " you generate are smile, happy, excited, good. Those are a few examples"
+                    " Here is the message: {message}"
+                    " Return the tags in a comma separated list. I repeat your response to this message should ONLY be " 
+                    "a list of the tags that you have generated, separated by commas. No brackets necessary"
                 }
             ]
         )
-        return completion.choices[0].message
+        tags = response.choices[0].message.content.strip().split(',')
+        return [tag.strip() for tag in tags]
     except openai.error.AuthenticationError as e:
         print(f"Authentication Error: {e}")
         return "Authentication error in analyzing sentiment"
