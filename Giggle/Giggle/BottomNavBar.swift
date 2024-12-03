@@ -45,7 +45,7 @@ struct BottomNavBar: View {
             .sheet(isPresented: $isImagePickerPresented) {
                 ImagePicker(selectedImages: $selectedImages, pickingIsDone: $pickingIsDone)
             }
-            .onChange(of: selectedImages) {
+            .onChange(of: selectedImages) { //update so change on vids and GIFs xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                 print("selected memes changed")
             // only add new memes when there are a few in the selectedPhotos. (this .onchange gets called twice bc we clear the selected images array.)
 //            guard selectedImages.isEmpty else { return }
