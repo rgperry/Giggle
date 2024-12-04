@@ -38,10 +38,6 @@ class Tag {
         self.name = name
         self.memes = []
     }
-//    // Computed property to get the memes with this tag
-//    var memesWithThisTag: [Meme] {
-//        return memes.filter { $0.tags.contains(self) }
-//    }
 }
 
 @Model

@@ -22,21 +22,7 @@ enum MemeMedia: Equatable { //copy of enum type in SharedLogic.swift (commented 
 @ModelActor
 actor MemeImportManager {
     
-//    private func extractFirstFrame(fromMediaAt data: Data?) async -> UIImage? {
-//        guard let data = data, let url = URL(dataRepresentation: data, relativeTo: nil) else { return nil }
-//        
-//        let asset = AVURLAsset(url: url)
-//        let imageGenerator = AVAssetImageGenerator(asset: asset)
-//        imageGenerator.appliesPreferredTrackTransform = true // Fix orientation of video
-//        
-//        do {
-//            let image = try await imageGenerator.image(at: CMTime.zero)
-//            return UIImage(cgImage: image.image)
-//        } catch {
-//            print("Failed to extract first frame: \(error)")
-//            return nil
-//        }
-//    }
+    //https://developer.apple.com/documentation/avfoundation/avassetimagegenerator
     private func extractFirstFrame(fromMediaURL url: URL) async throws -> UIImage? {
         let asset = AVURLAsset(url: url)
         let imageGenerator = AVAssetImageGenerator(asset: asset)
@@ -51,11 +37,10 @@ actor MemeImportManager {
     }
     
     private func extractFirstFrameFromGif(fromMediaURL url: URL) async throws -> UIImage? {
-        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
-              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
-            return nil
+        guard let image = UIImage(contentsOfFile: url.path) else {
+            throw NSError(domain: "ExtractGIFError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to load GIF"])
         }
-        return UIImage(cgImage: cgImage)
+        return image
     }
     
     func storeMemes(memes: [MemeMedia], completion: @escaping () -> Void) async throws {
@@ -76,11 +61,9 @@ actor MemeImportManager {
                         frame = image
                     case .video(let url):
                         do {
-                            //mediaData = try Data(contentsOf: url) //Not sure if this is bad to store all this data here xxxxxxxxxxxxxxxxxxxxxxx
                             frame = try await self.extractFirstFrame(fromMediaURL: url)!
                         } catch {
                             logger.error("Failed to load video data from \(url) in storeMemes")
-                            //mediaData = try convertImageToPNG(UIImage(systemName: "video"))
                             frame = UIImage(systemName: "video")!
                         }
                     case .gif(let url):
@@ -88,11 +71,11 @@ actor MemeImportManager {
                             frame = try await self.extractFirstFrameFromGif(fromMediaURL: url)!
                         } catch {
                             logger.error("Failed to load gif data from \(url) in storeMemes")
+                            frame = UIImage(systemName: "video")!
                         }
-                        frame = UIImage(systemName: "video")!
                     }
                     
-                    let (tags, content) = try await DataManager.getInfo(for: frame) //update getInfo call so gif/vid works
+                    let (tags, content) = try await DataManager.getInfo(for: frame)
                     
                     // Direct insertion without actor synchronization
                     let meme = Meme(content: content, tags: tags, media: meme, thumbnail: frame)
