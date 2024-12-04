@@ -121,7 +121,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        logger.log("MessagesViewController loaded")
+        //logger.log("MessagesViewController loaded")
         collectionView.backgroundColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)
         
         searchBar.delegate = self
@@ -227,7 +227,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         NSLayoutConstraint.activate([
             buttonContainer.heightAnchor.constraint(equalToConstant: 35),
-            buttonContainer.widthAnchor.constraint(equalToConstant: 378), // Match width to the search bar
+            buttonContainer.widthAnchor.constraint(equalTo: collectionView.widthAnchor, constant: -12), // Adjust width relative to the collection view
             buttonContainer.centerXAnchor.constraint(equalTo: searchBar.centerXAnchor), // Align horizontally with the search bar
             buttonContainer.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: -2), // Move closer to or overlap with the search bar
 
@@ -248,7 +248,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         Task {
             if let relevantTags = await getSentimentWrapper(message: searchText) {
-                logger.log("Relevant tags: \(relevantTags)")
+                //logger.log("Relevant tags: \(relevantTags)")
                 if relevantTags.isEmpty {
                     let alert = UIAlertController(title: "No Results", message: "No relevant tags were found for your message.", preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -282,6 +282,14 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             segmentedControl.isHidden = false
             vibeCheckerButtonContainer?.isHidden = true
         }
+
+        Task { @MainActor in
+            currentTab = .allGiggles
+            segmentedControl.selectedSegmentIndex = 0
+            //logger.log("Switched to All Giggles due to toggle change.")
+        }
+        
+        collectionView.reloadData()
     }
 
     //reset to all giggles if search bar is empty. auto reload kinda
@@ -289,7 +297,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             if self.searchText.isEmpty && self.imagesArray != self.allMemes {
-                logger.log("Search is empty. Resetting to all memes.")
+                //logger.log("Search is empty. Resetting to all memes.")
                 self.imagesArray = self.allMemes
                 self.collectionView.reloadData()
             }
@@ -302,7 +310,6 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         super.viewDidAppear(animated)
         //setupLoadingIndicator()
         
-        // Load memes only once when the view appears for the first time
         if !hasLoadedMemes {
             hasLoadedMemes = true
             Task {
@@ -325,10 +332,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     }
 
     private func adjustSearchBarWidth() {
-        // Get the width of the collection view
         let collectionViewWidth = collectionView.bounds.width
 
-        // Set the search bar width to match the collection view's width
         searchBar.frame = CGRect(
             x: collectionView.frame.origin.x - 2,
             y: searchBar.frame.origin.y - 4,
@@ -350,7 +355,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         self.searchText = searchText
         
         guard !isAdvancedSearch else {
-            logger.log("Advanced search mode is active. Ignoring search bar text change.")
+            //logger.log("Advanced search mode is active. Ignoring search bar text change.")
             return
         }
         
@@ -363,49 +368,14 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         }
     }
 
-
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder() // Dismiss the keyboard
         
-        logger.log("Search button clicked. Keyboard dismissed.")
+        //logger.log("Search button clicked. Keyboard dismissed.")
     }
 
-//    private func performSearch(query: String) {
-//        logger.log("Running search for query: \(query)")
-//
-//        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-//            guard let self = self else { return }
-//            let results: [Meme]
-//            
-//            if query.isEmpty {
-//                results = self.allMemes //resets to full list of mems
-//                logger.log("Memes Filtered, returning All Giggles")
-//            }
-//            else if self.isAdvancedSearch {
-//                // Placeholder for sentence search logic (no filtering for now)
-//                logger.log("Advanced search mode active. No filtering applied.")
-//                results = self.allMemes
-//            }
-//            else {
-//                let filteredMemes = self.imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
-//                results = filteredMemes.sorted { $0.dateAdded > $1.dateAdded }
-//                logger.log("Memes Filtered, returning subset")
-//            }
-//
-//            // Log the size of the filtered results
-//            logger.log("Search results count for query '\(query)': \(results.count)")
-//
-//            // Update the filtered array and UI on the main thread
-//            DispatchQueue.main.async {
-////                self.filteredMemes = results
-////                logger.log("Filtered memes updated: \(self.filteredMemes.count) items.")
-//                self.imagesArray = results // Update the source data
-//                self.collectionView.reloadData()
-//            }
-//        }
-//    }
     private func performSearch(query: String) async {
-        logger.log("Running search for query: \(query)")
+        //logger.log("Running search for query: \(query)")
         
         self.imagesArray = self.allMemes
 
@@ -413,16 +383,16 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         if query.isEmpty {
             results = self.allMemes // Reset to full list of memes
-            logger.log("Search query is empty. Returning all memes.")
+            //logger.log("Search query is empty. Returning all memes.")
         } else if isAdvancedSearch {
             // Placeholder for advanced search logic
-            logger.log("Advanced search mode active. Returning all memes (no filtering applied).")
+            //logger.log("Advanced search mode active. Returning all memes (no filtering applied).")
             results = imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
                 .sorted { $0.dateAdded > $1.dateAdded }
         } else {
             results = imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
                 .sorted { $0.dateAdded > $1.dateAdded }
-            logger.log("Search results count for query '\(query)': \(results.count)")
+            //logger.log("Search results count for query '\(query)': \(results.count)")
         }
 
         // Update UI on the main thread
@@ -436,7 +406,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     //clear imagesArray to free up memory when needed
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        logger.log("Received memory warning, clearing imagesArray.")
+        //logger.log("Received memory warning, clearing imagesArray.")
         //imagesArray.removeAll()
         collectionView.reloadData()
     }
@@ -468,7 +438,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let count = filteredMemes.count
-        logger.log("Number of items in section: \(count)")
+        //logger.log("Number of items in section: \(count)")
         
         return count
     }
@@ -521,7 +491,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // Ensure activeConversation is available
         guard let conversation = activeConversation else {
-            logger.log("No active conversation found.")
+            //logger.log("No active conversation found.")
             return
         }
 
@@ -542,7 +512,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         // Insert the message into the conversation
         conversation.insert(message) { error in
             if let error = error {
-                logger.log("Failed to insert message: \(error.localizedDescription)")
+                //logger.log("Failed to insert message: \(error.localizedDescription)")
             }
             //UPDATE SHARE DATE
             // Update the dateLastShared for the sent meme
@@ -570,7 +540,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         // Called when the extension is about to move from the inactive to active state.
         // This will happen when the extension is about to present UI.
         super.willBecomeActive(with: conversation)
-        logger.log("MessagesViewController became active")
+        //logger.log("MessagesViewController became active")
         collectionView.reloadData()
         // Use this method to configure the extension and restore previously stored state.
     }
