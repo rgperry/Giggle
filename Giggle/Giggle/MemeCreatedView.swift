@@ -15,12 +15,14 @@ struct MemeCreatedView: View {
     @State private var showAlert = false
     @State private var navigateToAllGiggles = false // Navigation state
     @Environment(\.dismiss) private var dismiss
+    
+    @State private var uiImage: UIImage? = nil
 
     var body: some View {
         VStack {
             PageHeader(text: "Giggle")
             // Meme Image or Placeholder
-            if let imageData = meme.image, let image = UIImage(data: imageData) {
+            if let image = uiImage {
                 MemeImageView(image: image)
             } else if isGenerating {
                 ProgressView()
@@ -59,6 +61,9 @@ struct MemeCreatedView: View {
         .navigationDestination(isPresented: $navigateToAllGiggles) {
             FolderView(header: "All Giggles")
         }
+        .task {
+            uiImage = await meme.memeAsUIImage
+        }
     }
 
     private func generateMemeButtonPressed() {
@@ -71,7 +76,8 @@ struct MemeCreatedView: View {
             if let newImage = await generateMeme(description: meme.content) {
                 DispatchQueue.main.async {
                     if let imageData = newImage.pngData() {
-                        meme.image = imageData
+                        meme.mediaType = .image
+                        meme.mediaData = imageData
                     }
                     isGenerating = false
                 }
@@ -85,7 +91,7 @@ struct MemeCreatedView: View {
 
     private func deleteMeme() {
         meme.content = ""
-        meme.image = nil
+        meme.mediaData = nil
         dismiss()
     }
 
@@ -95,7 +101,7 @@ struct MemeCreatedView: View {
             do {
                 let modelContainer = try ModelContainer(for: Meme.self, Tag.self)
                 let importManager = MemeImportManager(modelContainer: modelContainer)
-                try await importManager.storeMemes(images: [UIImage(data: meme.image!)!]) {
+                try await importManager.storeMemes(memes: [.image(uiImage!)], favorited: false) {
                     print("Meme stored successfully!")
                 }
             } catch {
@@ -174,12 +180,12 @@ struct Content: View {
 }
 
 // Example Preview
-#Preview {
-    MemeCreatedView(
-        meme: Meme(
-            content: "Meme with a dog who doesn’t like exercise",
-            tags: [],
-            image: UIImage(systemName: "photo") ?? UIImage() // Ensure image data matches expected type
-        )
-    )
-}
+//#Preview {
+//    MemeCreatedView(
+//        meme: Meme(
+//            content: "Meme with a dog who doesn’t like exercise",
+//            tags: [],
+//            image: UIImage(systemName: "photo") ?? UIImage() // Ensure image data matches expected type
+//        )
+//    )
+//}
