@@ -11,6 +11,12 @@ import SwiftData
 import OSLog
 import AVFoundation
 
+// here is my main reference for swiftData (youtube playlist from tundsdev)
+// https://www.youtube.com/watch?v=kLNNNXD8X2U&list=PLvUWi5tdh92wZ5_iDMcBpenwTgFNan9T7&index=1
+
+// This is the link to the swiftData docs, which I also used for this
+// https://developer.apple.com/documentation/swiftdata
+
 let logger = Logger()
 
 enum ImageConversionError: Error {
@@ -41,9 +47,9 @@ class Tag {
 }
 
 @Model
-class Meme {
-    @Attribute(.externalStorage) var mediaData: Data? //xxxxx
-    @Attribute(.unique) var id: UUID
+public class Meme {
+    @Attribute(.externalStorage) var mediaData: Data?
+    @Attribute(.unique) public var id: UUID
     @Relationship(inverse: \Tag.memes) var tags: [Tag]
     
     var dateAdded: Date
@@ -60,7 +66,7 @@ class Meme {
         case video
     }
 
-    init(content: String, tags: [Tag] = [], media: MemeMedia, id: UUID? = nil, thumbnail: UIImage?) {
+    init(content: String, tags: [Tag] = [], media: MemeMedia, id: UUID? = nil, favorited: Bool = false, thumbnail: UIImage?) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
         self.dateAdded = Date()
@@ -69,8 +75,13 @@ class Meme {
         self.content = content
         self.tags = tags
         
-        self.favorited = false
-        self.dateFavorited = nil
+        self.favorited = favorited
+        
+        if self.favorited {
+            self.dateFavorited = Date()
+        } else {
+            self.dateFavorited = nil
+        }
         
         if let thumbnail = thumbnail {
             self.thumbnail = try? convertImageToPNG(thumbnail)

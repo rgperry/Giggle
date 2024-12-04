@@ -12,12 +12,13 @@ struct MemeCreatedView: View {
     @State private var navigateToGenerateMemeView = false
     @State private var navigateToMemeCreatedView = false
     @State private var navigateToAllGiggles = false
+    @Binding var memeImage: UIImage?
 
     var body: some View {
         NavigationStack {
             VStack {
                 PageHeader(text: "Giggle")
-                // MemeImageView(image: )
+                MemeImageView(image: memeImage!)
 
                 ActionButtonsView(
                     downloadAction: {
@@ -33,7 +34,7 @@ struct MemeCreatedView: View {
 
                 MemeDescriptionField(memeDescription: $memeDescription)
 
-                GenerateMemeButton(isClicked: .constant(false), isEnabled: true, showAlertAction: {})
+                GenerateMemeButton(isClicked: .constant(false), memeDescription: $memeDescription, isEnabled: true, showAlertAction: {}, memeImage: $memeImage)
 
                 BottomNavBar()
             }
@@ -42,7 +43,7 @@ struct MemeCreatedView: View {
                 GenerateMemeView()
             }
             .navigationDestination(isPresented: $navigateToMemeCreatedView) {
-                MemeCreatedView(memeDescription: memeDescription)
+                MemeCreatedView(memeDescription: memeDescription, memeImage: $memeImage)
             }
             .navigationDestination(isPresented: $navigateToAllGiggles) {
                 FolderView(header: "All Giggles")
@@ -101,6 +102,26 @@ struct RefreshButton: View {
     }
 }
 
-#Preview {
-    MemeCreatedView(memeDescription: "Sample Meme Description")
+struct DeleteButton: View {
+    let size: CGFloat = 40
+    var deleteAction: () -> Void
+
+    var body: some View {
+        Button(action: {
+            deleteAction()
+        }) {
+            Image(systemName: "xmark")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: size * 0.4, height: size * 0.4) // Make the icon smaller within the circle
+                .foregroundColor(.white)
+                .frame(width: size, height: size)
+                .background(Circle().fill(Color.clear)) // Transparent fill for the circle
+                .overlay(Circle().stroke(Color.white, lineWidth: 2)) // White border
+        }
+    }
 }
+
+//#Preview {
+//    MemeCreatedView(memeDescription: "Sample Meme Description")
+//}

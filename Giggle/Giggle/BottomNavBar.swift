@@ -18,7 +18,8 @@ struct BottomNavBar: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             Rectangle()
-                .fill(Color(white: 0.98))
+                // .fill(Colors.giggleWhite)
+                .fill(Color(UIColor.systemBackground))
                 .frame(height: 127)
                 .edgesIgnoringSafeArea(.bottom)
 
@@ -87,6 +88,7 @@ struct BottomNavBarIcon: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
+                .foregroundColor(Color.primary)
                 .padding(.trailing, 30)
         }
     }
