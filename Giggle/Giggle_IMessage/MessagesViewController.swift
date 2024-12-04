@@ -5,6 +5,7 @@
 //
 
 import UIKit
+//UIKit Source https://reintech.io/blog/developing-imessage-apps-sticker-packs-ios
 import Messages
 import SwiftUI
 import SwiftData
