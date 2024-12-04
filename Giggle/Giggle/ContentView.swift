@@ -90,10 +90,9 @@ struct ContentView: View {
         }
     }
 
-    // Extracted search results section
     private var searchResultsView: some View {
         ForEach(filteredMemes) { meme in
-            GiggleItem(meme: meme)
+            GiggleItem(meme: meme, header: "Giggle")
         }
     }
 }
