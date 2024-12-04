@@ -398,7 +398,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             // Update the dateLastShared for the sent meme
             meme.dateLastShared = Date()
 
-            // Persist the updated meme data
+            // FINISH: maybe put a context.save() here eventually?
             //DataManager.updateMeme(meme)
 
             // Reload the collection view to reflect the updated order

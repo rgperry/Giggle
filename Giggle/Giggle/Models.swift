@@ -61,7 +61,7 @@ class Meme {
     var favorited: Bool = false
     var dateFavorited: Date?
 
-    init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil) {
+    init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil, favorited: Bool = false) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
         self.dateAdded = Date()
@@ -70,8 +70,13 @@ class Meme {
         self.content = content
         self.tags = tags
         
-        self.favorited = false
-        self.dateFavorited = nil
+        self.favorited = favorited
+        
+        if self.favorited {
+            self.dateFavorited = Date()
+        } else {
+            self.dateFavorited = nil
+        }
         
         do {
             self.image = try convertImageToPNG(image)

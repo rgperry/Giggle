@@ -16,7 +16,7 @@ import Alamofire
 // reference for concurrent API calls: https://www.youtube.com/watch?v=U6lQustiTGE&t=45s
 @ModelActor
 actor MemeImportManager {
-    func storeMemes(images: [UIImage], completion: @escaping () -> Void) async throws {
+    func storeMemes(images: [UIImage], favorited: Bool = false, completion: @escaping () -> Void) async throws {
         guard !images.isEmpty else {
             logger.log("NO IMAGES TO IMPORT")
             return
@@ -30,7 +30,7 @@ actor MemeImportManager {
                     let (tags, content) = try await DataManager.getInfo(for: image)
                     
                     // Direct insertion without actor synchronization
-                    let meme = Meme(content: content, tags: tags, image: image)
+                    let meme = Meme(content: content, tags: tags, image: image, favorited: favorited)
                     return meme
                 }
             }
@@ -119,7 +119,8 @@ class DataManager {
 
         return sortedEntries
     }
-
+    
+    // Created for searching from iMessage, no longer being used as well
     static func findSimilarEntries(query: String, memes: [Meme], limit: Int = 10, tagName: String?) -> [Meme] {
         logger.debug("searching for similar entries \(query)")
         let embedding = NLEmbedding.sentenceEmbedding(for: .english)
@@ -159,7 +160,8 @@ class DataManager {
         return sortedEntries
     }
 
-    // Decorated with @MainActor to avoid concurrency issues with passing down the model context (NO LONGER BEING USED --> MemeImportManager handles this now)
+    // Decorated with @MainActor to avoid concurrency issues with passing down the model context
+    // (NO LONGER BEING USED --> MemeImportManager handles this now)
     @MainActor
     static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
         do {
@@ -307,6 +309,7 @@ func generateMeme(description: String) async -> UIImage? {
         return nil
     }
 }
+
 func regenerateMeme(description: String) async -> UIImage? {
     let url = URL(string: "https://18.223.212.43/redoGeneration")!
     var request = URLRequest(url: url)

@@ -100,14 +100,28 @@ class ShareViewController: UIViewController {
                 } else {
                     print("Attempting to store image into All Giggles.")
                 }
-
-                // Mark as favorite by adding a tag or flag in your database logic
-                await DataManager.storeMemes(context: modelContext, images: [image]) {
-                    if isFavorite {
-                        //UPDATE FAVORITE FLAG HERE
-                        print("Successfully stored 1 image to Giggle Favorites.")
-                    } else {
-                        print("Successfully stored 1 image to All Giggles.")
+                
+                let importManager = MemeImportManager(modelContainer: modelContainer)
+                
+                if isFavorite {
+                    do {
+                        try await importManager.storeMemes(images: [image], favorited: true) {
+                            logger.info("Successfully stored 1 image to Giggle All + Favorites from Share Extension")
+                        }
+                    }
+                    catch {
+                        logger.error("Error storing 1 image to Giggle All + Favorites from Share extension \(error)")
+                    }
+                }
+                
+                else {
+                    do {
+                        try await importManager.storeMemes(images: [image]) {
+                            logger.info("Successfully stored 1 image to Giggle All from Share Extension")
+                        }
+                    }
+                    catch {
+                        logger.error("Error storing 1 image to Giggle All from Share extension \(error)")
                     }
                 }
             }
