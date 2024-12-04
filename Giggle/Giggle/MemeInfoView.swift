@@ -138,7 +138,11 @@ struct ContentWithWhiteBackground: View {
                                         .foregroundColor(.white)
                                         .bold()
                                 }
-                                .confirmationDialog("Delete tag \"\(tag.name)\"?", isPresented: $showDeleteTagAlert, titleVisibility: .visible) {
+                                .confirmationDialog(
+                                    "Delete tag \"\(selectedTagToDelete?.name ?? "")\"?",
+                                    isPresented: $showDeleteTagAlert,
+                                    titleVisibility: .visible
+                                ) {
                                     Button("Delete", role: .destructive) {
                                         guard let tagToDelete = selectedTagToDelete else { return }
                                         removeTagAction(selectedTagToDelete!.name)
