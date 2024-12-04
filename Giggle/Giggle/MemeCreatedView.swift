@@ -78,6 +78,7 @@ struct MemeCreatedView: View {
                     if let imageData = newImage.pngData() {
                         meme.mediaType = .image
                         meme.mediaData = imageData
+                        uiImage = newImage
                     }
                     isGenerating = false
                 }
