@@ -12,12 +12,13 @@ struct MemeCreatedView: View {
     @State private var navigateToGenerateMemeView = false
     @State private var navigateToMemeCreatedView = false
     @State private var navigateToAllGiggles = false
+    @Binding var memeImage: UIImage?
 
     var body: some View {
         NavigationStack {
             VStack {
                 PageHeader(text: "Giggle")
-                // MemeImageView(image: )
+                MemeImageView(image: memeImage!)
 
                 ActionButtonsView(
                     downloadAction: {
@@ -33,7 +34,7 @@ struct MemeCreatedView: View {
 
                 MemeDescriptionField(memeDescription: $memeDescription)
 
-                GenerateMemeButton(isClicked: .constant(false), isEnabled: true, showAlertAction: {})
+                GenerateMemeButton(isClicked: .constant(false), memeDescription: $memeDescription, isEnabled: true, showAlertAction: {}, memeImage: $memeImage)
 
                 BottomNavBar()
             }
@@ -42,7 +43,7 @@ struct MemeCreatedView: View {
                 GenerateMemeView()
             }
             .navigationDestination(isPresented: $navigateToMemeCreatedView) {
-                MemeCreatedView(memeDescription: memeDescription)
+                MemeCreatedView(memeDescription: memeDescription, memeImage: $memeImage)
             }
             .navigationDestination(isPresented: $navigateToAllGiggles) {
                 FolderView(header: "All Giggles")

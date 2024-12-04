@@ -12,6 +12,8 @@ import SwiftData
 struct GiggleApp: App {
     @Environment(\.modelContext) private var context
     
+    
+    // swift Data model container reference: https://developer.apple.com/documentation/swiftdata/modelcontainer
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Meme.self,

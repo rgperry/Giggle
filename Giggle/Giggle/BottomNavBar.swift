@@ -10,13 +10,16 @@ import SwiftUI
 struct BottomNavBar: View {
     @State private var isImagePickerPresented = false
     @State private var selectedImages: [UIImage] = []
+    @State private var isStoring: Bool = false
+    @State private var pickingIsDone = false
     
     @Environment(\.modelContext) private var context
 
     var body: some View {
         ZStack(alignment: .bottom) {
             Rectangle()
-                .fill(Colors.giggleWhite)
+                // .fill(Colors.giggleWhite)
+                .fill(Color(UIColor.systemBackground))
                 .frame(height: 127)
                 .edgesIgnoringSafeArea(.bottom)
 
@@ -28,6 +31,7 @@ struct BottomNavBar: View {
                 BottomNavBarIcon(icon: "plus.circle.fill")
                     .onTapGesture {
                         isImagePickerPresented = true
+                        pickingIsDone = false
                     }
                 
                 NavigationLink(destination: GenerateMemeView()) {
@@ -40,18 +44,31 @@ struct BottomNavBar: View {
             }
             .padding(.leading, 25)
             .sheet(isPresented: $isImagePickerPresented) {
-                ImagePicker(selectedImages: $selectedImages)
+                ImagePicker(selectedImages: $selectedImages, pickingIsDone: $pickingIsDone)
             }
-            .onChange(of: selectedImages) {
+            .onChange(of: selectedImages) { //update so change on vids and GIFs xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                 print("selected memes changed")
             // only add new memes when there are a few in the selectedPhotos. (this .onchange gets called twice bc we clear the selected images array.)
 //            guard selectedImages.isEmpty else { return }
-            Task {
-                print("made it in the task")
-                // ignore the modelContext warning here - Matt (@MainActor decorator on storeMemes function fixed this)
-                await DataManager.storeMemes(context: context, images: selectedImages) {
-                    logger.info("Successfully store \(selectedImages.count) images to the swiftData database")
-                    selectedImages.removeAll()
+                guard !isStoring else { return }
+                guard pickingIsDone, !selectedImages.isEmpty else {
+                    logger.info("picking not done yet wait!!!!!")
+                    return
+                }
+                Task {
+                    isStoring = true
+                    defer { isStoring = false }
+                    
+                    do {
+                        let importManager = MemeImportManager(modelContainer: context.container)
+                        try await importManager.storeMemes(images: selectedImages) {
+                            logger.info("Successfully stored \(selectedImages.count) images to the SwiftData database")
+                            DispatchQueue.main.async {
+                                selectedImages.removeAll()
+                            }
+                        }
+                    } catch {
+                        logger.error("Error storing \(selectedImages.count) memes: \(error)")
                     }
                 }
             }
@@ -71,6 +88,7 @@ struct BottomNavBarIcon: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: size, height: size)
+                .foregroundColor(Color.primary)
                 .padding(.trailing, 30)
         }
     }

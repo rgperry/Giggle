@@ -10,6 +10,12 @@ import NaturalLanguage
 import SwiftData
 import OSLog
 
+// here is my main reference for swiftData (youtube playlist from tundsdev)
+// https://www.youtube.com/watch?v=kLNNNXD8X2U&list=PLvUWi5tdh92wZ5_iDMcBpenwTgFNan9T7&index=1
+
+// This is the link to the swiftData docs, which I also used for this
+// https://developer.apple.com/documentation/swiftdata
+
 let logger = Logger()
 
 enum ImageConversionError: Error {
@@ -28,7 +34,6 @@ func convertImageToPNG(_ uiImage: UIImage?) throws -> Data {
     return pngData
 }
 
-// This isn't being used now, but if we wanted to do search solely based on tags, we could with this.
 @Model
 class Tag {
     @Attribute(.unique) var name: String
@@ -56,7 +61,7 @@ public class Meme {
     var favorited: Bool = false
     var dateFavorited: Date?
 
-    init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil) {
+    init(content: String, tags: [Tag] = [], image: UIImage, id: UUID? = nil, favorited: Bool = false) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
         self.dateAdded = Date()
@@ -65,8 +70,13 @@ public class Meme {
         self.content = content
         self.tags = tags
         
-        self.favorited = false
-        self.dateFavorited = nil
+        self.favorited = favorited
+        
+        if self.favorited {
+            self.dateFavorited = Date()
+        } else {
+            self.dateFavorited = nil
+        }
         
         do {
             self.image = try convertImageToPNG(image)
