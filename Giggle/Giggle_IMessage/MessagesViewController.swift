@@ -12,7 +12,6 @@ import Combine
 
 //ADDED FUNCTIONS - Tamaer
 extension UIImage {
-    // Generate lower quality thumbnails to save memory
     func thumbnail(maxWidth: CGFloat = 100) -> UIImage {
         let aspectRatio = size.height / size.width
         let targetSize = CGSize(width: maxWidth, height: maxWidth * aspectRatio)
@@ -44,13 +43,15 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
     var imagesArray: [Meme] = []
     var allMemes: [Meme] = [] // Original, unfiltered memes
-
-    private var searchDebounce: AnyCancellable?  // Combine publisher for debouncing
     
     private var resetSearchTimer: Timer?
+    //private var searchTimer: Timer?
+    private var isSearching = false // Debounce mechanism to prevent overlapping searches
 
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
+    
+    private var segmentedControl: UISegmentedControl!
     
     var filteredMemes: [Meme] {
         switch currentTab {
@@ -120,10 +121,9 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
         logger.log("MessagesViewController loaded")
         collectionView.backgroundColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)
-
+        
         searchBar.delegate = self
         collectionView.dataSource = self
         
@@ -132,42 +132,158 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         searchBar.backgroundColor = .clear // Make the search bar transparent
         searchBar.searchTextField.backgroundColor = UIColor.systemBackground
         view.backgroundColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)
-
+        
+        setupSearchToggle()
+        
         setupCollectionViewLayout()
         collectionView.delegate = self
         collectionView.prefetchDataSource = self //enable prefetching so app only loads what is seen
         collectionView.reloadData()
         
-        //tabs
-        let segmentedControl = UISegmentedControl(items: ["All Giggles", "Favorites", "Recents"])
+        segmentedControl = UISegmentedControl(items: ["All Giggles", "Favorites", "Recents"])
         segmentedControl.selectedSegmentIndex = 0
         segmentedControl.addTarget(self, action: #selector(tabChanged(_:)), for: .valueChanged)
         segmentedControl.translatesAutoresizingMaskIntoConstraints = false
 
-        // Set background and tint
         segmentedControl.backgroundColor = dynamicBackgroundColor // Dynamic background color
         segmentedControl.selectedSegmentTintColor = .clear // Ensure selected tint does not obscure text
 
-        // Ensure the text attributes are applied for visibility
         segmentedControl.setTitleTextAttributes([.foregroundColor: dynamicTextColor], for: .normal)
         segmentedControl.setTitleTextAttributes([
             .foregroundColor: UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0),
             .font: UIFont.boldSystemFont(ofSize: 16) // Optional: Adjust font style
         ], for: .selected)
 
-        // Add to view
         view.addSubview(segmentedControl)
 
-        // Add constraints
         NSLayoutConstraint.activate([
             segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 38),
             segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6),
             segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -6)
         ])
-
+        
+        setupVibeCheckerButton()
         resetSearchTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(resetIfSearchEmpty), userInfo: nil, repeats: true)
     }
+
     
+    //Switch for Message Analysis
+    private func setupSearchToggle() {
+        let toggleContainer = UIView()
+        toggleContainer.translatesAutoresizingMaskIntoConstraints = false
+        toggleContainer.backgroundColor = UIColor.systemBackground
+        toggleContainer.layer.cornerRadius = 10   // Rounded corners
+        toggleContainer.layer.masksToBounds = true
+        
+        let searchToggle = UISwitch()
+        searchToggle.translatesAutoresizingMaskIntoConstraints = false
+        searchToggle.isOn = false // Default state
+        
+        searchToggle.onTintColor = UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0) // Custom ON state color
+        searchToggle.thumbTintColor = UIColor.white // Custom thumb color
+        
+        searchToggle.addTarget(self, action: #selector(toggleSearchMode(_:)), for: .valueChanged)
+
+        toggleContainer.addSubview(searchToggle)
+        
+        view.addSubview(toggleContainer)
+
+        NSLayoutConstraint.activate([
+            toggleContainer.heightAnchor.constraint(equalToConstant: 36),
+            toggleContainer.widthAnchor.constraint(equalToConstant: 60),
+            toggleContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -6),
+            toggleContainer.topAnchor.constraint(equalTo: searchBar.topAnchor),
+            
+            searchToggle.centerXAnchor.constraint(equalTo: toggleContainer.centerXAnchor, constant: -1), // Adjust X-axis offset if needed
+            searchToggle.centerYAnchor.constraint(equalTo: toggleContainer.centerYAnchor, constant: 0) // Adjust Y-axis offset for centering
+        ])
+
+    }
+    //
+    private var vibeCheckerButtonContainer: UIView?
+
+    private func setupVibeCheckerButton() {
+        let buttonContainer = UIView()
+        buttonContainer.translatesAutoresizingMaskIntoConstraints = false
+        buttonContainer.backgroundColor = UIColor.systemBackground
+        buttonContainer.layer.cornerRadius = 10   // Rounded corners
+        buttonContainer.layer.masksToBounds = true
+        buttonContainer.isHidden = true // Hidden by default
+        vibeCheckerButtonContainer = buttonContainer // Store reference for toggling visibility
+
+        let vibeCheckerButton = UIButton(type: .system)
+        vibeCheckerButton.translatesAutoresizingMaskIntoConstraints = false
+        vibeCheckerButton.setTitle("Click to Search Message on Vibes", for: .normal)
+        vibeCheckerButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16) // Adjusted font size
+        vibeCheckerButton.setTitleColor(UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0), for: .normal) // Dynamic text color
+        vibeCheckerButton.setTitleColor(UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0), for: .highlighted)
+        vibeCheckerButton.backgroundColor = .clear // Transparent background for the button
+
+        vibeCheckerButton.addTarget(self, action: #selector(vibeCheckerClicked), for: .touchUpInside)
+
+        buttonContainer.addSubview(vibeCheckerButton)
+
+        view.addSubview(buttonContainer)
+
+        NSLayoutConstraint.activate([
+            buttonContainer.heightAnchor.constraint(equalToConstant: 35),
+            buttonContainer.widthAnchor.constraint(equalToConstant: 378), // Match width to the search bar
+            buttonContainer.centerXAnchor.constraint(equalTo: searchBar.centerXAnchor), // Align horizontally with the search bar
+            buttonContainer.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: -2), // Move closer to or overlap with the search bar
+
+            vibeCheckerButton.widthAnchor.constraint(equalToConstant: 378), // Set desired button width
+            vibeCheckerButton.centerXAnchor.constraint(equalTo: buttonContainer.centerXAnchor),
+            vibeCheckerButton.centerYAnchor.constraint(equalTo: buttonContainer.centerYAnchor)
+        ])
+
+    }
+
+    @objc private func vibeCheckerClicked() {
+        guard let searchText = searchBar.text, !searchText.isEmpty else {
+            let alert = UIAlertController(title: "Error", message: "Please enter a message to check its vibe.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            present(alert, animated: true, completion: nil)
+            return
+        }
+
+        Task {
+            if let relevantTags = await getSentimentWrapper(message: searchText) {
+                logger.log("Relevant tags: \(relevantTags)")
+                if relevantTags.isEmpty {
+                    let alert = UIAlertController(title: "No Results", message: "No relevant tags were found for your message.", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    await MainActor.run {
+                        present(alert, animated: true, completion: nil)
+                    }
+                    return
+                }
+
+                await performSearch(query: relevantTags)
+            } else {
+                let alert = UIAlertController(title: "Error", message: "Unable to fetch sentiment analysis results. Please try again.", preferredStyle: .alert)
+                await MainActor.run {
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    present(alert, animated: true, completion: nil)
+                }
+            }
+        }
+    }
+
+    //
+    private var isAdvancedSearch = false
+    @objc func toggleSearchMode(_ sender: UISwitch) {
+        isAdvancedSearch = sender.isOn
+        searchBar.placeholder = isAdvancedSearch ? "Paste Message Here!" : "Search All Giggles"
+
+        if isAdvancedSearch {
+            segmentedControl.isHidden = true
+            vibeCheckerButtonContainer?.isHidden = false
+        } else {
+            segmentedControl.isHidden = false
+            vibeCheckerButtonContainer?.isHidden = true
+        }
+    }
+
     //reset to all giggles if search bar is empty. auto reload kinda
     @objc private func resetIfSearchEmpty() {
         DispatchQueue.main.async { [weak self] in
@@ -216,7 +332,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         searchBar.frame = CGRect(
             x: collectionView.frame.origin.x - 2,
             y: searchBar.frame.origin.y - 4,
-            width: collectionViewWidth + 4,
+            width: collectionViewWidth - 60,
             height: searchBar.frame.height
         )
     }
@@ -232,21 +348,21 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         self.searchText = searchText
-
-        DispatchQueue.global(qos: .userInitiated).async {
+        
+        guard !isAdvancedSearch else {
+            logger.log("Advanced search mode is active. Ignoring search bar text change.")
+            return
+        }
+        
+        Task {
             if searchText.isEmpty {
-                self.imagesArray = self.allMemes
-                DispatchQueue.main.async {
-                    self.collectionView.reloadData()
-                }
-                
-                logger.log("Search Bar empty, returning All Giggles")
-            }
-            else {
-                self.performSearch(query: searchText)
+                await performSearch(query: "") // Handle the case for empty search text
+            } else {
+                await performSearch(query: searchText) // Call the async search function
             }
         }
     }
+
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder() // Dismiss the keyboard
@@ -254,34 +370,68 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         logger.log("Search button clicked. Keyboard dismissed.")
     }
 
-    private func performSearch(query: String) {
+//    private func performSearch(query: String) {
+//        logger.log("Running search for query: \(query)")
+//
+//        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+//            guard let self = self else { return }
+//            let results: [Meme]
+//            
+//            if query.isEmpty {
+//                results = self.allMemes //resets to full list of mems
+//                logger.log("Memes Filtered, returning All Giggles")
+//            }
+//            else if self.isAdvancedSearch {
+//                // Placeholder for sentence search logic (no filtering for now)
+//                logger.log("Advanced search mode active. No filtering applied.")
+//                results = self.allMemes
+//            }
+//            else {
+//                let filteredMemes = self.imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
+//                results = filteredMemes.sorted { $0.dateAdded > $1.dateAdded }
+//                logger.log("Memes Filtered, returning subset")
+//            }
+//
+//            // Log the size of the filtered results
+//            logger.log("Search results count for query '\(query)': \(results.count)")
+//
+//            // Update the filtered array and UI on the main thread
+//            DispatchQueue.main.async {
+////                self.filteredMemes = results
+////                logger.log("Filtered memes updated: \(self.filteredMemes.count) items.")
+//                self.imagesArray = results // Update the source data
+//                self.collectionView.reloadData()
+//            }
+//        }
+//    }
+    private func performSearch(query: String) async {
         logger.log("Running search for query: \(query)")
+        
+        self.imagesArray = self.allMemes
 
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-            let results: [Meme]
-            
-            if query.isEmpty {
-                results = self.allMemes //resets to full list of mems
-                logger.log("Memes Filtered, returning All Giggles")
-            } else {
-                let filteredMemes = self.imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
-                results = filteredMemes.sorted { $0.dateAdded > $1.dateAdded }
-                logger.log("Memes Filtered, returning subset")
-            }
+        let results: [Meme]
 
-            // Log the size of the filtered results
+        if query.isEmpty {
+            results = self.allMemes // Reset to full list of memes
+            logger.log("Search query is empty. Returning all memes.")
+        } else if isAdvancedSearch {
+            // Placeholder for advanced search logic
+            logger.log("Advanced search mode active. Returning all memes (no filtering applied).")
+            results = imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
+                .sorted { $0.dateAdded > $1.dateAdded }
+        } else {
+            results = imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
+                .sorted { $0.dateAdded > $1.dateAdded }
             logger.log("Search results count for query '\(query)': \(results.count)")
+        }
 
-            // Update the filtered array and UI on the main thread
-            DispatchQueue.main.async {
-//                self.filteredMemes = results
-//                logger.log("Filtered memes updated: \(self.filteredMemes.count) items.")
-                self.imagesArray = results // Update the source data
-                self.collectionView.reloadData()
-            }
+        // Update UI on the main thread
+        await MainActor.run {
+            self.imagesArray = results
+            self.collectionView.reloadData()
         }
     }
+
 
     //clear imagesArray to free up memory when needed
     override func didReceiveMemoryWarning() {
