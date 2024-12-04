@@ -504,38 +504,42 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         // Ensure activeConversation is available
 
         // ROB CHANGES  ------------------------------------------------
-        // Task {
-        //     guard let conversation = activeConversation else {
-        //         logger.log("No active conversation found.")
-        //         return
-        //     }
+        Task {
+            guard let conversation = activeConversation else {
+                logger.log("No active conversation found.")
+                return
+            }
             
-        //     let meme = filteredMemes[indexPath.item]
+            let meme = filteredMemes[indexPath.item]
             
-        //     let originalImage = await meme.memeAsUIImage.fixedOrientation()//preserve orientation
+            let originalImage = await meme.memeAsUIImage.fixedOrientation()//preserve orientation
             
-        //     // Configure the message layout with the meme's image
-        //     let layout = MSMessageTemplateLayout()
-        //     layout.image = originalImage
-        //     // layout.caption = "Sent from Giggle" // Optional caption
+            // Configure the message layout with the meme's image
+            let layout = MSMessageTemplateLayout()
+            layout.image = originalImage
+            // layout.caption = "Sent from Giggle" // Optional caption
             
-        //     // Create and configure the message
-        //     let message = MSMessage()
-        //     message.layout = layout
+            // Create and configure the message
+            let message = MSMessage()
+            message.layout = layout
             
-        //     searchBar.resignFirstResponder()
+            searchBar.resignFirstResponder()
             
-        //     // Insert the message into the conversation
-        //     conversation.insert(message) { error in
-        //         if let error = error {
-        //             logger.log("Failed to insert message: \(error.localizedDescription)")
-        //         }
-        //     }
-            
-        //     //ensure the extension view minimizes immediately on tap
-        //     DispatchQueue.main.async {
-        //         self.requestPresentationStyle(.compact)
-        //     }
+            // Insert the message into the conversation
+            conversation.insert(message) { error in
+                if let error = error {
+                    logger.log("Failed to insert message: \(error.localizedDescription)")
+                }
+            }
+            meme.dateLastShared = Date()
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
+            }
+        }
+            //ensure the extension view minimizes immediately on tap
+        DispatchQueue.main.async {
+            self.requestPresentationStyle(.compact)
+        }
         // ------------------------------------------------------------------
 
 //        guard let conversation = activeConversation else {
@@ -577,9 +581,9 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 //        }
 
         //ensure the extension view minimizes immediately on tap
-        DispatchQueue.main.async {
-            self.requestPresentationStyle(.compact)
-        }
+//        DispatchQueue.main.async {
+//            self.requestPresentationStyle(.compact)
+//        }
     }
     //END OF ADDED FUNCTIONS - Tamaer
 

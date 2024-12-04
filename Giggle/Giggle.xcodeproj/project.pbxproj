@@ -387,7 +387,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = U5F6M9HZ78;
+				DEVELOPMENT_TEAM = 44D7Z79LC8;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Giggle_IMessage/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Giggle;
@@ -398,7 +398,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.Giggle.eecs441Giggle.Giggle.Giggle-IMessage";
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-IMessage";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -415,7 +415,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = U5F6M9HZ78;
+				DEVELOPMENT_TEAM = 44D7Z79LC8;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Giggle_IMessage/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Giggle;
@@ -426,7 +426,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.Giggle.eecs441Giggle.Giggle.Giggle-IMessage";
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-IMessage";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -441,7 +441,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Giggle-Share-RT/Giggle-Share-RT.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = U5F6M9HZ78;
+				DEVELOPMENT_TEAM = 44D7Z79LC8;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Giggle-Share-RT/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Giggle-Share-RT";
@@ -453,7 +453,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.Giggle.eecs441Giggle.Giggle.Giggle-Share-RT";
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-Share-RT";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -468,7 +468,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Giggle-Share-RT/Giggle-Share-RT.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = U5F6M9HZ78;
+				DEVELOPMENT_TEAM = 44D7Z79LC8;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Giggle-Share-RT/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Giggle-Share-RT";
@@ -480,7 +480,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.Giggle.eecs441Giggle.Giggle.Giggle-Share-RT";
+				PRODUCT_BUNDLE_IDENTIFIER = "edu.umich.eecs441Giggle.Giggle.Giggle-Share-RT";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -617,7 +617,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Giggle/Preview Content\"";
-				DEVELOPMENT_TEAM = U5F6M9HZ78;
+				DEVELOPMENT_TEAM = 44D7Z79LC8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Upload Memes";
@@ -631,7 +631,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = edu.umich.Giggle.eecs441Giggle.Giggle;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.umich.eecs441Giggle.Giggle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -648,7 +648,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Giggle/Preview Content\"";
-				DEVELOPMENT_TEAM = U5F6M9HZ78;
+				DEVELOPMENT_TEAM = 44D7Z79LC8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "To Upload Memes";
@@ -662,7 +662,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = edu.umich.Giggle.eecs441Giggle.Giggle;
+				PRODUCT_BUNDLE_IDENTIFIER = edu.umich.eecs441Giggle.Giggle;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
