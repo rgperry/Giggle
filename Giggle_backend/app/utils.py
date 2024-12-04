@@ -100,7 +100,7 @@ def analyze_sentiment(message, tags):
                 }
             ]
         )
-        tags = response.choices[0].message.content.strip().split(',')
+        tags = response.choices[0].message.content.strip()
         return [tag.strip() for tag in tags]
     except openai.error.AuthenticationError as e:
         print(f"Authentication Error: {e}")
