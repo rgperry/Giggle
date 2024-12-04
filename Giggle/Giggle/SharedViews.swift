@@ -161,19 +161,23 @@ struct GenerateMemeButton: View {
     var isEnabled: Bool
     var showAlertAction: () -> Void
     @Binding var memeImage: UIImage?
+    @Binding var isLoading: Bool // Add loading state binding
 
     var body: some View {
         Button(action: {
             if isEnabled {
                 print("Generate meme with Dalle3 AI!")
+                isLoading = true // Start loading
                 Task {
                     let generatedImage = await generateMeme(description: memeDescription)
                     guard let generatedImage else {
                         logger.error("ERROR GENERATING IMAGE")
+                        isLoading = false // Stop loading if generation fails
                         return
                     }
-                    isClicked = true
                     memeImage = generatedImage
+                    isLoading = false // Stop loading
+                    isClicked = true
                 }
             } else {
                 // Trigger alert if no description
@@ -185,15 +189,16 @@ struct GenerateMemeButton: View {
                 .foregroundColor(.white)
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(Color.black)
+                .background(isLoading ? Color.gray : Color.black)
                 .cornerRadius(10)
                 .padding(.horizontal, 80)
                 .padding(.bottom, 30)
         }
-        
+        .disabled(isLoading) // Disable button while loading
         Spacer().frame(height: 40)
     }
 }
+
 
 struct MemeImageView: View {
     let image: UIImage
