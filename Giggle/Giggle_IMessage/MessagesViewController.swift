@@ -378,8 +378,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     private func performSearch(query: String) async {
         //logger.log("Running search for query: \(query)")
         
-        let sharedDefaults = UserDefaults(suiteName: "group.com.Giggle.Giggle")
-        let numSearchResults = sharedDefaults?.integer(forKey: "numSearchResultsiMessage") ?? 10
+        // let sharedDefaults = UserDefaults(suiteName: "group.com.Giggle.Giggle")
+        // let numSearchResults = sharedDefaults?.integer(forKey: "numSearchResultsiMessage") ?? 10
         
         // logger.log("\(numSearchResults)")
         
@@ -396,13 +396,13 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             results = Array(
                 imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
                     .sorted { $0.dateAdded > $1.dateAdded }
-                    .prefix(numSearchResults)
+                    // .prefix(numSearchResults)
                 )
         } else {
             results = Array(
                 imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
                     .sorted { $0.dateAdded > $1.dateAdded }
-                    .prefix(numSearchResults)
+                    // .prefix(numSearchResults)
                 )
             //logger.log("Search results count for query '\(query)': \(results.count)")
         }
