@@ -56,6 +56,7 @@ class Meme {
     var favorited: Bool = false
     var dateFavorited: Date?
     var mediaType: MediaType
+    @Attribute(.externalStorage) var thumbnail: Data?
 
     enum MediaType: String, Codable {
         case image
@@ -63,7 +64,7 @@ class Meme {
         case video
     }
 
-    init(content: String, tags: [Tag] = [], media: MemeMedia, id: UUID? = nil) {
+    init(content: String, tags: [Tag] = [], media: MemeMedia, id: UUID? = nil, thumbnail: UIImage?) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
         self.dateAdded = Date()
@@ -74,6 +75,10 @@ class Meme {
         
         self.favorited = false
         self.dateFavorited = nil
+        
+        if let thumbnail = thumbnail {
+            self.thumbnail = try? convertImageToPNG(thumbnail)
+        }
         
         switch media {
         case .image(let image):
@@ -105,7 +110,10 @@ class Meme {
                 }
                 return UIImage(data: imageData) ?? UIImage()
             case .gif, .video:
-                return await extractFirstFrame(fromMediaAt: mediaData) ?? UIImage(systemName: "video") ?? UIImage()
+                guard let thumbnailData = thumbnail else {
+                    return UIImage(systemName: "photo") ?? UIImage()
+                }
+                return UIImage(data: thumbnailData) ?? UIImage()
             }
         }
     }

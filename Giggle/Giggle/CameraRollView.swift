@@ -11,6 +11,8 @@ import PhotosUI
 import UniformTypeIdentifiers
 
 //https://developer.apple.com/documentation/photokit/phpickerviewcontroller
+
+//Loading other types of media: https://stackoverflow.com/questions/70943855/phpicker-load-video
 struct ImagePicker: UIViewControllerRepresentable {
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedMemes: [MemeMedia] //updated xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -52,37 +54,97 @@ struct ImagePicker: UIViewControllerRepresentable {
             
             var memesToAppend: [MemeMedia] = [] //updated xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
             
-            let group = DispatchGroup()  // To track all asynchronous loading tasks
-            for result in results {
-                if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.gif.identifier) {
-                    group.enter()
-                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.gif.identifier) { (url, error) in
-                        if let url = url {
-                            DispatchQueue.main.async {
-                                memesToAppend.append(.gif(url))
+//            let group = DispatchGroup()  // To track all asynchronous loading tasks
+//            for result in results {
+//                if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.gif.identifier) {
+//                    group.enter()
+//                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.gif.identifier) { (url, error) in
+//                        if let url = url {
+//                            DispatchQueue.main.async {
+//                                memesToAppend.append(.gif(url))
+//                            }
+//                            group.leave()
+//                        }
+//                    }
+//                }
+//                else if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
+//                    group.enter()
+//                    result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
+//                        if let uiImage = image as? UIImage {
+//                            memesToAppend.append(.image(uiImage))
+//                        }
+//                        group.leave()
+//                    }
+//                }
+//                else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+//                    group.enter()
+//                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { (url, error) in
+//                        if let url = url {
+//                            DispatchQueue.main.async {
+//                                memesToAppend.append(.video(url))
+//                            }
+//                            group.leave()
+//                        }
+//                    }
+//                }
+//            }
+//            // Once all images are loaded, update the state
+//            group.notify(queue: .main) {
+//                self.parent.selectedMemes.append(contentsOf: memesToAppend)
+//                self.parent.pickingIsDone = true  // Signal that meme selection is done
+//            }
+//            
+//            
+//            // new code here:
+            
+            let group = DispatchGroup()
+            
+            picker.dismiss(animated: true)
+            results.forEach { result in
+                guard let typeIdentifier = result.itemProvider.registeredTypeIdentifiers.first,
+                      let utType = UTType(typeIdentifier) else { return }
+                if utType.conforms(to: .movie) || utType.conforms(to: .gif) { // process videos or gifs
+                    var name = ""
+                    if let suggestedName = result.itemProvider.suggestedName {
+                        if utType.conforms(to: .movie) {
+                            if utType.conforms(to: .mpeg4Movie) {
+                                name = suggestedName + UUID().uuidString + ".mp4"
+                            } else {
+                                name = suggestedName + UUID().uuidString + ".mov"
                             }
-                            group.leave()
+                        } else {
+                            name = suggestedName + UUID().uuidString + ".gif"
                         }
                     }
-                }
-                else if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
+                    group.enter()
+                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { [weak self] url, error in
+                        guard let self, let url else { return }
+                        if let error {
+                            print(error.localizedDescription)
+                        }
+                        // copying file
+                        let fm = FileManager.default
+                        let destination = fm.temporaryDirectory.appendingPathComponent(name)
+                        do {
+                            try fm.copyItem(at: url, to: destination)
+                            if (utType.conforms(to: .movie)) {
+                                memesToAppend.append(.video(destination))
+                            } else {
+                                memesToAppend.append(.gif(destination))
+                            }
+                            
+                        } catch {
+                            print(error.localizedDescription)
+                        }
+                        group.leave()
+                    }
+                } else if utType.conforms(to: .image) {
                     group.enter()
                     result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
                         if let uiImage = image as? UIImage {
                             memesToAppend.append(.image(uiImage))
                         }
                         group.leave()
-                    }
-                }
-                else if result.itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
-                    group.enter()
-                    result.itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier) { (url, error) in
-                        if let url = url {
-                            DispatchQueue.main.async {
-                                memesToAppend.append(.video(url))
-                            }
-                            group.leave()
-                        }
                     }
                 }
             }
@@ -94,3 +156,5 @@ struct ImagePicker: UIViewControllerRepresentable {
         }
     }
 }
+
+

@@ -10,6 +10,8 @@ import NaturalLanguage
 import SwiftUI
 import Alamofire
 import AVFoundation
+import UIKit
+import ImageIO
 
 enum MemeMedia: Equatable { //copy of enum type in SharedLogic.swift (commented out there)
     case image(UIImage)
@@ -48,6 +50,14 @@ actor MemeImportManager {
         }
     }
     
+    private func extractFirstFrameFromGif(fromMediaURL url: URL) async throws -> UIImage? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let cgImage = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+            return nil
+        }
+        return UIImage(cgImage: cgImage)
+    }
+    
     func storeMemes(memes: [MemeMedia], completion: @escaping () -> Void) async throws {
         guard !memes.isEmpty else {
             logger.log("NO IMAGES TO IMPORT")
@@ -64,22 +74,28 @@ actor MemeImportManager {
                     switch meme {
                     case .image(let image):
                         frame = image
-                    case .gif(let url), .video(let url):
+                    case .video(let url):
                         do {
                             //mediaData = try Data(contentsOf: url) //Not sure if this is bad to store all this data here xxxxxxxxxxxxxxxxxxxxxxx
                             frame = try await self.extractFirstFrame(fromMediaURL: url)!
                         } catch {
-                            logger.error("Failed to load media data from \(url) in storeMeme")
+                            logger.error("Failed to load video data from \(url) in storeMemes")
                             //mediaData = try convertImageToPNG(UIImage(systemName: "video"))
                             frame = UIImage(systemName: "video")!
                         }
-                        
+                    case .gif(let url):
+                        do {
+                            frame = try await self.extractFirstFrameFromGif(fromMediaURL: url)!
+                        } catch {
+                            logger.error("Failed to load gif data from \(url) in storeMemes")
+                        }
+                        frame = UIImage(systemName: "video")!
                     }
                     
                     let (tags, content) = try await DataManager.getInfo(for: frame) //update getInfo call so gif/vid works
                     
                     // Direct insertion without actor synchronization
-                    let meme = Meme(content: content, tags: tags, media: meme)
+                    let meme = Meme(content: content, tags: tags, media: meme, thumbnail: frame)
                     return meme
                 }
             }
@@ -311,6 +327,7 @@ class DataManager {
             
             // Delete all memes
             for meme in memes {
+                
                 context.delete(meme)
             }
             
