@@ -380,7 +380,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         let sharedDefaults = UserDefaults(suiteName: "group.com.Giggle.Giggle")
         let numSearchResults = sharedDefaults?.integer(forKey: "numSearchResultsiMessage") ?? 10
         
-        logger.log("\(numSearchResults)")
+        // logger.log("\(numSearchResults)")
         
         self.imagesArray = self.allMemes
 
