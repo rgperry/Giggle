@@ -83,13 +83,13 @@ struct MemeCreatedView: View {
     }
 
     private func storeMemeButton() {
+        navigateToAllGiggles = true 
         Task {
             do {
                 let modelContainer = try ModelContainer(for: Meme.self, Tag.self)
                 let importManager = MemeImportManager(modelContainer: modelContainer)
                 try await importManager.storeMemes(images: [UIImage(data: meme.image!)!]) {
                     print("Meme stored successfully!")
-                    navigateToAllGiggles = true // Navigate after storing
                 }
             } catch {
                 print("Failed to store meme: \(error.localizedDescription)")

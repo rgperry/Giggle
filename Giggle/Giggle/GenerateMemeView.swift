@@ -88,6 +88,8 @@ struct GenerateMemeView: View {
 }
 
 struct QuestionMark: View {
+    @Environment(\.colorScheme) var colorScheme // Detect light or dark mode
+
     var body: some View {
         VStack {
             Spacer()
@@ -96,7 +98,7 @@ struct QuestionMark: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 200, height: 200)
-                .foregroundColor(.white)
+                .foregroundColor(colorScheme == .dark ? .black : .white) 
 
             Spacer()
         }

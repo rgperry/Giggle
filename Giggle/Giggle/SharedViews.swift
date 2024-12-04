@@ -141,19 +141,23 @@ struct PageHeader: View {
 
 struct MemeDescriptionField: View {
     @Binding var memeDescription: String
+    @Environment(\.colorScheme) var colorScheme // Detect light or dark mode
 
     var body: some View {
         VStack {
-            TextField("Describe the meme you want to create!", text: $memeDescription)
+            TextField("Describe a meme to create!", text: $memeDescription)
                 .padding()
-                .background(Color.white)
+                .background(colorScheme == .dark ? Color.black : Color.white)
                 .cornerRadius(15)
+                .foregroundColor(colorScheme == .dark ? .white : .black)
+                .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
             
             Spacer().frame(height: 20)
         }
     }
 }
+
 
 struct GenerateMemeButton: View {
     @Binding var isClicked: Bool
@@ -162,6 +166,7 @@ struct GenerateMemeButton: View {
     var showAlertAction: () -> Void
     @Binding var memeImage: UIImage?
     @Binding var isLoading: Bool // Add loading state binding
+    @Environment(\.colorScheme) var colorScheme // Detect light or dark mode
 
     var body: some View {
         Button(action: {
@@ -186,11 +191,14 @@ struct GenerateMemeButton: View {
         }) {
             Text("Generate with Dalle3 AI")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(colorScheme == .dark ? Color(UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)) : Color(UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0))) // Text color contrast
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(isLoading ? Color.gray : Color.black)
-                .cornerRadius(10)
+                .background(
+                    isLoading
+                        ? Color.gray // Loading state color
+                    : (colorScheme == .dark ? Color.black : Color.white) // Dynamic background color
+                )                .cornerRadius(10)
                 .padding(.horizontal, 80)
                 .padding(.bottom, 30)
         }
