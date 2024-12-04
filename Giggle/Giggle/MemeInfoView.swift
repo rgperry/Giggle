@@ -7,6 +7,7 @@
 
 import SwiftUI
 import AVKit
+import Giffy
 
 struct MemeInfoView: View {
     @Bindable var meme: Meme
@@ -32,11 +33,22 @@ struct MemeInfoView: View {
                 } else {
                     Text("Loading image...")
                 }
+//            case .gif:
+//                Giffy(filePath: meme.mediaURL!)
             case .gif, .video:
                 if let player = player {
                     VideoPlayer(player: player)
                         .onAppear {
                             player.play()
+                            player.actionAtItemEnd = .none // Loop the video
+                            NotificationCenter.default.addObserver(
+                                forName: .AVPlayerItemDidPlayToEndTime,
+                                object: player.currentItem,
+                                queue: .main
+                            ) { _ in
+                                player.seek(to: .zero)
+                                player.play()
+                            }
                         }
                         .frame(height: 300) // Adjust as needed
                 } else {
@@ -71,14 +83,17 @@ struct MemeInfoView: View {
         case .image:
             uiImage = await meme.memeAsUIImage
         case .gif, .video:
+//            if let url = meme.mediaURL {
+//                let asset = AVURLAsset(url: url)
+//                let playerItem = AVPlayerItem(asset: asset)
+//
+//                // Use AVQueuePlayer and AVPlayerLooper for looping
+//                let queuePlayer = AVQueuePlayer()
+//                AVPlayerLooper(player: queuePlayer, templateItem: playerItem)
+//                player = queuePlayer
+//            }
             if let url = meme.mediaURL {
-                let asset = AVURLAsset(url: url)
-                let playerItem = AVPlayerItem(asset: asset)
-                
-                // Use AVQueuePlayer and AVPlayerLooper for looping
-                let queuePlayer = AVQueuePlayer()
-                AVPlayerLooper(player: queuePlayer, templateItem: playerItem)
-                player = queuePlayer
+                player = AVPlayer(url: url)
             }
         }
     }

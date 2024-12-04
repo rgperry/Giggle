@@ -80,7 +80,9 @@ struct ImagePicker: UIViewControllerRepresentable {
                         }
                         // copying file
                         let fm = FileManager.default
-                        let destination = fm.temporaryDirectory.appendingPathComponent(name)
+                        let documentsURL = fm.urls(for: .documentDirectory, in: .userDomainMask).first!
+                        let destination = documentsURL.appendingPathComponent(name)
+                        //let destination = fm.temporaryDirectory.appendingPathComponent(name)
                         do {
                             try fm.copyItem(at: url, to: destination)
                             if (utType.conforms(to: .movie)) {

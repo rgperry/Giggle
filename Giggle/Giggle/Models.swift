@@ -59,6 +59,7 @@ public class Meme {
     var dateFavorited: Date?
     var mediaType: MediaType
     @Attribute(.externalStorage) var thumbnail: Data?
+    var mediaURL: URL?
 
     enum MediaType: String, Codable {
         case image
@@ -66,7 +67,7 @@ public class Meme {
         case video
     }
 
-    init(content: String, tags: [Tag] = [], media: MemeMedia, id: UUID? = nil, favorited: Bool = false, thumbnail: UIImage?) {
+    init(content: String, tags: [Tag] = [], media: MemeMedia, id: UUID? = nil, favorited: Bool = false, thumbnail: UIImage?, mediaURL: URL?) {
         // Use the provided id or generate a new UUID if none is provided
         self.id = id ?? UUID()
         self.dateAdded = Date()
@@ -99,6 +100,8 @@ public class Meme {
                 self.mediaData = nil
             }
         }
+        
+        self.mediaURL = mediaURL
         
         if self.favorited {
             self.dateFavorited = Date()
@@ -154,31 +157,6 @@ public class Meme {
 }
 
 extension Meme {
-    var mediaURL: URL? {
-        guard let mediaData = mediaData else { return nil }
-        let tempDirectory = FileManager.default.temporaryDirectory
-        let fileExtension: String = {
-            switch mediaType {
-            case .gif: return "gif"
-            case .video: return "mp4"
-            default: return "dat"
-            }
-        }()
-        let fileName = "\(id).\(fileExtension)"
-        let fileURL = tempDirectory.appendingPathComponent(fileName)
-
-        // Write data to a temporary file if it doesn't already exist
-        if !FileManager.default.fileExists(atPath: fileURL.path) {
-            do {
-                try mediaData.write(to: fileURL)
-            } catch {
-                print("Failed to write media data to temporary file: \(error)")
-                return nil
-            }
-        }
-        return fileURL
-    }
-    
     func addTag(_ tagName: String) {
         let tag = Tag(name: tagName.lowercased().trimmingCharacters(in: .whitespacesAndNewlines))
         if !tags.contains(where: { $0.name == tag.name }) {

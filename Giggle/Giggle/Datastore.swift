@@ -60,6 +60,7 @@ actor MemeImportManager {
                 group.addTask {
                     //var mediaData: Data
                     var frame: UIImage
+                    var mediaURL: URL?
                     switch meme {
                     case .image(let image):
                         frame = image
@@ -70,6 +71,7 @@ actor MemeImportManager {
                             logger.error("Failed to load video data from \(url) in storeMemes")
                             frame = UIImage(systemName: "video")!
                         }
+                        mediaURL = url
                     case .gif(let url):
                         do {
                             frame = try await self.extractFirstFrameFromGif(fromMediaURL: url)!
@@ -77,12 +79,13 @@ actor MemeImportManager {
                             logger.error("Failed to load gif data from \(url) in storeMemes")
                             frame = UIImage(systemName: "video")!
                         }
+                        mediaURL = url
                     }
                     
                     let (tags, content) = try await DataManager.getInfo(for: frame)
                     
                     // Direct insertion without actor synchronization
-                    let meme = Meme(content: content, tags: tags, media: meme, favorited: favorited, thumbnail: frame)
+                    let meme = Meme(content: content, tags: tags, media: meme, favorited: favorited, thumbnail: frame, mediaURL: mediaURL)
                     return meme
                 }
             }
