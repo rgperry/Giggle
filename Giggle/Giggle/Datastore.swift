@@ -332,3 +332,72 @@ func regenerateMeme(description: String) async -> UIImage? {
     
     return nil // Return nil if the operation fails
 }
+//Matt/Tamaer, iMessage sentiment
+func getSentimentWrapper (message: String) async -> String? {
+    do {
+        // Initialize ModelContainer and ModelContext the same way as in saveImageToDataStore
+        let modelContainer = try ModelContainer(for: Meme.self, Tag.self)
+        let sentimentHelper = SentimentActor(modelContainer: modelContainer)
+        return await sentimentHelper.getSentiment(message: message)
+        
+    } catch {
+        logger.error("Failed to initialize ModelContainer: \(error.localizedDescription)")
+    }
+    return nil
+}
+
+@ModelActor
+actor SentimentActor {
+    // gets the relevant tags in a space separated string for easy searching
+    func getSentiment(message: String) async -> String? {
+        // Fetch all the tags from your data model
+        guard let tagList = try? fetchAllTags() else {
+            print("Failed to fetch tags from the data model")
+            return nil
+        }
+        
+        if tagList.count == 0 {
+            print("no tags stored in the db")
+            return nil
+        }
+        
+        // Construct URL using URLComponents
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "18.223.212.43"
+        components.path = "/getSentiment/"
+        components.queryItems = [
+            URLQueryItem(name: "message", value: message),
+            URLQueryItem(name: "tags", value: tagList.joined(separator: ","))
+        ]
+        
+        guard let url = components.url else {
+            print("Invalid URL")
+            return nil
+        }
+
+        do {
+            // Fetch data from the endpoint
+            let (data, _) = try await URLSession.shared.data(from: url)
+            
+            // Decode the JSON response
+            if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                let relevantTags = json["relevantTags"] as? String {
+                // this is just a string
+                return relevantTags
+            } else {
+                print("Failed to parse JSON or find 'sentiment' key")
+                return nil
+            }
+        } catch {
+            print("Error in getSentiment: \(error)")
+            return nil
+        }
+    }
+    
+    private func fetchAllTags() throws -> [String] {
+        // Replace 'TagEntity' with the name of your model entity storing tags
+        let tags = try modelContext.fetch(FetchDescriptor<Tag>())
+        return tags.map { $0.name }
+    }
+}
