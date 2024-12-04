@@ -96,7 +96,7 @@ def analyze_sentiment(message, tags):
                                 "For example, if the message is 'I'm really excited to see you' and the database contains tags like smile, happy, excited, and good, you would return those tags. "
                                 "If no relevant tags are found in the provided list, return an empty string. "
                                 f"Here is the message: {message}. Here is the list of tags from our database: {tags}. "
-                                "Return the tags in a comma-separated list. I repeat, your response to this message should ONLY be a list of the tags you have selected, separated by commas. No brackets necessary."
+                                "Return the tags in a single string, with each tag separated by spaces. Make sure they are all lowercase. Thank you"
                 }
             ]
         )
