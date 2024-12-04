@@ -91,7 +91,9 @@ class ShareViewController: UIViewController {
             Task {
                 print("Attempting to store image into all giggles.")
                 let importManager = MemeImportManager(modelContainer: modelContext.container)
-                try await importManager.storeMemes(images: [image]) {
+                var memes: [MemeMedia] = []
+                memes.append(.image(image))
+                try await importManager.storeMemes(memes: memes) {
                     print("Successfully stored 1 image to the SwiftData database.")
                 }
             }

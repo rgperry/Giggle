@@ -31,11 +31,12 @@ struct GiggleItem: View {
     @Environment(\.modelContext) private var context
 
     @State private var navigateToMemeInfo = false
+    @State private var displayedImage: UIImage?
 
     var body: some View {
         NavigationStack {
             VStack {
-                Image(uiImage: meme.imageAsUIImage)
+                Image(uiImage: displayedImage ?? UIImage(systemName: "photo")!)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size, height: size)
@@ -48,8 +49,9 @@ struct GiggleItem: View {
                     }
                     .contextMenu {
                         Button(action: {
-                            copyImage()
-                            
+                            Task {
+                                await copyImage()
+                            }
                             meme.dateLastShared = Date()
                             DataManager.saveContext(
                                 context: context,
@@ -62,8 +64,9 @@ struct GiggleItem: View {
                         }
 
                         Button(action: {
-                            shareImage()
-                            
+                            Task {
+                                await shareImage()
+                            }
                             meme.dateLastShared = Date()
                             DataManager.saveContext(
                                 context: context,
@@ -91,6 +94,9 @@ struct GiggleItem: View {
                 }
                 .offset(x: -72, y: -175)
             }
+            .onAppear {
+                loadImage()
+            }
             .navigationDestination(isPresented: $navigateToMemeInfo) {
                 MemeInfoView(
                     meme: meme
@@ -98,14 +104,23 @@ struct GiggleItem: View {
             }
         }
     }
+    
+    private func loadImage() {
+        Task {
+            let image = await meme.memeAsUIImage
+            DispatchQueue.main.async {
+                self.displayedImage = image
+            }
+        }
+    }
 
-    private func copyImage() {
-        let imageToCopy = meme.imageAsUIImage
+    private func copyImage() async {
+        let imageToCopy = await meme.memeAsUIImage
         UIPasteboard.general.image = imageToCopy
     }
 
-    private func shareImage() {
-        let activityVC = UIActivityViewController(activityItems: [meme.imageAsUIImage], applicationActivities: nil)
+    private func shareImage() async {
+        let activityVC = await UIActivityViewController(activityItems: [meme.memeAsUIImage], applicationActivities: nil)
 
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootVC = windowScene.windows.first?.rootViewController {

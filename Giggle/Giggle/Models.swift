@@ -97,33 +97,33 @@ class Meme {
     
     // Computed property to get the UIImage from meme Data
     var memeAsUIImage: UIImage { //imageAsUIImage
-        switch mediaType {
-        case .image:
-            guard let imageData = mediaData else {
-                return UIImage(systemName: "photo") ?? UIImage()
+        get async {
+            switch mediaType {
+            case .image:
+                guard let imageData = mediaData else {
+                    return UIImage(systemName: "photo") ?? UIImage()
+                }
+                return UIImage(data: imageData) ?? UIImage()
+            case .gif, .video:
+                return await extractFirstFrame(fromMediaAt: mediaData) ?? UIImage(systemName: "video") ?? UIImage()
             }
-            return UIImage(data: imageData) ?? UIImage()
-        case .gif, .video:
-            return UIImage(systemName: "video") ?? UIImage() // Placeholder
         }
     }
     
     //https://developer.apple.com/documentation/avfoundation/avassetimagegenerator
-    private func extractFirstFrame(fromMediaAt data: Data?) -> UIImage? {
+    private func extractFirstFrame(fromMediaAt data: Data?) async -> UIImage? {
         guard let data = data, let url = URL(dataRepresentation: data, relativeTo: nil) else { return nil }
         
         let asset = AVURLAsset(url: url)
         let imageGenerator = AVAssetImageGenerator(asset: asset)
-        imageGenerator.appliesPreferredTrackTransform = true // Ensure correct orientation
+        imageGenerator.appliesPreferredTrackTransform = true // Fix orientation of video
         
-        Task {
-            do {
-                let image = try imageGenerator.image(at: CMTime.zero)
-                return UIImage(cgImage: image.image)
-            } catch {
-                print("Failed to extract first frame: \(error)")
-                return nil
-            }
+        do {
+            let image = try await imageGenerator.image(at: CMTime.zero)
+            return UIImage(cgImage: image.image)
+        } catch {
+            print("Failed to extract first frame: \(error)")
+            return nil
         }
     }
     

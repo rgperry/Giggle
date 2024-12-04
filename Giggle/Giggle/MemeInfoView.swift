@@ -11,13 +11,14 @@ struct MemeInfoView: View {
     @Bindable var meme: Meme
 
     @State private var navigateToAllGiggles = false
-
+    @State private var displayedImage: UIImage?
+    
     var body: some View {
         NavigationStack {
             VStack {
                 PageHeader(text: "Giggle")
 
-                MemeImageView(image: meme.imageAsUIImage)
+                MemeImageView(image: displayedImage ?? UIImage(systemName: "photo")!)
                 Tags(tags: meme.tags)
                 MoreInfo(dateAdded: meme.dateAdded, source: "TODO")
                 
@@ -29,8 +30,20 @@ struct MemeInfoView: View {
                 BottomNavBar()
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
+            .onAppear {
+                loadImage()
+            }
             .navigationDestination(isPresented: $navigateToAllGiggles) {
                 FolderView(header: "All Giggles")
+            }
+        }
+    }
+    
+    private func loadImage() {
+        Task {
+            let image = await meme.memeAsUIImage
+            DispatchQueue.main.async {
+                self.displayedImage = image
             }
         }
     }
