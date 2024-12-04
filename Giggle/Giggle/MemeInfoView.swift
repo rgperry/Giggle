@@ -33,9 +33,9 @@ struct MemeInfoView: View {
                 } else {
                     Text("Loading image...")
                 }
-//            case .gif:
-//                Giffy(filePath: meme.mediaURL!)
-            case .gif, .video:
+            case .gif:
+                Giffy(filePath: meme.mediaURL!)
+            case .video:
                 if let player = player {
                     VideoPlayer(player: player)
                         .onAppear {
