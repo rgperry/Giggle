@@ -34,7 +34,7 @@ struct BottomNavBar: View {
                     }
                 
                 // have to fix this image thing
-                NavigationLink(destination: GenerateMemeView(meme: Meme(content: "", tags: [], image: nil))) {
+                NavigationLink(destination: GenerateMemeView(meme: Meme(content: "", tags: [], image: UIImage(systemName: "photo") ?? UIImage()))) {
                     BottomNavBarIcon(icon: "paintbrush.fill")
                 }
 

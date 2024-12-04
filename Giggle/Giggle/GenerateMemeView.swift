@@ -7,10 +7,9 @@ struct GenerateMemeView: View {
     @State private var isGenerating = false
     @State private var showAlert = false
 
-    // let modelContainer: ModelContainer
-    
     var body: some View {
         VStack {
+            PageHeader(text: "Giggle")
             // Meme Image or Placeholder
             if isGenerating {
                 Image(systemName: "photo")
@@ -29,7 +28,8 @@ struct GenerateMemeView: View {
                 showAlertAction: { showAlert = true },
                 generateAction: generateMemeButtonPressed,
                 deleteAction: deleteMeme,
-                downloadAction: storeMemeButton
+                downloadAction: storeMemeButton,
+                refreshAction: generateMemeButtonPressed
             )
             .padding(.bottom, 62)
 
@@ -86,66 +86,66 @@ struct Content: View {
     var generateAction: () -> Void
     var deleteAction: () -> Void
     var downloadAction: () -> Void
+    var refreshAction: () -> Void
 
     var body: some View {
         ZStack {
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .center, spacing: 8) {
                 // Meme Description
-                TextField("Enter your meme description here", text: $memeDescription)
+                TextField("Enter meme description", text: $memeDescription)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
-                    .background(Color.white.cornerRadius(8))
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 10)
+                    .padding(.horizontal, 10)
+                    .frame(maxWidth: UIScreen.main.bounds.width * 0.8)
+                    .padding(.bottom, 5)
 
                 // Action Buttons
-                HStack {
-                    Spacer()
+                HStack(spacing: 15) {
                     Button(action: downloadAction) {
                         Image(systemName: "arrow.down.circle.fill")
                             .resizable()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 30, height: 30)
                             .foregroundColor(.black)
-                            .padding(10)
                     }
-                    Spacer()
+                    Button(action: refreshAction) {
+                        Image(systemName: "arrow.counterclockwise.circle.fill")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .foregroundColor(.black)
+                    }
                     Button(action: deleteAction) {
                         Image(systemName: "trash.circle.fill")
                             .resizable()
-                            .frame(width: 40, height: 40)
+                            .frame(width: 30, height: 30)
                             .foregroundColor(.black)
-                            .padding(10)
                     }
-                    Spacer()
                 }
-                .padding(.horizontal)
+                .padding(.vertical, 5)
 
                 // Generate Button
                 Button(action: generateAction) {
                     Text(isGenerating ? "Generating..." : "Generate Meme")
                         .font(.headline)
                         .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
                         .background(
-                            RoundedRectangle(cornerRadius: 10)
+                            RoundedRectangle(cornerRadius: 8)
                                 .fill(isGenerating ? Color.gray : Color.blue)
                         )
-                        .padding(.horizontal)
                 }
                 .disabled(isGenerating)
             }
-            .padding(15)
+            .padding(10)
             .background(
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: 15)
                     .fill(Colors.giggleWhite)
-                    .shadow(radius: 10)
+                    .shadow(radius: 5)
             )
-            .frame(maxWidth: UIScreen.main.bounds.width * 0.95)
-            .padding(.horizontal)
+            .frame(maxWidth: UIScreen.main.bounds.width * 0.8)
         }
     }
 }
+
 
 // Example Preview
 #Preview {
