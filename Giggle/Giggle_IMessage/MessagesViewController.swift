@@ -538,43 +538,43 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         //     }
         // ------------------------------------------------------------------
 
-        guard let conversation = activeConversation else {
-            //logger.log("No active conversation found.")
-            return
-        }
-
-        let meme = filteredMemes[indexPath.item]
-        let originalImage = meme.imageAsUIImage.fixedOrientation()//preserve orientation
-
-        // Configure the message layout with the meme's image
-        let layout = MSMessageTemplateLayout()
-        layout.image = originalImage
-        // layout.caption = "Sent from Giggle" // Optional caption
-
-        // Create and configure the message
-        let message = MSMessage()
-        message.layout = layout
-
-        searchBar.resignFirstResponder()
-
-        // Insert the message into the conversation
-        conversation.insert(message) { error in
-            if let error = error {
-                //logger.log("Failed to insert message: \(error.localizedDescription)")
-            }
-            //UPDATE SHARE DATE
-            // Update the dateLastShared for the sent meme
-            meme.dateLastShared = Date()
-
-            // FINISH: maybe put a context.save() here eventually?
-            //DataManager.updateMeme(meme)
-
-            // Reload the collection view to reflect the updated order
-            DispatchQueue.main.async {
-                self.collectionView.reloadData()
-            }
-            //
-        }
+//        guard let conversation = activeConversation else {
+//            //logger.log("No active conversation found.")
+//            return
+//        }
+//
+//        let meme = filteredMemes[indexPath.item]
+//        let originalImage = meme.imageAsUIImage.fixedOrientation()//preserve orientation
+//
+//        // Configure the message layout with the meme's image
+//        let layout = MSMessageTemplateLayout()
+//        layout.image = originalImage
+//        // layout.caption = "Sent from Giggle" // Optional caption
+//
+//        // Create and configure the message
+//        let message = MSMessage()
+//        message.layout = layout
+//
+//        searchBar.resignFirstResponder()
+//
+//        // Insert the message into the conversation
+//        conversation.insert(message) { error in
+//            if let error = error {
+//                //logger.log("Failed to insert message: \(error.localizedDescription)")
+//            }
+//            //UPDATE SHARE DATE
+//            // Update the dateLastShared for the sent meme
+//            meme.dateLastShared = Date()
+//
+//            // FINISH: maybe put a context.save() here eventually?
+//            //DataManager.updateMeme(meme)
+//
+//            // Reload the collection view to reflect the updated order
+//            DispatchQueue.main.async {
+//                self.collectionView.reloadData()
+//            }
+//            //
+//        }
 
         //ensure the extension view minimizes immediately on tap
         DispatchQueue.main.async {

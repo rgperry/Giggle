@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import AVKit
 
 struct MemeInfoView: View {
     @Bindable var meme: Meme
     
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
+    @State private var uiImage: UIImage? = nil
+    @State private var player: AVPlayer?
     
     var header: String
 
@@ -22,8 +25,25 @@ struct MemeInfoView: View {
                 .foregroundColor(.white)
                 .padding(.bottom, -1)
             
-            MemeImageView(image: meme.imageAsUIImage)
-
+            switch meme.mediaType {
+            case .image:
+                if let image = uiImage {
+                    MemeImageView(image: image)
+                } else {
+                    Text("Loading image...")
+                }
+            case .gif, .video:
+                if let player = player {
+                    VideoPlayer(player: player)
+                        .onAppear {
+                            player.play()
+                        }
+                        .frame(height: 300) // Adjust as needed
+                } else {
+                    Text("Failed to load video/GIF")
+                }
+            }
+            
             ContentWithWhiteBackground(
                 tags: $meme.tags,
                 favorited: $meme.favorited,
@@ -32,17 +52,34 @@ struct MemeInfoView: View {
                 removeTagAction: removeTag,
                 favoriteAction: { favoriteMeme(meme: meme, context: context) },
                 deleteAction: { deleteMeme(meme: meme, context: context) },
-                shareAction: { shareMeme(meme: meme, context: context) },
-                copyAction: { copyMeme(meme: meme, context: context) },
+                shareAction: { await shareMeme(meme: meme, context: context) },
+                copyAction: { await copyMeme(meme: meme, context: context) },
                 dismissAction: dismiss
             ).padding(.bottom, 62)
 
             Spacer()
             BottomNavBar()
         }
+        .task {
+            await loadMedia()
+        }
         .background(Colors.backgroundColor.ignoresSafeArea())
-        .onAppear {
-            loadImage()
+    }
+    
+    private func loadMedia() async {
+        switch meme.mediaType {
+        case .image:
+            uiImage = await meme.memeAsUIImage
+        case .gif, .video:
+            if let url = meme.mediaURL {
+                let asset = AVURLAsset(url: url)
+                let playerItem = AVPlayerItem(asset: asset)
+                
+                // Use AVQueuePlayer and AVPlayerLooper for looping
+                let queuePlayer = AVQueuePlayer()
+                AVPlayerLooper(player: queuePlayer, templateItem: playerItem)
+                player = queuePlayer
+            }
         }
     }
     
@@ -71,14 +108,14 @@ struct MemeInfoView: View {
         )
     }
     
-    private func loadImage() {
-        Task {
-            let image = await meme.memeAsUIImage
-            DispatchQueue.main.async {
-                self.displayedImage = image
-            }
-        }
-    }
+//    private func loadImage() {
+//        Task {
+//            let image = await meme.memeAsUIImage
+//            DispatchQueue.main.async {
+//                self.displayedImage = image
+//            }
+//        }
+//    }
 }
 
 struct ContentWithWhiteBackground: View {
@@ -92,8 +129,8 @@ struct ContentWithWhiteBackground: View {
     
     var favoriteAction: () -> Void
     var deleteAction: () -> Void
-    var shareAction: () -> Void
-    var copyAction: () -> Void
+    var shareAction: () async -> Void
+    var copyAction: () async -> Void
     var dismissAction: DismissAction
     
     @State private var newTag: String = ""
@@ -186,7 +223,9 @@ struct ContentWithWhiteBackground: View {
                     
                     // Share button
                     Button(action: {
-                        shareAction()
+                        Task {
+                            await shareAction()
+                        }
                     }) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 43))
@@ -197,7 +236,9 @@ struct ContentWithWhiteBackground: View {
                     
                     // Copy button
                     Button(action: {
-                        copyAction()
+                        Task {
+                            await copyAction()
+                        }
                         memeCopied = true
                     }) {
                         ZStack {
@@ -281,20 +322,20 @@ struct MoreInfo: View {
     }
 }
 
-#Preview {
-    MemeInfoView(
-        meme: Meme(
-            content: "This is a sample meme for preview purposes",
-            tags: [
-                Tag(name: "dog"),
-                Tag(name: "exercise"),
-                Tag(name: "funny"),
-                Tag(name: "hi"),
-                Tag(name: "hello"),
-                Tag(name: "yo"),
-            ],
-            image: UIImage(systemName: "photo") ?? UIImage()
-        ),
-        header: "All Giggles"
-    )
-}
+//#Preview {
+//    MemeInfoView(
+//        meme: Meme(
+//            content: "This is a sample meme for preview purposes",
+//            tags: [
+//                Tag(name: "dog"),
+//                Tag(name: "exercise"),
+//                Tag(name: "funny"),
+//                Tag(name: "hi"),
+//                Tag(name: "hello"),
+//                Tag(name: "yo"),
+//            ],
+//            image: UIImage(systemName: "photo") ?? UIImage()
+//        ),
+//        header: "All Giggles"
+//    )
+//}

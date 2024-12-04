@@ -18,6 +18,7 @@ struct FolderItem: View {
     @State var isPinned = false
     @State private var currentIndex: Int = 0
     @State private var timer: Timer? = nil
+    @State private var uiImage: UIImage? = nil
     
     // Thumbnail cycle interval
     let interval: TimeInterval = 10.0
@@ -29,24 +30,37 @@ struct FolderItem: View {
                     ZStack {
                         if !memes.isEmpty {
                             ZStack {
-                                ForEach(memes.indices, id: \.self) { index in
-                                    if index == currentIndex {
-                                        Image(uiImage: memes[index].imageAsUIImage)
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill) // Make the image fill the space
-                                            .frame(width: size, height: size)
-                                            .clipped() // Ensure no overflow
-                                            .cornerRadius(18)
-                                            .shadow(radius: 4)
-                                            .transition(.opacity.animation(.easeInOut(duration: 1))) // Smooth fade
-//                                            .transition(.scale.combined(with: .opacity).animation(.easeInOut(duration: 0.5))) // Fade + Scale
-//                                            .transition(.asymmetric(
-//                                                insertion: .scale.animation(.easeOut(duration: 0.3)),
-//                                                removal: .opacity.animation(.easeInOut(duration: 0.7))
-//                                            )) //Pop Effect
-//                                            .transition(.scale.combined(with: .opacity).animation(.easeInOut(duration: 0.5)))
-                                    }
-                                }
+                                let x: UIImage = uiImage ?? UIImage(systemName: "person.circle.fill")!
+                                
+                                Image(uiImage: x)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill) // Make the image fill the space
+                                    .frame(width: size, height: size)
+                                    .clipped() // Ensure no overflow
+                                    .cornerRadius(18)
+                                    .shadow(radius: 4)
+//                                ForEach(Array(memes.indices), id: \.offset) { index, meme in
+//                                    if index == currentIndex {
+//                                        let x: UIImage = uiImage ?? UIImage(systemName: "person.circle.fill")!
+//                                        Image(uiImage: x)
+//                                            .resizable()
+//                                            .aspectRatio(contentMode: .fill) // Make the image fill the space
+//                                            .frame(width: size, height: size)
+//                                            .clipped() // Ensure no overflow
+//                                            .cornerRadius(18)
+//                                            .shadow(radius: 4)
+//                                            .transition(.opacity.animation(.easeInOut(duration: 1))) // Smooth fade
+////                                            .transition(.scale.combined(with: .opacity).animation(.easeInOut(duration: 0.5))) // Fade + Scale
+////                                            .transition(.asymmetric(
+////                                                insertion: .scale.animation(.easeOut(duration: 0.3)),
+////                                                removal: .opacity.animation(.easeInOut(duration: 0.7))
+////                                            )) //Pop Effect
+////                                            .transition(.scale.combined(with: .opacity).animation(.easeInOut(duration: 0.5)))
+//                                    }
+//                                }
+                            }
+                            .task {
+                                uiImage = await memes.first?.memeAsUIImage
                             }
                         } else {
                             // Fallback image for empty folders

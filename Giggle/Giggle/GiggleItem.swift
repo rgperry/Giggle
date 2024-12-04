@@ -32,11 +32,15 @@ struct GiggleItem: View {
     var header: String
 
     @State private var navigateToMemeInfo = false
-    @State private var displayedImage: UIImage?
+    //@State private var displayedImage: UIImage?
+    @State private var uiImage: UIImage? = nil
 
     var body: some View {
         VStack {
-            Image(uiImage: meme.imageAsUIImage)
+            
+            let x: UIImage = uiImage ?? UIImage(systemName: "person.circle.fill")!
+            
+            Image(uiImage: x)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: size, height: size)
@@ -80,9 +84,12 @@ struct GiggleItem: View {
             }
             .offset(x: -72, y: -175)
         }
-        .onAppear {
-            loadImage()
+        .task {
+            uiImage = await meme.memeAsUIImage
         }
+//        .onAppear {
+//            loadImage()
+//        }
         .navigationDestination(isPresented: $navigateToMemeInfo) {
             MemeInfoView(
                 meme: meme,
@@ -91,12 +98,12 @@ struct GiggleItem: View {
         }
     }
     
-    private func loadImage() {
-        Task {
-            let image = await meme.memeAsUIImage
-            DispatchQueue.main.async {
-                self.displayedImage = image
-            }
-        }
-    }
+//    private func loadImage() {
+//        Task {
+//            let image = await meme.memeAsUIImage
+//            DispatchQueue.main.async {
+//                self.displayedImage = image
+//            }
+//        }
+//    }
 }
