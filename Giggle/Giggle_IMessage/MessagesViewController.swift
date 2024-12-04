@@ -16,9 +16,12 @@ extension UIImage {
     func thumbnail(maxWidth: CGFloat = 100) -> UIImage {
         let aspectRatio = size.height / size.width
         let targetSize = CGSize(width: maxWidth, height: maxWidth * aspectRatio)
+        
         UIGraphicsBeginImageContextWithOptions(targetSize, false, 1.0)
         defer { UIGraphicsEndImageContext() }
+        
         draw(in: CGRect(origin: .zero, size: targetSize))
+        
         return UIGraphicsGetImageFromCurrentImageContext() ?? self
     }
 
@@ -40,11 +43,79 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     var searchText: String = ""  // Store search text
 
     var imagesArray: [Meme] = []
-    var filteredMemes: [Meme] = []  // Store filtered memes
+    var allMemes: [Meme] = [] // Original, unfiltered memes
+
     private var searchDebounce: AnyCancellable?  // Combine publisher for debouncing
+    
+    private var resetSearchTimer: Timer?
 
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
+    
+    var filteredMemes: [Meme] {
+        switch currentTab {
+            case .favorites:
+                return imagesArray
+                    .filter { $0.favorited }
+                    .sorted { ($0.dateFavorited ?? .distantPast) > ($1.dateFavorited ?? .distantPast) }
+                
+            case .recentlyShared:
+                return imagesArray
+                    .filter { $0.dateLastShared != nil }
+                    .sorted { $0.dateLastShared! > $1.dateLastShared! }
+                    .prefix(24)
+                    .map { $0 }
+                
+            case .allGiggles:
+                return imagesArray.sorted { $0.dateAdded > $1.dateAdded }
+        }
+    }
+    
+    enum MemeTab {
+        case favorites
+        case recentlyShared
+        case allGiggles
+    }
+    
+    var currentTab: MemeTab = .allGiggles {
+        didSet {
+            collectionView.reloadData()
+        }
+    }
+
+    @objc func tabChanged(_ sender: UISegmentedControl) {
+        switch sender.selectedSegmentIndex {
+            case 1:
+                currentTab = .favorites
+                searchBar.placeholder = "Search Favorite Giggles"
+            
+            case 2:
+                currentTab = .recentlyShared
+                searchBar.placeholder = "Search Recently Shared"
+            
+            default:
+                currentTab = .allGiggles
+                searchBar.placeholder = "Search All Giggles"
+        }
+    }
+
+    let dynamicBackgroundColor = UIColor { traitCollection in
+        return traitCollection.userInterfaceStyle == .dark ?
+            UIColor.black :
+            UIColor.white
+    }
+
+    let dynamicSelectedTintColor = UIColor { traitCollection in
+        return traitCollection.userInterfaceStyle == .dark ?
+            UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0) :
+            UIColor.systemGray4
+    }
+
+    let dynamicTextColor = UIColor { traitCollection in
+        return traitCollection.userInterfaceStyle == .dark ?
+            UIColor.lightGray :
+            UIColor.black
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,7 +126,8 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         searchBar.delegate = self
         collectionView.dataSource = self
-
+        
+        searchBar.placeholder = "Search All Giggles"
         searchBar.backgroundImage = UIImage() // Remove the default background image for a solid color
         searchBar.backgroundColor = .clear // Make the search bar transparent
         searchBar.searchTextField.backgroundColor = UIColor.systemBackground
@@ -65,6 +137,47 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         collectionView.delegate = self
         collectionView.prefetchDataSource = self //enable prefetching so app only loads what is seen
         collectionView.reloadData()
+        
+        //tabs
+        let segmentedControl = UISegmentedControl(items: ["All Giggles", "Favorites", "Recents"])
+        segmentedControl.selectedSegmentIndex = 0
+        segmentedControl.addTarget(self, action: #selector(tabChanged(_:)), for: .valueChanged)
+        segmentedControl.translatesAutoresizingMaskIntoConstraints = false
+
+        // Set background and tint
+        segmentedControl.backgroundColor = dynamicBackgroundColor // Dynamic background color
+        segmentedControl.selectedSegmentTintColor = .clear // Ensure selected tint does not obscure text
+
+        // Ensure the text attributes are applied for visibility
+        segmentedControl.setTitleTextAttributes([.foregroundColor: dynamicTextColor], for: .normal)
+        segmentedControl.setTitleTextAttributes([
+            .foregroundColor: UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0),
+            .font: UIFont.boldSystemFont(ofSize: 16) // Optional: Adjust font style
+        ], for: .selected)
+
+        // Add to view
+        view.addSubview(segmentedControl)
+
+        // Add constraints
+        NSLayoutConstraint.activate([
+            segmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 38),
+            segmentedControl.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 6),
+            segmentedControl.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -6)
+        ])
+
+        resetSearchTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(resetIfSearchEmpty), userInfo: nil, repeats: true)
+    }
+    
+    //reset to all giggles if search bar is empty. auto reload kinda
+    @objc private func resetIfSearchEmpty() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if self.searchText.isEmpty && self.imagesArray != self.allMemes {
+                logger.log("Search is empty. Resetting to all memes.")
+                self.imagesArray = self.allMemes
+                self.collectionView.reloadData()
+            }
+        }
     }
 
     //LOAD MEMES FROM DATA
@@ -72,14 +185,16 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         //setupLoadingIndicator()
+        
         // Load memes only once when the view appears for the first time
         if !hasLoadedMemes {
             hasLoadedMemes = true
             Task {
                 //showLoadingIndicator()
                 await DataManager.loadMemes { [weak self] loadedMemes in
-                    self?.imagesArray = loadedMemes
-                    self?.filteredMemes = loadedMemes  // Initialize with all memes
+                    self?.allMemes = loadedMemes // Store all memes
+                    self?.imagesArray = loadedMemes // Initialize with all memes
+                    self?.currentTab = .allGiggles
                     self?.collectionView.reloadData()
                 }
             }
@@ -119,12 +234,23 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         self.searchText = searchText
 
         DispatchQueue.global(qos: .userInitiated).async {
-            self.performSearch(query: searchText)
+            if searchText.isEmpty {
+                self.imagesArray = self.allMemes
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+                
+                logger.log("Search Bar empty, returning All Giggles")
+            }
+            else {
+                self.performSearch(query: searchText)
+            }
         }
     }
 
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.resignFirstResponder() // Dismiss the keyboard
+        
         logger.log("Search button clicked. Keyboard dismissed.")
     }
 
@@ -133,10 +259,10 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
-
             let results: [Meme]
+            
             if query.isEmpty {
-                results = self.imagesArray
+                results = self.allMemes //resets to full list of mems
                 logger.log("Memes Filtered, returning All Giggles")
             } else {
                 let filteredMemes = self.imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
@@ -149,8 +275,9 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
 
             // Update the filtered array and UI on the main thread
             DispatchQueue.main.async {
-                self.filteredMemes = results
-                logger.log("Filtered memes updated: \(self.filteredMemes.count) items.")
+//                self.filteredMemes = results
+//                logger.log("Filtered memes updated: \(self.filteredMemes.count) items.")
+                self.imagesArray = results // Update the source data
                 self.collectionView.reloadData()
             }
         }
@@ -179,7 +306,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             let section = NSCollectionLayoutSection(group: group)
             section.interGroupSpacing = itemSpacing //row spacing equal to column spacing
             section.contentInsets = NSDirectionalEdgeInsets(
-                top: itemSpacing,     // Space above the section
+                top: itemSpacing + 38,     // Space above the section
                 leading: itemSpacing, // Space on the left side
                 bottom: itemSpacing,  // Space below the section
                 trailing: itemSpacing // Space on the rwight side
@@ -192,6 +319,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let count = filteredMemes.count
         logger.log("Number of items in section: \(count)")
+        
         return count
     }
 
@@ -248,7 +376,6 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         }
 
         let meme = filteredMemes[indexPath.item]
-
         let originalImage = meme.imageAsUIImage.fixedOrientation()//preserve orientation
 
         // Configure the message layout with the meme's image
@@ -267,6 +394,18 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             if let error = error {
                 logger.log("Failed to insert message: \(error.localizedDescription)")
             }
+            //UPDATE SHARE DATE
+            // Update the dateLastShared for the sent meme
+            meme.dateLastShared = Date()
+
+            // FINISH: maybe put a context.save() here eventually?
+            //DataManager.updateMeme(meme)
+
+            // Reload the collection view to reflect the updated order
+            DispatchQueue.main.async {
+                self.collectionView.reloadData()
+            }
+            //
         }
 
         //ensure the extension view minimizes immediately on tap

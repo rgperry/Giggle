@@ -10,9 +10,13 @@ import NaturalLanguage
 import SwiftUI
 import Alamofire
 
+
+// reference for using model actor to load memes in background: https://www.youtube.com/watch?v=B3JSgcXjsL8&list=PLvUWi5tdh92wZ5_iDMcBpenwTgFNan9T7&index=13
+
+// reference for concurrent API calls: https://www.youtube.com/watch?v=U6lQustiTGE&t=45s
 @ModelActor
 actor MemeImportManager {
-    func storeMemes(images: [UIImage], completion: @escaping () -> Void) async throws {
+    func storeMemes(images: [UIImage], favorited: Bool = false, completion: @escaping () -> Void) async throws {
         guard !images.isEmpty else {
             logger.log("NO IMAGES TO IMPORT")
             return
@@ -26,7 +30,7 @@ actor MemeImportManager {
                     let (tags, content) = try await DataManager.getInfo(for: image)
                     
                     // Direct insertion without actor synchronization
-                    let meme = Meme(content: content, tags: tags, image: image)
+                    let meme = Meme(content: content, tags: tags, image: image, favorited: favorited)
                     return meme
                 }
             }
@@ -51,6 +55,7 @@ actor MemeImportManager {
     }
 }
 
+// reference: https://developer.apple.com/documentation/foundation/nspredicate
 func memeSearchPredicate(for searchText: String) -> NSPredicate {
     NSPredicate { meme, _ in
         guard let meme = meme as? Meme, !searchText.isEmpty else { return false }
@@ -76,6 +81,7 @@ func memeSearchPredicate(for searchText: String) -> NSPredicate {
 // Utility Class
 class DataManager {
     // (no longer being used in the main app (may be useful though for sentiment search so I will leave it here for now))
+    // here is the reference for it anyways: https://developer.apple.com/documentation/naturallanguage/finding-similarities-between-pieces-of-text
     static func findSimilarEntries(query: String, context: ModelContext, limit: Int = 10, tagName: String?) -> [Meme] {
         logger.debug("searching for similar entries \(query)")
         let embedding = NLEmbedding.sentenceEmbedding(for: .english)
@@ -113,7 +119,8 @@ class DataManager {
 
         return sortedEntries
     }
-
+    
+    // Created for searching from iMessage, no longer being used as well
     static func findSimilarEntries(query: String, memes: [Meme], limit: Int = 10, tagName: String?) -> [Meme] {
         logger.debug("searching for similar entries \(query)")
         let embedding = NLEmbedding.sentenceEmbedding(for: .english)
@@ -154,6 +161,7 @@ class DataManager {
     }
 
     // Decorated with @MainActor to avoid concurrency issues with passing down the model context
+    // (NO LONGER BEING USED --> MemeImportManager handles this now)
     @MainActor
     static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
         do {
@@ -271,11 +279,31 @@ class DataManager {
 
 func generateMeme(description: String) async -> UIImage? {
     let urlString = "https://18.223.212.43/generateMeme/?description=\(description.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
-    guard let url = URL(string: urlString) else { return nil }
+    guard let url = URL(string: urlString) else { 
+        print("Invalid URL")
+        return nil 
+    }
 
     do {
+        // Fetch data from the endpoint
         let (data, _) = try await URLSession.shared.data(from: url)
-        return UIImage(data: data)
+        
+        // Decode the JSON response
+        if let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+            let base64String = json["image"] as? String {
+            
+            // Convert Base64 string to Data
+            if let imageData = Data(base64Encoded: base64String, options: .ignoreUnknownCharacters) {
+                // Create UIImage from Data
+                return UIImage(data: imageData)
+            } else {
+                print("Failed to convert Base64 string to Data")
+                return nil
+            }
+        } else {
+            print("Failed to parse JSON or find 'image' key")
+            return nil
+        }
     } catch {
         print("Error in generateMeme: \(error)")
         return nil
@@ -294,8 +322,8 @@ func regenerateMeme(description: String) async -> UIImage? {
     do {
         let (data, _) = try await URLSession.shared.data(for: request)
         if let json = try? JSONSerialization.jsonObject(with: data) as? [String: String],
-           let imageFile = json["imageFile"],
-           let imageData = Data(base64Encoded: imageFile) {
+            let imageFile = json["imageFile"],
+            let imageData = Data(base64Encoded: imageFile) {
             return UIImage(data: imageData)
         }
     } catch {

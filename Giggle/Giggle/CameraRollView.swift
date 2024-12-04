@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import PhotosUI
+import UniformTypeIdentifiers
 
 struct ImagePicker: UIViewControllerRepresentable {
     @Environment(\.modelContext) private var modelContext
@@ -16,8 +17,9 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
-        // Only show images
-        config.filter = .images
+        
+        config.filter = .any(of: [.images, .videos])
+        
         // Allow multiple selections
         config.selectionLimit = 0
 
@@ -49,7 +51,8 @@ struct ImagePicker: UIViewControllerRepresentable {
 
                 var imagesToAppend: [UIImage] = []
                 
-                // Iterate over the selected results and check if we can load the UIImage
+            // reference for concurrency info. https://www.youtube.com/watch?v=U6lQustiTGE&t=45s
+            // Iterate over the selected results and check if we can load the UIImage
                 let group = DispatchGroup()  // To track all asynchronous loading tasks
                 for result in results {
                     if result.itemProvider.canLoadObject(ofClass: UIImage.self) {
@@ -62,7 +65,6 @@ struct ImagePicker: UIViewControllerRepresentable {
                         }
                     }
                 }
-
                 // Once all images are loaded, update the state
                 group.notify(queue: .main) {
                     self.parent.selectedImages.append(contentsOf: imagesToAppend)
