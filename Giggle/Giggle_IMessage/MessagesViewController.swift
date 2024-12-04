@@ -377,6 +377,11 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     private func performSearch(query: String) async {
         //logger.log("Running search for query: \(query)")
         
+        let sharedDefaults = UserDefaults(suiteName: "group.com.Giggle.Giggle")
+        let numSearchResults = sharedDefaults?.integer(forKey: "numSearchResultsiMessage") ?? 10
+        
+        logger.log("\(numSearchResults)")
+        
         self.imagesArray = self.allMemes
 
         let results: [Meme]
@@ -387,11 +392,17 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
         } else if isAdvancedSearch {
             // Placeholder for advanced search logic
             //logger.log("Advanced search mode active. Returning all memes (no filtering applied).")
-            results = imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
-                .sorted { $0.dateAdded > $1.dateAdded }
+            results = Array(
+                imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
+                    .sorted { $0.dateAdded > $1.dateAdded }
+                    .prefix(numSearchResults)
+                )
         } else {
-            results = imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
-                .sorted { $0.dateAdded > $1.dateAdded }
+            results = Array(
+                imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
+                    .sorted { $0.dateAdded > $1.dateAdded }
+                    .prefix(numSearchResults)
+                )
             //logger.log("Search results count for query '\(query)': \(results.count)")
         }
 

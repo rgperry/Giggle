@@ -13,7 +13,7 @@ struct SettingsView: View {
     // https://medium.com/@B4k3R/setting-up-your-appgroup-to-share-data-between-app-extensions-in-ios-43c7c642c4c7
     @AppStorage(
         "numSearchResultsiMessage",
-        store: UserDefaults(suiteName: "group.com.yourdomain.appname")
+        store: UserDefaults(suiteName: "group.com.Giggle.Giggle")
     ) private var numSearchResultsiMessage: Double = 10
     
     @Environment(\.modelContext) private var context
