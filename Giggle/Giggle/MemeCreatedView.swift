@@ -1,3 +1,10 @@
+//
+//  MemeCreatedView.swift
+//  Giggle
+//
+//  Created by Griffin Gong on 11/10/24.
+//
+
 import SwiftUI
 import SwiftData
 
@@ -165,7 +172,6 @@ struct Content: View {
         }
     }
 }
-
 
 // Example Preview
 #Preview {
