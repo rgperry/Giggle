@@ -122,6 +122,6 @@ struct DeleteButton: View {
     }
 }
 
-#Preview {
-    MemeCreatedView(memeDescription: "Sample Meme Description")
-}
+//#Preview {
+//    MemeCreatedView(memeDescription: "Sample Meme Description")
+//}
