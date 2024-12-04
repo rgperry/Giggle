@@ -63,9 +63,13 @@ def get_sentiment(request):
     if not message:
         return JsonResponse({"error": "Message cannot be empty"}, status=400)
     
+    tags = request.GET.get('tags', '').strip()
+    if not tags:
+        return JsonResponse({"error": "Tags cannot be empty"}, status=400)
+    
     try:
-        sentiment = analyze_sentiment(message)
-        return JsonResponse({"sentiment": sentiment}, status=200)
+        relevant_tags = analyze_sentiment(message, tags)
+        return JsonResponse({"relevantTags": relevant_tags}, status=200)
     except Exception as e:
         print(f"Error in get_sentiment: {e}")
         return JsonResponse({"error": "Internal Server Error"}, status=500)
