@@ -141,13 +141,16 @@ struct PageHeader: View {
 
 struct MemeDescriptionField: View {
     @Binding var memeDescription: String
+    @Environment(\.colorScheme) var colorScheme // Detect light or dark mode
 
     var body: some View {
         VStack {
-            TextField("Describe the meme you want to create!", text: $memeDescription)
+            TextField("Describe a meme to create!", text: $memeDescription)
                 .padding()
-                .background(Color.white)
+                .background(colorScheme == .dark ? Color.black : Color.white)
                 .cornerRadius(15)
+                .foregroundColor(colorScheme == .dark ? .white : .black)
+                .multilineTextAlignment(.center)
                 .padding(.horizontal, 30)
             
             Spacer().frame(height: 20)
@@ -155,25 +158,31 @@ struct MemeDescriptionField: View {
     }
 }
 
+
 struct GenerateMemeButton: View {
     @Binding var isClicked: Bool
     @Binding var memeDescription: String
     var isEnabled: Bool
     var showAlertAction: () -> Void
     @Binding var memeImage: UIImage?
+    @Binding var isLoading: Bool // Add loading state binding
+    @Environment(\.colorScheme) var colorScheme // Detect light or dark mode
 
     var body: some View {
         Button(action: {
             if isEnabled {
                 print("Generate meme with Dalle3 AI!")
+                isLoading = true // Start loading
                 Task {
                     let generatedImage = await generateMeme(description: memeDescription)
                     guard let generatedImage else {
                         logger.error("ERROR GENERATING IMAGE")
+                        isLoading = false // Stop loading if generation fails
                         return
                     }
-                    isClicked = true
                     memeImage = generatedImage
+                    isLoading = false // Stop loading
+                    isClicked = true
                 }
             } else {
                 // Trigger alert if no description
@@ -182,18 +191,22 @@ struct GenerateMemeButton: View {
         }) {
             Text("Generate with Dalle3 AI")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(colorScheme == .dark ? Color(UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0)) : Color(UIColor(red: 104/255, green: 86/255, blue: 182/255, alpha: 1.0))) // Text color contrast
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(Color.black)
-                .cornerRadius(10)
+                .background(
+                    isLoading
+                        ? Color.gray // Loading state color
+                    : (colorScheme == .dark ? Color.black : Color.white) // Dynamic background color
+                )                .cornerRadius(10)
                 .padding(.horizontal, 80)
                 .padding(.bottom, 30)
         }
-        
+        .disabled(isLoading) // Disable button while loading
         Spacer().frame(height: 40)
     }
 }
+
 
 struct MemeImageView: View {
     let image: UIImage

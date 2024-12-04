@@ -6,122 +6,180 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MemeCreatedView: View {
-    @State var memeDescription: String
-    @State private var navigateToGenerateMemeView = false
-    @State private var navigateToMemeCreatedView = false
-    @State private var navigateToAllGiggles = false
-    @Binding var memeImage: UIImage?
+    @Bindable var meme: Meme
+
+    @State private var isGenerating = false
+    @State private var showAlert = false
+    @State private var navigateToAllGiggles = false // Navigation state
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            VStack {
-                PageHeader(text: "Giggle")
-                MemeImageView(image: memeImage!)
+        VStack {
+            PageHeader(text: "Giggle")
+            // Meme Image or Placeholder
+            if let imageData = meme.image, let image = UIImage(data: imageData) {
+                MemeImageView(image: image)
+            } else if isGenerating {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .padding()
+                Text("Generating your meme...")
+                    .foregroundColor(.white)
+                    .font(.headline)
+            } else {
+                Image(systemName: "questionmark.circle")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 200, height: 200)
+                    .foregroundColor(.white)
+            }
 
-                ActionButtonsView(
-                    downloadAction: {
-                        navigateToAllGiggles = true
-                    },
-                    refreshAction: {
-                        navigateToMemeCreatedView = true
-                    },
-                    deleteAction: {
-                        navigateToGenerateMemeView = true
+            // Content
+            Content(
+                memeDescription: $meme.content,
+                isGenerating: $isGenerating,
+                showAlertAction: { showAlert = true },
+                generateAction: generateMemeButtonPressed,
+                deleteAction: deleteMeme,
+                downloadAction: storeMemeButton,
+                refreshAction: generateMemeButtonPressed
+            )
+            .padding(.bottom, 62)
+
+            Spacer()
+            BottomNavBar()
+        }
+        .background(Colors.backgroundColor.ignoresSafeArea())
+        .alert("Missing Description", isPresented: $showAlert) {
+            Button("OK", role: .cancel) {}
+        }
+        .navigationDestination(isPresented: $navigateToAllGiggles) {
+            FolderView(header: "All Giggles")
+        }
+    }
+
+    private func generateMemeButtonPressed() {
+        guard !meme.content.isEmpty else {
+            showAlert = true
+            return
+        }
+        isGenerating = true
+        Task {
+            if let newImage = await generateMeme(description: meme.content) {
+                DispatchQueue.main.async {
+                    if let imageData = newImage.pngData() {
+                        meme.image = imageData
                     }
-                )
-
-                MemeDescriptionField(memeDescription: $memeDescription)
-
-                GenerateMemeButton(isClicked: .constant(false), memeDescription: $memeDescription, isEnabled: true, showAlertAction: {}, memeImage: $memeImage)
-
-                BottomNavBar()
+                    isGenerating = false
+                }
+            } else {
+                DispatchQueue.main.async {
+                    isGenerating = false
+                }
             }
-            .background(Colors.backgroundColor.ignoresSafeArea())
-            .navigationDestination(isPresented: $navigateToGenerateMemeView) {
-                GenerateMemeView()
-            }
-            .navigationDestination(isPresented: $navigateToMemeCreatedView) {
-                MemeCreatedView(memeDescription: memeDescription, memeImage: $memeImage)
-            }
-            .navigationDestination(isPresented: $navigateToAllGiggles) {
-                FolderView(header: "All Giggles")
+        }
+    }
+
+    private func deleteMeme() {
+        meme.content = ""
+        meme.image = nil
+        dismiss()
+    }
+
+    private func storeMemeButton() {
+        navigateToAllGiggles = true 
+        Task {
+            do {
+                let modelContainer = try ModelContainer(for: Meme.self, Tag.self)
+                let importManager = MemeImportManager(modelContainer: modelContainer)
+                try await importManager.storeMemes(images: [UIImage(data: meme.image!)!]) {
+                    print("Meme stored successfully!")
+                }
+            } catch {
+                print("Failed to store meme: \(error.localizedDescription)")
             }
         }
     }
 }
 
-struct ActionButtonsView: View {
+struct Content: View {
+    @Binding var memeDescription: String
+    @Binding var isGenerating: Bool
+
+    var showAlertAction: () -> Void
+    var generateAction: () -> Void
+    var deleteAction: () -> Void
     var downloadAction: () -> Void
     var refreshAction: () -> Void
-    var deleteAction: () -> Void
 
     var body: some View {
-        HStack(spacing: 40) {
-            DownloadButton(downloadAction: downloadAction)
-            RefreshButton(refreshAction: refreshAction)
-            DeleteButton(deleteAction: deleteAction)
-        }
-        .padding(.vertical, 20)
-    }
-}
+        ZStack {
+            VStack(alignment: .center, spacing: 8) {
+                // Meme Description
+                TextField("Enter meme description", text: $memeDescription)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.horizontal, 10)
+                    .frame(maxWidth: UIScreen.main.bounds.width * 0.8)
+                    .padding(.bottom, 5)
 
-struct DownloadButton: View {
-    let size: CGFloat = 65
-    var downloadAction: () -> Void
+                // Action Buttons
+                HStack(spacing: 15) {
+                    Button(action: downloadAction) {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .foregroundColor(.black)
+                    }
+                    Button(action: refreshAction) {
+                        Image(systemName: "arrow.counterclockwise.circle.fill")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .foregroundColor(.black)
+                    }
+                    Button(action: deleteAction) {
+                        Image(systemName: "trash.circle.fill")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .foregroundColor(.black)
+                    }
+                }
+                .padding(.vertical, 5)
 
-    var body: some View {
-        Button(action: {
-            downloadAction()
-        }) {
-            Image(systemName: "square.and.arrow.down")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size * 0.5, height: size * 0.5) // Icon size adjusted to fit within button frame
-                .foregroundColor(.white)
-                .frame(width: size, height: size) // Consistent button size
-                .background(Color.clear)
-        }
-    }
-}
-
-struct RefreshButton: View {
-    var refreshAction: () -> Void
-
-    var body: some View {
-        Button(action: {
-            refreshAction()
-        }) {
-            Image(systemName: "arrow.counterclockwise")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 40, height: 40)
-                .foregroundColor(.white)
-        }
-    }
-}
-
-struct DeleteButton: View {
-    let size: CGFloat = 40
-    var deleteAction: () -> Void
-
-    var body: some View {
-        Button(action: {
-            deleteAction()
-        }) {
-            Image(systemName: "xmark")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: size * 0.4, height: size * 0.4) // Make the icon smaller within the circle
-                .foregroundColor(.white)
-                .frame(width: size, height: size)
-                .background(Circle().fill(Color.clear)) // Transparent fill for the circle
-                .overlay(Circle().stroke(Color.white, lineWidth: 2)) // White border
+                // Generate Button
+                Button(action: generateAction) {
+                    Text(isGenerating ? "Generating..." : "Generate New Meme")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 8)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(isGenerating ? Color.gray : Color.blue)
+                        )
+                }
+                .disabled(isGenerating)
+            }
+            .padding(10)
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(Colors.giggleWhite)
+                    .shadow(radius: 5)
+            )
+            .frame(maxWidth: UIScreen.main.bounds.width * 0.8)
         }
     }
 }
 
-//#Preview {
-//    MemeCreatedView(memeDescription: "Sample Meme Description")
-//}
+// Example Preview
+#Preview {
+    MemeCreatedView(
+        meme: Meme(
+            content: "Meme with a dog who doesn’t like exercise",
+            tags: [],
+            image: UIImage(systemName: "photo") ?? UIImage() // Ensure image data matches expected type
+        )
+    )
+}
