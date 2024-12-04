@@ -28,7 +28,6 @@ struct MemeInfoView: View {
                 tags: $meme.tags,
                 favorited: $meme.favorited,
                 dateAdded: meme.dateAdded,
-                source: "TODO",
                 addTagAction: addTag,
                 removeTagAction: removeTag,
                 favoriteAction: { favoriteMeme(meme: meme, context: context) },
@@ -59,7 +58,7 @@ struct MemeInfoView: View {
         // Remove tag from meme
         meme.removeTag(tagName)
         // Delete tag if it is not attached to any other memes
-        deleteTag(meme: meme, context: context)
+        deleteTagIfUnused(tagName: tagName, context: context)
         
         DataManager.saveContext(
             context: context,
@@ -75,7 +74,6 @@ struct ContentWithWhiteBackground: View {
     @Binding var favorited: Bool
     
     var dateAdded: Date
-    var source: String
     
     var addTagAction: (String) -> Void
     var removeTagAction: (String) -> Void
@@ -152,7 +150,7 @@ struct ContentWithWhiteBackground: View {
                     }
                 }
 
-                MoreInfo(dateAdded: dateAdded, source: source)
+                MoreInfo(dateAdded: dateAdded)
 
                 // Action buttons
                 HStack {
@@ -248,7 +246,6 @@ struct ContentWithWhiteBackground: View {
 
 struct MoreInfo: View {
     var dateAdded: Date
-    var source: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -261,10 +258,6 @@ struct MoreInfo: View {
             HStack {
                 Text("Date Saved:").fontWeight(.bold)
                 Text(dateAdded.formatted(date: .abbreviated, time: .shortened))
-            }
-            HStack {
-                Text("Source:").fontWeight(.bold)
-                Text(source)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -76,7 +76,7 @@ public func deleteMeme(meme: Meme, context: ModelContext) {
     
     // This could probably be removed to deleteTag
     let tagsToDelete = meme.tags.filter {
-        $0.memes.count == 1 && $0.memes.first?.id == meme. // I don't think the ID check is necessary
+        $0.memes.count == 1 // && $0.memes.first?.id == meme. // I don't think the ID check is necessary
     }
     
     tagsToDelete.forEach { tag in
@@ -92,15 +92,30 @@ public func deleteMeme(meme: Meme, context: ModelContext) {
     )
 }
 
-public func deleteTag(meme: Meme, context: ModelContext) {
-    // Remove tag overall fi
-    if let tag = meme.tags.first(where: { $0.name == tagName }) {
-        
+public func deleteTagIfUnused(tagName: String, context: ModelContext) {
+    let fetchDescriptor = FetchDescriptor<Tag>(predicate: #Predicate { $0.name == tagName })
 
-        // Check if this was the last meme using this tag
-        if tag.memes.count == 1 {
+    // Query for the tag with the matching name
+    if let tag = try? context.fetch(fetchDescriptor).first {
+        // Check if no more memes use this tag
+        if tag.memes.count == 0 {
             print("Deleting tag: \(tag.name)")
             context.delete(tag)
         }
+    } else {
+        print("Tag with name \(tagName) not found")
     }
 }
+
+    // Remove tag overall fi
+    // if let tag = meme.tags.first(where: { $0.name == tagName }) {
+    
+    // Check if tag is no longer connected to any more memes
+//    let tag = Tags.
+//
+//    // Check if this was the last meme using this tag
+//    if tag.memes.count == 1 {
+//        print("Deleting tag: \(tag.name)")
+//        context.delete(tag)
+//    }
+// }
