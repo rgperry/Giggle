@@ -1,68 +1,159 @@
-//
-//  GenerateMemeView.swift
-//  Giggle
-//
-//  Created by Griffin Gong on 11/10/24.
-//
-
 import SwiftUI
+import SwiftData
 
 struct GenerateMemeView: View {
-    @State private var memeDescription: String = ""
-    @State private var isClicked = false
+    @Bindable var meme: Meme
+    
+    @State private var isGenerating = false
     @State private var showAlert = false
-    @State private var memeImage: UIImage? = nil
 
-    var body: some View {
-        NavigationStack {
-            VStack {
-                PageHeader(text: "Giggle")
-                QuestionMark()
-                MemeDescriptionField(memeDescription: $memeDescription)
-
-                GenerateMemeButton(
-                    isClicked: $isClicked,
-                    memeDescription: $memeDescription,
-                    isEnabled: !memeDescription.isEmpty,
-                    showAlertAction: { showAlert = true },
-                    memeImage: $memeImage
-                )
-                .alert(isPresented: $showAlert) {
-                    Alert(
-                        title: Text("Missing Description"),
-                        message: Text("Please enter a meme description."),
-                        dismissButton: .default(Text("OK"))
-                    )
-                }
-
-                BottomNavBar()
-            }
-            .background(Colors.backgroundColor.ignoresSafeArea())
-            .navigationDestination(isPresented: $isClicked) {
-                MemeCreatedView(memeDescription: memeDescription, memeImage: $memeImage)
-            }
-        }
-        .tint(.black)
-        .navigationBarHidden(true)
-    }
-}
-
-struct QuestionMark: View {
+    // let modelContainer: ModelContainer
+    
     var body: some View {
         VStack {
-            Spacer()
+            // Meme Image or Placeholder
+            if isGenerating {
+                Image(systemName: "photo")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 200, height: 200)
+                    .foregroundColor(.white)
+            } else {
+                MemeImageView(image: meme.imageAsUIImage)
+            }
 
-            Image(systemName: "questionmark.circle.fill")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 200, height: 200)
-                .foregroundColor(.white)
+            // Content
+            Content(
+                memeDescription: $meme.content,
+                isGenerating: $isGenerating,
+                showAlertAction: { showAlert = true },
+                generateAction: generateMemeButtonPressed,
+                deleteAction: deleteMeme,
+                downloadAction: storeMemeButton
+            )
+            .padding(.bottom, 62)
 
             Spacer()
+            BottomNavBar()
+        }
+        .background(Colors.backgroundColor.ignoresSafeArea())
+        .alert("Missing Description", isPresented: $showAlert) {
+                    Button("OK", role: .cancel) {}
+                }
+    }
+
+    private func generateMemeButtonPressed() {
+        guard !meme.content.isEmpty else {
+            showAlert = true
+            return
+        }
+        isGenerating = true
+        Task {
+            let newImage = await generateMeme(description: meme.content)
+            DispatchQueue.main.async {
+                meme.image = newImage?.pngData() // Save the new image to the meme object
+                isGenerating = false
+            }
+        }
+    }
+
+    private func deleteMeme() {
+        meme.image = nil
+    }
+
+    private func storeMemeButton() {
+        Task {
+            do {
+                let modelContainer = try ModelContainer(for: Meme.self, Tag.self)
+                let importManager = MemeImportManager(modelContainer: modelContainer)
+                
+                // Store memes
+                try await importManager.storeMemes(images: [meme.imageAsUIImage]) {
+                    print("Meme stored successfully!")
+                }
+            } catch {
+                print("Failed to store meme: \(error.localizedDescription)")
+            }
         }
     }
 }
 
-//#Preview {
-//    GenerateMemeView()
-//}
+struct Content: View {
+    @Binding var memeDescription: String
+    @Binding var isGenerating: Bool
+
+    var showAlertAction: () -> Void
+    var generateAction: () -> Void
+    var deleteAction: () -> Void
+    var downloadAction: () -> Void
+
+    var body: some View {
+        ZStack {
+            VStack(alignment: .leading, spacing: 10) {
+                // Meme Description
+                TextField("Enter your meme description here", text: $memeDescription)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.horizontal)
+                    .background(Color.white.cornerRadius(8))
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 10)
+
+                // Action Buttons
+                HStack {
+                    Spacer()
+                    Button(action: downloadAction) {
+                        Image(systemName: "arrow.down.circle.fill")
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(.black)
+                            .padding(10)
+                    }
+                    Spacer()
+                    Button(action: deleteAction) {
+                        Image(systemName: "trash.circle.fill")
+                            .resizable()
+                            .frame(width: 40, height: 40)
+                            .foregroundColor(.black)
+                            .padding(10)
+                    }
+                    Spacer()
+                }
+                .padding(.horizontal)
+
+                // Generate Button
+                Button(action: generateAction) {
+                    Text(isGenerating ? "Generating..." : "Generate Meme")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(isGenerating ? Color.gray : Color.blue)
+                        )
+                        .padding(.horizontal)
+                }
+                .disabled(isGenerating)
+            }
+            .padding(15)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Colors.giggleWhite)
+                    .shadow(radius: 10)
+            )
+            .frame(maxWidth: UIScreen.main.bounds.width * 0.95)
+            .padding(.horizontal)
+        }
+    }
+}
+
+// Example Preview
+#Preview {
+    GenerateMemeView(
+        meme: Meme(
+            content: "Meme with a dog who doesn’t like exercise",
+            tags: [],
+            image: UIImage(systemName: "photo") ?? UIImage() // Ensure image data matches expected type
+        )
+    )
+}

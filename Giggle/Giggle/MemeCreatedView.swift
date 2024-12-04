@@ -13,7 +13,7 @@ struct MemeCreatedView: View {
     @State private var navigateToMemeCreatedView = false
     @State private var navigateToAllGiggles = false
     @Binding var memeImage: UIImage?
-
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -40,7 +40,7 @@ struct MemeCreatedView: View {
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
             .navigationDestination(isPresented: $navigateToGenerateMemeView) {
-                GenerateMemeView()
+                GenerateMemeView(meme: Meme(content: memeDescription, tags: [], image: UIImage()))
             }
             .navigationDestination(isPresented: $navigateToMemeCreatedView) {
                 MemeCreatedView(memeDescription: memeDescription, memeImage: $memeImage)

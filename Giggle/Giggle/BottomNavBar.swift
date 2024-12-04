@@ -12,7 +12,6 @@ struct BottomNavBar: View {
     @State private var selectedImages: [UIImage] = []
     @State private var isStoring: Bool = false
     @State private var pickingIsDone = false
-    
     @Environment(\.modelContext) private var context
 
     var body: some View {
@@ -34,10 +33,12 @@ struct BottomNavBar: View {
                         pickingIsDone = false
                     }
                 
-                NavigationLink(destination: GenerateMemeView()) {
+                // have to fix this image thing
+                NavigationLink(destination: GenerateMemeView(meme: Meme(content: "", tags: [], image: nil))) {
                     BottomNavBarIcon(icon: "paintbrush.fill")
                 }
-                
+
+
                 NavigationLink(destination: SettingsView()) {
                     BottomNavBarIcon(icon: "gearshape.fill")
                 }
