@@ -391,7 +391,7 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
             results = self.allMemes // Reset to full list of memes
             //logger.log("Search query is empty. Returning all memes.")
         } else if isAdvancedSearch {
-            // Placeholder for advanced search logic
+
             //logger.log("Advanced search mode active. Returning all memes (no filtering applied).")
             results = Array(
                 imagesArray.filter { memeSearchPredicate(for: query).evaluate(with: $0) }
