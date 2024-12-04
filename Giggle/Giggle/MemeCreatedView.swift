@@ -3,22 +3,31 @@ import SwiftData
 
 struct MemeCreatedView: View {
     @Bindable var meme: Meme
-    
+
     @State private var isGenerating = false
     @State private var showAlert = false
+    @State private var navigateToAllGiggles = false // Navigation state
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack {
             PageHeader(text: "Giggle")
             // Meme Image or Placeholder
-            if isGenerating {
-                Image(systemName: "photo")
+            if let imageData = meme.image, let image = UIImage(data: imageData) {
+                MemeImageView(image: image)
+            } else if isGenerating {
+                ProgressView()
+                    .scaleEffect(1.5)
+                    .padding()
+                Text("Generating your meme...")
+                    .foregroundColor(.white)
+                    .font(.headline)
+            } else {
+                Image(systemName: "questionmark.circle")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 200, height: 200)
                     .foregroundColor(.white)
-            } else {
-                MemeImageView(image: meme.imageAsUIImage)
             }
 
             // Content
@@ -38,8 +47,11 @@ struct MemeCreatedView: View {
         }
         .background(Colors.backgroundColor.ignoresSafeArea())
         .alert("Missing Description", isPresented: $showAlert) {
-                    Button("OK", role: .cancel) {}
-                }
+            Button("OK", role: .cancel) {}
+        }
+        .navigationDestination(isPresented: $navigateToAllGiggles) {
+            FolderView(header: "All Giggles")
+        }
     }
 
     private func generateMemeButtonPressed() {
@@ -51,26 +63,23 @@ struct MemeCreatedView: View {
         Task {
             if let newImage = await generateMeme(description: meme.content) {
                 DispatchQueue.main.async {
-                    // Safely convert UIImage to Data
                     if let imageData = newImage.pngData() {
                         meme.image = imageData
-                    } else {
-                        print("Failed to convert UIImage to Data")
                     }
                     isGenerating = false
                 }
             } else {
                 DispatchQueue.main.async {
-                    print("Failed to generate meme.")
                     isGenerating = false
                 }
             }
         }
     }
 
-
     private func deleteMeme() {
+        meme.content = ""
         meme.image = nil
+        dismiss()
     }
 
     private func storeMemeButton() {
@@ -78,10 +87,9 @@ struct MemeCreatedView: View {
             do {
                 let modelContainer = try ModelContainer(for: Meme.self, Tag.self)
                 let importManager = MemeImportManager(modelContainer: modelContainer)
-                
-                // Store memes
-                try await importManager.storeMemes(images: [meme.imageAsUIImage]) {
+                try await importManager.storeMemes(images: [UIImage(data: meme.image!)!]) {
                     print("Meme stored successfully!")
+                    navigateToAllGiggles = true // Navigate after storing
                 }
             } catch {
                 print("Failed to store meme: \(error.localizedDescription)")
@@ -135,7 +143,7 @@ struct Content: View {
 
                 // Generate Button
                 Button(action: generateAction) {
-                    Text(isGenerating ? "Generating..." : "Generate Meme")
+                    Text(isGenerating ? "Generating..." : "Generate New Meme")
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding(.horizontal, 20)

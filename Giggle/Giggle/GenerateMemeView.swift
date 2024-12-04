@@ -67,14 +67,20 @@ struct GenerateMemeView: View {
             }
             .background(Colors.backgroundColor.ignoresSafeArea())
             .navigationDestination(isPresented: $isClicked) {
-                MemeCreatedView(
+                if let image = memeImage {
+                    MemeCreatedView(
                         meme: Meme(
                             content: memeDescription,
-                            tags: [], // Add tags if applicable
-                            image: UIImage() // Convert UIImage to Data
+                            tags: [],
+                            image: image // Pass the UIImage directly
                         )
                     )
+                } else {
+                    Text("Failed to load image.")
+                        .foregroundColor(.red)
+                }
             }
+
         }
         .tint(.black)
         .navigationBarHidden(true)
