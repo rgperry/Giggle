@@ -94,7 +94,7 @@ public class Meme {
         case .gif(let url), .video(let url):
             self.mediaType = media == .gif(url) ? .gif : .video
             do {
-                self.mediaData = try Data(contentsOf: url) //Not sure if this is bad to store all this data here xxxxxxxxxxxxxxxxxxxxxxx
+                self.mediaData = try Data(contentsOf: url) 
             } catch {
                 logger.error("Failed to load media data from \(url) for \(self.id)")
                 self.mediaData = nil
@@ -111,7 +111,7 @@ public class Meme {
     }
     
     // Computed property to get the UIImage from meme Data
-    var memeAsUIImage: UIImage { //imageAsUIImage
+    var memeAsUIImage: UIImage {
         get async {
             switch mediaType {
             case .image:

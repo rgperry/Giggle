@@ -87,9 +87,6 @@ struct GiggleItem: View {
         .task {
             uiImage = await meme.memeAsUIImage
         }
-//        .onAppear {
-//            loadImage()
-//        }
         .navigationDestination(isPresented: $navigateToMemeInfo) {
             MemeInfoView(
                 meme: meme,
@@ -97,13 +94,4 @@ struct GiggleItem: View {
             )
         }
     }
-    
-//    private func loadImage() {
-//        Task {
-//            let image = await meme.memeAsUIImage
-//            DispatchQueue.main.async {
-//                self.displayedImage = image
-//            }
-//        }
-//    }
 }

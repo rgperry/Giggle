@@ -9,7 +9,7 @@ import SwiftUI
 
 struct BottomNavBar: View {
     @State private var isImagePickerPresented = false
-    @State private var selectedMemes: [MemeMedia] = [] //updated xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    @State private var selectedMemes: [MemeMedia] = []
     @State private var isStoring: Bool = false
     @State private var pickingIsDone = false
     
@@ -44,14 +44,14 @@ struct BottomNavBar: View {
             }
             .padding(.leading, 25)
             .sheet(isPresented: $isImagePickerPresented) {
-                ImagePicker(selectedMemes: $selectedMemes, pickingIsDone: $pickingIsDone) //updated xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                ImagePicker(selectedMemes: $selectedMemes, pickingIsDone: $pickingIsDone)
             }
-            .onChange(of: selectedMemes) { //updated   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            .onChange(of: selectedMemes) {
                 print("selected memes changed")
             // only add new memes when there are a few in the selectedPhotos. (this .onchange gets called twice bc we clear the selected images array.)
 //            guard selectedImages.isEmpty else { return }
                 guard !isStoring else { return }
-                guard pickingIsDone, !selectedMemes.isEmpty else { //updated    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                guard pickingIsDone, !selectedMemes.isEmpty else {
                     logger.info("picking not done yet wait!!!!!")
                     return
                 }
@@ -59,9 +59,9 @@ struct BottomNavBar: View {
                     isStoring = true
                     defer { isStoring = false }
                     
-                    do { //updated    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                    do {
                         let importManager = MemeImportManager(modelContainer: context.container)
-                        try await importManager.storeMemes(memes: selectedMemes) { //updated  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                        try await importManager.storeMemes(memes: selectedMemes) { 
                             logger.info("Successfully stored \(selectedMemes.count) images to the SwiftData database")
                             DispatchQueue.main.async {
                                 selectedMemes.removeAll()

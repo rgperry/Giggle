@@ -83,15 +83,6 @@ struct MemeInfoView: View {
         case .image:
             uiImage = await meme.memeAsUIImage
         case .gif, .video:
-//            if let url = meme.mediaURL {
-//                let asset = AVURLAsset(url: url)
-//                let playerItem = AVPlayerItem(asset: asset)
-//
-//                // Use AVQueuePlayer and AVPlayerLooper for looping
-//                let queuePlayer = AVQueuePlayer()
-//                AVPlayerLooper(player: queuePlayer, templateItem: playerItem)
-//                player = queuePlayer
-//            }
             if let url = meme.mediaURL {
                 player = AVPlayer(url: url)
             }
@@ -122,15 +113,6 @@ struct MemeInfoView: View {
             id: meme.id
         )
     }
-    
-//    private func loadImage() {
-//        Task {
-//            let image = await meme.memeAsUIImage
-//            DispatchQueue.main.async {
-//                self.displayedImage = image
-//            }
-//        }
-//    }
 }
 
 struct ContentWithWhiteBackground: View {
