@@ -90,13 +90,13 @@ def analyze_sentiment(message, tags):
                 },
                 {
                     "role": "user",
-                    "content": f"You are tasked with generating 10 descriptive tags for the following message. You can generate more if you think it is necessary. "
-                                f"The message that we will give you will be sent in a conversation. For context, we have a predefined list of tags for memes stored in a database. "
-                                f"The tags that you generate must only be selected from this list, which we will provide. The tags will be used to find a meme that matches the sentiment/emotion of the text message. "
-                                f"For example, if the message is 'I'm really excited to see you' and the database contains tags like smile, happy, excited, and good, you would return those tags. "
-                                f"If no relevant tags are found in the provided list, return an empty string. "
+                    "content": "You are tasked with generating 10 descriptive tags for the following message. You can generate more if you think it is necessary. "
+                                "The message that we will give you will be sent in a conversation. For context, we have a predefined list of tags for memes stored in a database. "
+                                "The tags that you generate must only be selected from this list, which we will provide. The tags will be used to find a meme that matches the sentiment/emotion of the text message. "
+                                "For example, if the message is 'I'm really excited to see you' and the database contains tags like smile, happy, excited, and good, you would return those tags. "
+                                "If no relevant tags are found in the provided list, return an empty string. "
                                 f"Here is the message: {message}. Here is the list of tags from our database: {tags}. "
-                                f"Return the tags in a comma-separated list. I repeat, your response to this message should ONLY be a list of the tags you have selected, separated by commas. No brackets necessary."
+                                "Return the tags in a comma-separated list. I repeat, your response to this message should ONLY be a list of the tags you have selected, separated by commas. No brackets necessary."
                 }
             ]
         )
