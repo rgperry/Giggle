@@ -40,8 +40,8 @@ struct GenerateMemeView: View {
                 }
                 Spacer()
                 
-                // Meme Description Field
-                TextField("Meme with a dog who doesn’t like exercise", text: $memeDescription)
+                // meme text description
+                TextField("Meme Text Description", text: $memeDescription)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal, 20)
                     .frame(maxWidth: UIScreen.main.bounds.width * 0.85)
@@ -58,7 +58,7 @@ struct GenerateMemeView: View {
                     Button(action: {
                         generateMemeButtonPressed()
                     }) {
-                        Text(isGenerating ? "Generating..." : "Generate with DALL·E AI")
+                        Text(isGenerating ? "Generating..." : "Generate Meme")
                             .font(.headline)
                             .foregroundColor(.white)
                             .padding()
