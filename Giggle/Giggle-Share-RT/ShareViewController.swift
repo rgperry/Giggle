@@ -102,10 +102,13 @@ class ShareViewController: UIViewController {
                 }
                 
                 let importManager = MemeImportManager(modelContainer: modelContainer)
+
+                var memes: [MemeMedia] = []
+                memes.append(.image(image))
                 
                 if isFavorite {
                     do {
-                        try await importManager.storeMemes(images: [image], favorited: true) {
+                        try await importManager.storeMemes(memes: memes, favorited: true) {
                             logger.info("Successfully stored 1 image to Giggle All + Favorites from Share Extension")
                         }
                     }
@@ -116,7 +119,7 @@ class ShareViewController: UIViewController {
                 
                 else {
                     do {
-                        try await importManager.storeMemes(images: [image]) {
+                        try await importManager.storeMemes(memes: memes) {
                             logger.info("Successfully stored 1 image to Giggle All from Share Extension")
                         }
                     }

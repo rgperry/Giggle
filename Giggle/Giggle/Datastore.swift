@@ -9,6 +9,15 @@ import SwiftData
 import NaturalLanguage
 import SwiftUI
 import Alamofire
+import AVFoundation
+import UIKit
+import ImageIO
+
+enum MemeMedia: Equatable { //copy of enum type in SharedLogic.swift (commented out there)
+    case image(UIImage)
+    case video(URL)
+    case gif(URL)
+}
 
 
 // reference for using model actor to load memes in background: https://www.youtube.com/watch?v=B3JSgcXjsL8&list=PLvUWi5tdh92wZ5_iDMcBpenwTgFNan9T7&index=13
@@ -16,8 +25,30 @@ import Alamofire
 // reference for concurrent API calls: https://www.youtube.com/watch?v=U6lQustiTGE&t=45s
 @ModelActor
 actor MemeImportManager {
-    func storeMemes(images: [UIImage], favorited: Bool = false, completion: @escaping () -> Void) async throws {
-        guard !images.isEmpty else {
+    
+    //https://developer.apple.com/documentation/avfoundation/avassetimagegenerator
+    private func extractFirstFrame(fromMediaURL url: URL) async throws -> UIImage? {
+        let asset = AVURLAsset(url: url)
+        let imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.appliesPreferredTrackTransform = true
+
+        do {
+            let cgImage = try await imageGenerator.image(at: .zero)
+            return UIImage(cgImage: cgImage.image)
+        } catch {
+            throw error
+        }
+    }
+    
+    private func extractFirstFrameFromGif(fromMediaURL url: URL) async throws -> UIImage? {
+        guard let image = UIImage(contentsOfFile: url.path) else {
+            throw NSError(domain: "ExtractGIFError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to load GIF"])
+        }
+        return image
+    }
+    
+    func storeMemes(memes: [MemeMedia], favorited: Bool = false, completion: @escaping () -> Void) async throws {
+        guard !memes.isEmpty else {
             logger.log("NO IMAGES TO IMPORT")
             return
         }
@@ -25,12 +56,36 @@ actor MemeImportManager {
         let startTime = Date()
         
         try await withThrowingTaskGroup(of: Meme.self) { group in
-            for image in images {
+            for meme in memes {
                 group.addTask {
-                    let (tags, content) = try await DataManager.getInfo(for: image)
+                    //var mediaData: Data
+                    var frame: UIImage
+                    var mediaURL: URL?
+                    switch meme {
+                    case .image(let image):
+                        frame = image
+                    case .video(let url):
+                        do {
+                            frame = try await self.extractFirstFrame(fromMediaURL: url)!
+                        } catch {
+                            logger.error("Failed to load video data from \(url) in storeMemes")
+                            frame = UIImage(systemName: "video")!
+                        }
+                        mediaURL = url
+                    case .gif(let url):
+                        do {
+                            frame = try await self.extractFirstFrameFromGif(fromMediaURL: url)!
+                        } catch {
+                            logger.error("Failed to load gif data from \(url) in storeMemes")
+                            frame = UIImage(systemName: "video")!
+                        }
+                        mediaURL = url
+                    }
+                    
+                    let (tags, content) = try await DataManager.getInfo(for: frame)
                     
                     // Direct insertion without actor synchronization
-                    let meme = Meme(content: content, tags: tags, image: image, favorited: favorited)
+                    let meme = Meme(content: content, tags: tags, media: meme, favorited: favorited, thumbnail: frame, mediaURL: mediaURL)
                     return meme
                 }
             }
@@ -45,11 +100,11 @@ actor MemeImportManager {
         
         let endTime = Date()
         let totalTime = endTime.timeIntervalSince(startTime)
-        let averageTime = totalTime / Double(images.count)
+        let averageTime = totalTime / Double(memes.count)
         
         print("Total Import Time: \(String(format: "%.2f", totalTime)) seconds")
         print("Average Time per Image: \(String(format: "%.2f", averageTime)) seconds")
-        print("Total Images Imported: \(images.count)")
+        print("Total Images Imported: \(memes.count)")
         
         completion()
     }
@@ -161,35 +216,34 @@ class DataManager {
     }
 
     // Decorated with @MainActor to avoid concurrency issues with passing down the model context
-    // (NO LONGER BEING USED --> MemeImportManager handles this now)
-    @MainActor
-    static func storeMemes(context: ModelContext, images: [UIImage], completion: @escaping () -> Void) async {
-        do {
-            // Loop through each image
-            for (index, image) in images.enumerated() {
-                do {
-                    // Retrieve tags and content for each image
-                    let (tags, content) = try await DataManager.getInfo(for: image)
-                    
-                    let meme = Meme(content: content, tags: tags, image: image)
-                    context.insert(meme)
-                    
-                    logger.info("Successfully processed image \(index + 1) of \(images.count)")
-                } catch {
-                    logger.error("Error processing image \(index + 1): \(error.localizedDescription)")
-                    continue // This will skip the failed image and continue with others
-                }
-            }
-            
-            // Save all successfully processed memes
-            try context.save()
-            logger.info("Successfully saved \(images.count) memes")
-            completion()
-        } catch {
-            logger.error("Error saving to context: \(error.localizedDescription)")
-            completion()
-        }
-    }
+//    @MainActor
+//    static func storeMemes(context: ModelContext, memes: [MemeMedia], completion: @escaping () -> Void) async {
+//        do {
+//            // Loop through each image
+//            for (index, meme) in memes.enumerated() {
+//                do {
+//                    // Retrieve tags and content for each image
+//                    let (tags, content) = try await DataManager.getInfo(for: meme) //update getInfo call so gif/vid works
+//                    
+//                    let meme = Meme(content: content, tags: tags, media: meme)
+//                    context.insert(meme)
+//                    
+//                    logger.info("Successfully processed image \(index + 1) of \(memes.count)")
+//                } catch {
+//                    logger.error("Error processing image \(index + 1): \(error.localizedDescription)")
+//                    continue // This will skip the failed image and continue with others
+//                }
+//            }
+//            
+//            // Save all successfully processed memes
+//            try context.save()
+//            logger.info("Successfully saved \(memes.count) memes")
+//            completion()
+//        } catch {
+//            logger.error("Error saving to context: \(error.localizedDescription)")
+//            completion()
+//        }
+//    }
 
     //Tamaer A. 11/12/24
     @MainActor
@@ -266,6 +320,7 @@ class DataManager {
             
             // Delete all memes
             for meme in memes {
+                
                 context.delete(meme)
             }
             

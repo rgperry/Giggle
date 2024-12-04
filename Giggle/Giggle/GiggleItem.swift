@@ -32,10 +32,15 @@ struct GiggleItem: View {
     var header: String
 
     @State private var navigateToMemeInfo = false
+    //@State private var displayedImage: UIImage?
+    @State private var uiImage: UIImage? = nil
 
     var body: some View {
         VStack {
-            Image(uiImage: meme.imageAsUIImage)
+            
+            let x: UIImage = uiImage ?? UIImage(systemName: "person.circle.fill")!
+            
+            Image(uiImage: x)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(width: size, height: size)
@@ -48,13 +53,17 @@ struct GiggleItem: View {
                 }
                 .contextMenu {
                     Button(action: {
-                        copyMeme(meme: meme, context: context)
+                        Task {
+                            await copyMeme(meme: meme, context: context)
+                        }
                     }) {
                         Label("Copy", systemImage: "doc.on.doc")
                     }
 
                     Button(action: {
-                        shareMeme(meme: meme, context: context)
+                        Task {
+                            await shareMeme(meme: meme, context: context)
+                        }
                     }) {
                         Label("Share", systemImage: "square.and.arrow.up")
                     }
@@ -74,6 +83,9 @@ struct GiggleItem: View {
                     .font(.system(size: 50))
             }
             .offset(x: -72, y: -175)
+        }
+        .task {
+            uiImage = await meme.memeAsUIImage
         }
         .navigationDestination(isPresented: $navigateToMemeInfo) {
             MemeInfoView(

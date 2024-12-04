@@ -28,8 +28,8 @@ struct GridStyle {
     static let searchBarPadding: CGFloat = 28
 }
 
-public func shareMeme(meme: Meme, context: ModelContext) {
-    let activityVC = UIActivityViewController(activityItems: [meme.imageAsUIImage], applicationActivities: nil)
+public func shareMeme(meme: Meme, context: ModelContext) async {
+    let activityVC = await UIActivityViewController(activityItems: [meme.memeAsUIImage], applicationActivities: nil)
 
     if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
        let rootVC = windowScene.windows.first?.rootViewController {
@@ -46,8 +46,8 @@ public func shareMeme(meme: Meme, context: ModelContext) {
     }
 }
 
-public func copyMeme(meme: Meme, context: ModelContext) {
-    let imageToCopy = meme.imageAsUIImage
+public func copyMeme(meme: Meme, context: ModelContext) async {
+    let imageToCopy = await meme.memeAsUIImage
     UIPasteboard.general.image = imageToCopy
     
     meme.dateLastShared = Date()

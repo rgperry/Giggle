@@ -9,7 +9,7 @@ import SwiftUI
 
 struct BottomNavBar: View {
     @State private var isImagePickerPresented = false
-    @State private var selectedImages: [UIImage] = []
+    @State private var selectedMemes: [MemeMedia] = []
     @State private var isStoring: Bool = false
     @State private var pickingIsDone = false
     
@@ -44,14 +44,14 @@ struct BottomNavBar: View {
             }
             .padding(.leading, 25)
             .sheet(isPresented: $isImagePickerPresented) {
-                ImagePicker(selectedImages: $selectedImages, pickingIsDone: $pickingIsDone)
+                ImagePicker(selectedMemes: $selectedMemes, pickingIsDone: $pickingIsDone)
             }
-            .onChange(of: selectedImages) { //update so change on vids and GIFs xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            .onChange(of: selectedMemes) {
                 print("selected memes changed")
             // only add new memes when there are a few in the selectedPhotos. (this .onchange gets called twice bc we clear the selected images array.)
 //            guard selectedImages.isEmpty else { return }
                 guard !isStoring else { return }
-                guard pickingIsDone, !selectedImages.isEmpty else {
+                guard pickingIsDone, !selectedMemes.isEmpty else {
                     logger.info("picking not done yet wait!!!!!")
                     return
                 }
@@ -61,14 +61,14 @@ struct BottomNavBar: View {
                     
                     do {
                         let importManager = MemeImportManager(modelContainer: context.container)
-                        try await importManager.storeMemes(images: selectedImages) {
-                            logger.info("Successfully stored \(selectedImages.count) images to the SwiftData database")
+                        try await importManager.storeMemes(memes: selectedMemes) { 
+                            logger.info("Successfully stored \(selectedMemes.count) images to the SwiftData database")
                             DispatchQueue.main.async {
-                                selectedImages.removeAll()
+                                selectedMemes.removeAll()
                             }
                         }
                     } catch {
-                        logger.error("Error storing \(selectedImages.count) memes: \(error)")
+                        logger.error("Error storing \(selectedMemes.count) memes: \(error)")
                     }
                 }
             }

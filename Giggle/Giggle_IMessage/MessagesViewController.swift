@@ -459,7 +459,11 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     func collectionView(_ collectionView: UICollectionView, prefetchItemsAt indexPaths: [IndexPath]) {
         for indexPath in indexPaths {
             let meme = filteredMemes[indexPath.item]
-            _ = meme.imageAsUIImage.thumbnail(maxWidth: 20) // Prefetch thumbnails for images about to appear
+
+            // ROB CHANGES
+            Task {
+                _ = await meme.memeAsUIImage.thumbnail(maxWidth: 20) // Prefetch thumbnails for images about to appear
+            }
         }
     }
 
@@ -474,10 +478,13 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         guard let imageCell = cell as? ImageCell, indexPath.item < filteredMemes.count else { return }
         let meme = filteredMemes[indexPath.item]
+        
+        imageCell.imageView.image = UIImage(systemName: "photo") //placeholder
 
         // Load high-quality image asynchronously and ensure it doesn’t get overridden
-        DispatchQueue.global(qos: .utility).async {
-            let highQualityImage = meme.imageAsUIImage.thumbnail(maxWidth: 200)
+        // ROB CHANGES
+        Task {
+            let highQualityImage = await meme.memeAsUIImage.thumbnail(maxWidth: 200)
 
             // Set high-quality image on main thread with a fade-in effect
             DispatchQueue.main.async {
@@ -494,7 +501,11 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageCell", for: indexPath) as! ImageCell
         let meme = filteredMemes[indexPath.item]
-        cell.imageView.image = meme.imageAsUIImage.thumbnail(maxWidth: 50)
+
+        // ROB CHANGES
+        Task {
+            cell.imageView.image = await meme.memeAsUIImage.thumbnail(maxWidth: 50)
+        }
         //logger.log("Setting image for meme at index \(indexPath.item): \(meme.imageAsUIImage)")
         return cell
     }
@@ -502,48 +513,88 @@ class MessagesViewController: MSMessagesAppViewController, UISearchBarDelegate, 
     //for image attaching to imessage on tap
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // Ensure activeConversation is available
-        guard let conversation = activeConversation else {
-            //logger.log("No active conversation found.")
-            return
-        }
 
-        let meme = filteredMemes[indexPath.item]
-        let originalImage = meme.imageAsUIImage.fixedOrientation()//preserve orientation
-
-        // Configure the message layout with the meme's image
-        let layout = MSMessageTemplateLayout()
-        layout.image = originalImage
-        // layout.caption = "Sent from Giggle" // Optional caption
-
-        // Create and configure the message
-        let message = MSMessage()
-        message.layout = layout
-
-        searchBar.resignFirstResponder()
-
-        // Insert the message into the conversation
-        conversation.insert(message) { error in
-            if let error = error {
-                //logger.log("Failed to insert message: \(error.localizedDescription)")
+        // ROB CHANGES  ------------------------------------------------
+        Task {
+            guard let conversation = activeConversation else {
+                logger.log("No active conversation found.")
+                return
             }
-            //UPDATE SHARE DATE
-            // Update the dateLastShared for the sent meme
+            
+            let meme = filteredMemes[indexPath.item]
+            
+            let originalImage = await meme.memeAsUIImage.fixedOrientation()//preserve orientation
+            
+            // Configure the message layout with the meme's image
+            let layout = MSMessageTemplateLayout()
+            layout.image = originalImage
+            // layout.caption = "Sent from Giggle" // Optional caption
+            
+            // Create and configure the message
+            let message = MSMessage()
+            message.layout = layout
+            
+            searchBar.resignFirstResponder()
+            
+            // Insert the message into the conversation
+            conversation.insert(message) { error in
+                if let error = error {
+                    logger.log("Failed to insert message: \(error.localizedDescription)")
+                }
+            }
             meme.dateLastShared = Date()
-
-            // FINISH: maybe put a context.save() here eventually?
-            //DataManager.updateMeme(meme)
-
-            // Reload the collection view to reflect the updated order
             DispatchQueue.main.async {
                 self.collectionView.reloadData()
             }
-            //
         }
-
-        //ensure the extension view minimizes immediately on tap
+            //ensure the extension view minimizes immediately on tap
         DispatchQueue.main.async {
             self.requestPresentationStyle(.compact)
         }
+        // ------------------------------------------------------------------
+
+//        guard let conversation = activeConversation else {
+//            //logger.log("No active conversation found.")
+//            return
+//        }
+//
+//        let meme = filteredMemes[indexPath.item]
+//        let originalImage = meme.imageAsUIImage.fixedOrientation()//preserve orientation
+//
+//        // Configure the message layout with the meme's image
+//        let layout = MSMessageTemplateLayout()
+//        layout.image = originalImage
+//        // layout.caption = "Sent from Giggle" // Optional caption
+//
+//        // Create and configure the message
+//        let message = MSMessage()
+//        message.layout = layout
+//
+//        searchBar.resignFirstResponder()
+//
+//        // Insert the message into the conversation
+//        conversation.insert(message) { error in
+//            if let error = error {
+//                //logger.log("Failed to insert message: \(error.localizedDescription)")
+//            }
+//            //UPDATE SHARE DATE
+//            // Update the dateLastShared for the sent meme
+//            meme.dateLastShared = Date()
+//
+//            // FINISH: maybe put a context.save() here eventually?
+//            //DataManager.updateMeme(meme)
+//
+//            // Reload the collection view to reflect the updated order
+//            DispatchQueue.main.async {
+//                self.collectionView.reloadData()
+//            }
+//            //
+//        }
+
+        //ensure the extension view minimizes immediately on tap
+//        DispatchQueue.main.async {
+//            self.requestPresentationStyle(.compact)
+//        }
     }
     //END OF ADDED FUNCTIONS - Tamaer
 

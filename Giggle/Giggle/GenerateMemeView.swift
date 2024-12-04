@@ -72,7 +72,10 @@ struct GenerateMemeView: View {
                         meme: Meme(
                             content: memeDescription,
                             tags: [],
-                            image: image // Pass the UIImage directly
+                            media: .image(memeImage!), // Pass the UIImage directly,
+                            favorited: false,
+                            thumbnail: memeImage,
+                            mediaURL: nil
                         )
                     )
                 } else {
